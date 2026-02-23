@@ -5,7 +5,6 @@
     "node": ">=22"
   },
   "description": "",
-  "type": "module",
   "main": "dist/src/functions/*.js",
   "scripts": {
     "build": "prisma generate && tsgo",
