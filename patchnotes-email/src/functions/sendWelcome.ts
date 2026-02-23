@@ -1,7 +1,9 @@
+// Telemetry must be imported first to patch HTTP for dependency tracking
+import { trackEvent, trackException, flush } from "../lib/telemetry.js";
 import { app, HttpRequest, HttpResponseInit, InvocationContext } from "@azure/functions";
-import { resend, FROM_ADDRESS, escapeHtml, emailFooter, sanitizeSubject, isValidEmail } from "../lib/resend";
-import { getPrismaClient } from "../lib/prisma";
-import { renderTemplate, interpolateSubject } from "../lib/templateRenderer";
+import { resend, FROM_ADDRESS, escapeHtml, emailFooter, sanitizeSubject, isValidEmail } from "../lib/resend.js";
+import { getPrismaClient } from "../lib/prisma.js";
+import { renderTemplate, interpolateSubject } from "../lib/templateRenderer.js";
 
 interface WelcomeRequest {
     email: string;
@@ -12,6 +14,7 @@ export async function sendWelcome(
     request: HttpRequest,
     context: InvocationContext
 ): Promise<HttpResponseInit> {
+    const startedAt = Date.now();
     context.log("sendWelcome triggered");
 
     let body: WelcomeRequest;
@@ -32,6 +35,7 @@ export async function sendWelcome(
     try {
         let html: string;
         let subject: string;
+        let templateSource = "fallback";
 
         const db = getPrismaClient();
         const template = await db.emailTemplates.findUnique({ where: { Name: "welcome" } });
@@ -40,6 +44,7 @@ export async function sendWelcome(
             try {
                 html = await renderTemplate(template.JsxSource, { name: body.name });
                 subject = interpolateSubject(template.Subject, { name: body.name });
+                templateSource = "database";
                 context.log("Rendered welcome email from DB template");
             } catch (renderErr) {
                 context.warn("Failed to render welcome template, using fallback:", renderErr);
@@ -61,12 +66,29 @@ export async function sendWelcome(
 
         if (error) {
             context.error("Resend error:", error);
+            trackEvent("WelcomeEmailFailed", {
+                reason: "resend_error",
+                errorMessage: error.message,
+                durationMs: (Date.now() - startedAt).toString(),
+            });
+            await flush();
             return { status: 500, body: `Failed to send email: ${error.message}` };
         }
 
+        trackEvent("WelcomeEmailSent", {
+            templateSource,
+            durationMs: (Date.now() - startedAt).toString(),
+        });
+        await flush();
         return { status: 200, body: "Welcome email sent" };
     } catch (err) {
         context.error("Unexpected error:", err);
+        trackException(err, { operation: "sendWelcome", recipient: body.email });
+        trackEvent("WelcomeEmailFailed", {
+            reason: "exception",
+            durationMs: (Date.now() - startedAt).toString(),
+        });
+        await flush();
         return { status: 500, body: "Internal server error" };
     }
 }

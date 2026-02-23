@@ -1,0 +1,12 @@
+src/
+scripts/
+prisma/
+prisma.config.ts
+local.settings.json
+tsconfig.json
+*.test.ts
+.env
+.venv
+__blobstorage__
+__queuestorage__
+__azurite_db*__.json

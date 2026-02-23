@@ -64,7 +64,7 @@
     "knip": "^5.83.1",
     "lint-staged": "^16.2.7",
     "msw": "^2.12.10",
-    "orval": "^8.4.1",
+    "orval": "^8.4.2",
     "prettier": "^3.8.1",
     "tailwindcss": "catalog:",
     "typescript": "catalog:",
