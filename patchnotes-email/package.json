@@ -5,6 +5,7 @@
     "node": ">=22"
   },
   "description": "",
+  "type": "module",
   "main": "dist/src/functions/*.js",
   "scripts": {
     "build": "prisma generate && tsgo",
@@ -25,6 +26,7 @@
     "@react-email/render": "^2.0.4",
     "esbuild": "^0.27.3",
     "react": "catalog:",
+    "applicationinsights": "^3.5.1",
     "resend": "^6.9.2"
   },
   "packageManager": "pnpm@10.28.0",

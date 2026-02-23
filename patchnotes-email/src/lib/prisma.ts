@@ -1,5 +1,5 @@
 import { PrismaMssql } from "@prisma/adapter-mssql";
-import { PrismaClient } from "../../generated/prisma/client";
+import { PrismaClient } from "../../generated/prisma/client.js";
 
 // Singleton Prisma client for Azure Functions.
 // DATABASE_URL is set via Azure App Settings (production)
