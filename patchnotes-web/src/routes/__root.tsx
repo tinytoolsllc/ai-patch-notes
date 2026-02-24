@@ -6,12 +6,14 @@ import {
 } from '@tanstack/react-router'
 import type { QueryClient } from '@tanstack/react-query'
 import { Footer } from '../components/ui/Footer'
+import { NavigationProgress } from '../components/ui/NavigationProgress'
 import { seoHead } from '../seo'
 
 function RootLayout() {
   return (
     <div className="min-h-screen flex flex-col">
       <HeadContent />
+      <NavigationProgress />
       <Outlet />
       <Footer />
     </div>

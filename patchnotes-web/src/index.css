@@ -1,6 +1,19 @@
 @import 'tailwindcss';
 
+@keyframes progress {
+  0% {
+    transform: scaleX(0);
+  }
+  40% {
+    transform: scaleX(0.4);
+  }
+  100% {
+    transform: scaleX(0.8);
+  }
+}
+
 @theme {
+  --animate-progress: progress 2s ease-out infinite;
   /* Brand Colors */
   --color-brand-50: oklch(0.97 0.01 250);
   --color-brand-100: oklch(0.93 0.02 250);
