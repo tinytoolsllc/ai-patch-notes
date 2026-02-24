@@ -297,7 +297,7 @@ export function Settings() {
                     placeholder="Your name"
                   />
 
-                  {currentUserError && (
+                  {currentUserError != null && (
                     <p className="text-sm text-red-600 dark:text-red-400">
                       Failed to load profile
                     </p>
@@ -328,7 +328,7 @@ export function Settings() {
                     Email Digest Schedule
                   </h2>
 
-                  {emailPrefsError && (
+                  {emailPrefsError != null && (
                     <p className="text-sm text-red-600 dark:text-red-400 mb-4">
                       Failed to load email preferences
                     </p>
