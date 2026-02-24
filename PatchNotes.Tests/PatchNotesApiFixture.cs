@@ -290,6 +290,11 @@ public class MockStytchClient : IStytchClient
         _users.TryGetValue(userId, out var user);
         return Task.FromResult(user);
     }
+
+    public Task DeleteEmailAsync(string emailId, CancellationToken cancellationToken = default)
+    {
+        return Task.CompletedTask;
+    }
 }
 
 /// <summary>
