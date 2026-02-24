@@ -4,6 +4,8 @@ import { app, InvocationContext, Timer } from "@azure/functions";
 import { resend, FROM_ADDRESS, APP_BASE_URL, escapeHtml, emailFooter, sanitizeSubject, isValidEmail } from "../lib/resend.js";
 import { getPrismaClient } from "../lib/prisma.js";
 import { renderTemplate, interpolateSubject } from "../lib/templateRenderer.js";
+import { subDays, getDay, getHours } from "date-fns";
+import { UTCDate } from "@date-fns/utc";
 
 const DIGEST_WINDOW_DAYS = 7;
 
@@ -14,15 +16,14 @@ export async function sendDigest(
     const startedAt = Date.now();
     context.log("sendDigest triggered at", new Date().toISOString());
 
-    const now = new Date();
-    const currentDayOfWeek = now.getUTCDay();
-    const currentHour = now.getUTCHours();
+    const now = new UTCDate();
+    const currentDayOfWeek = getDay(now);
+    const currentHour = getHours(now);
     context.log(`Checking for digests: day=${currentDayOfWeek} hour=${currentHour}`);
 
     try {
         const db = getPrismaClient();
-        const cutoff = new Date();
-        cutoff.setDate(cutoff.getDate() - DIGEST_WINDOW_DAYS);
+        const cutoff = subDays(now, DIGEST_WINDOW_DAYS);
 
         const users = await db.users.findMany({
             where: {
