@@ -7,7 +7,7 @@ if (!apiKey) {
 
 export const resend = new Resend(apiKey);
 
-export const FROM_ADDRESS = "PatchNotes <notifications@patchnotes.dev>";
+export const FROM_ADDRESS = "My Release Notes Digest <digest@myreleasenotes.ai>";
 
 export function sanitizeSubject(str: string): string {
     return str.replace(/[\r\n]+/g, " ").trim();
