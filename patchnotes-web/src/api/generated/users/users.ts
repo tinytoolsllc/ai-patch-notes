@@ -306,6 +306,88 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       > => {
       return useMutation(getLoginUserMutationOptions(options), queryClient);
     }
+    export type confirmEmailChangeResponse200 = {
+  data: UserDto
+  status: 200
+}
+
+export type confirmEmailChangeResponse404 = {
+  data: void
+  status: 404
+}
+
+export type confirmEmailChangeResponseSuccess = (confirmEmailChangeResponse200) & {
+  headers: Headers;
+};
+export type confirmEmailChangeResponseError = (confirmEmailChangeResponse404) & {
+  headers: Headers;
+};
+
+export type confirmEmailChangeResponse = (confirmEmailChangeResponseSuccess | confirmEmailChangeResponseError)
+
+export const getConfirmEmailChangeUrl = () => {
+
+
+  
+
+  return `/api/users/me/confirm-email-change`
+}
+
+export const confirmEmailChange = async ( options?: RequestInit): Promise<confirmEmailChangeResponse> => {
+  
+  return customFetch<confirmEmailChangeResponse>(getConfirmEmailChangeUrl(),
+  {      
+    ...options,
+    method: 'POST'
+    
+    
+  }
+);}
+  
+
+
+
+export const getConfirmEmailChangeMutationOptions = <TError = void,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof confirmEmailChange>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof confirmEmailChange>>, TError,void, TContext> => {
+
+const mutationKey = ['confirmEmailChange'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof confirmEmailChange>>, void> = () => {
+          
+
+          return  confirmEmailChange(requestOptions)
+        }
+
+
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ConfirmEmailChangeMutationResult = NonNullable<Awaited<ReturnType<typeof confirmEmailChange>>>
+    
+    export type ConfirmEmailChangeMutationError = void
+
+    export const useConfirmEmailChange = <TError = void,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof confirmEmailChange>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof confirmEmailChange>>,
+        TError,
+        void,
+        TContext
+      > => {
+      return useMutation(getConfirmEmailChangeMutationOptions(options), queryClient);
+    }
     export type getEmailPreferencesResponse200 = {
   data: EmailPreferencesDto
   status: 200

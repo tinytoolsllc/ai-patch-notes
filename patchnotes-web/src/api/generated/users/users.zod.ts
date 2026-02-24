@@ -44,6 +44,17 @@ export const LoginUserResponse = zod.object({
   "isAdmin": zod.boolean().optional()
 })
 
+export const ConfirmEmailChangeResponse = zod.object({
+  "id": zod.string(),
+  "stytchUserId": zod.string(),
+  "email": zod.string().nullish(),
+  "name": zod.string().nullish(),
+  "createdAt": zod.iso.datetime({"offset":true}).optional(),
+  "lastLoginAt": zod.iso.datetime({"offset":true}).nullish(),
+  "isPro": zod.boolean().optional(),
+  "isAdmin": zod.boolean().optional()
+})
+
 export const GetEmailPreferencesResponse = zod.object({
   "emailDigestEnabled": zod.boolean().optional(),
   "emailWelcomeSent": zod.boolean().optional(),

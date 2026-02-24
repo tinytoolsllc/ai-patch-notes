@@ -68,6 +68,12 @@ public class StytchClient : IStytchClient
             {
                 UserId = response.UserId,
                 Email = response.Emails?.FirstOrDefault()?.Email,
+                Emails = response.Emails?.Select(e => new StytchEmail
+                {
+                    EmailId = e.EmailId,
+                    Email = e.Email,
+                    Verified = e.Verified
+                }).ToList() ?? [],
                 Name = name,
                 Status = response.Status
             };
@@ -77,5 +83,10 @@ public class StytchClient : IStytchClient
             _logger.LogWarning(ex, "Stytch get user failed for user {UserId}", userId);
             return null;
         }
+    }
+
+    public async Task DeleteEmailAsync(string emailId, CancellationToken cancellationToken = default)
+    {
+        await _client.Users.DeleteEmail(new UsersDeleteEmailRequest(emailId));
     }
 }

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Link, useNavigate } from '@tanstack/react-router'
-import { useStytchUser } from '@stytch/react'
+import { useStytch, useStytchUser } from '@stytch/react'
 import { Header, HeaderTitle, Container, Button, Input } from '../components/ui'
 import { ThemeToggle } from '../components/theme'
 import { UserMenu } from '../components/auth'
@@ -90,6 +90,7 @@ function SettingsSkeleton() {
 }
 
 export function Settings() {
+  const stytch = useStytch()
   const { user, isInitialized } = useStytchUser()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
@@ -109,6 +110,13 @@ export function Settings() {
   const [saved, setSaved] = useState(false)
 
   const name = nameOverride ?? serverName
+
+  // Email change state
+  const [showEmailInput, setShowEmailInput] = useState(false)
+  const [newEmail, setNewEmail] = useState('')
+  const [emailSending, setEmailSending] = useState(false)
+  const [emailSent, setEmailSent] = useState(false)
+  const [emailError, setEmailError] = useState<string | null>(null)
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -150,6 +158,27 @@ export function Settings() {
         },
       }
     )
+  }
+
+  const handleSendVerification = async () => {
+    if (!newEmail.trim()) return
+    setEmailSending(true)
+    setEmailError(null)
+    setEmailSent(false)
+
+    try {
+      await stytch.magicLinks.email.send(newEmail.trim(), {
+        login_magic_link_url: `${window.location.origin}/confirm-email`,
+      })
+      setEmailSent(true)
+    } catch (err) {
+      console.error('Failed to send verification email:', err)
+      setEmailError(
+        err instanceof Error ? err.message : 'Failed to send verification email'
+      )
+    } finally {
+      setEmailSending(false)
+    }
   }
 
   // Email preferences
@@ -286,6 +315,68 @@ export function Settings() {
             ) : (
               <>
                 <div className="space-y-6">
+                  <div>
+                    <label className="block text-sm font-medium text-text-primary mb-1.5">
+                      Email
+                    </label>
+                    <p className="text-sm text-text-secondary mb-2">
+                      {userData?.email ?? 'No email set'}
+                    </p>
+
+                    {!showEmailInput && !emailSent && (
+                      <button
+                        type="button"
+                        onClick={() => setShowEmailInput(true)}
+                        className="text-sm font-medium text-brand-600 hover:text-brand-700 dark:text-brand-400 dark:hover:text-brand-300"
+                      >
+                        Change Email
+                      </button>
+                    )}
+
+                    {showEmailInput && !emailSent && (
+                      <div className="flex items-center gap-2 mt-1">
+                        <Input
+                          type="email"
+                          value={newEmail}
+                          onChange={(e) => {
+                            setNewEmail(e.target.value)
+                            setEmailError(null)
+                          }}
+                          placeholder="New email address"
+                        />
+                        <Button
+                          onClick={handleSendVerification}
+                          disabled={emailSending || !newEmail.trim()}
+                        >
+                          {emailSending ? 'Sending...' : 'Send Verification'}
+                        </Button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setShowEmailInput(false)
+                            setNewEmail('')
+                            setEmailError(null)
+                          }}
+                          className="text-sm text-text-tertiary hover:text-text-secondary"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    )}
+
+                    {emailSent && (
+                      <p className="text-sm text-emerald-600 dark:text-emerald-400 mt-1">
+                        Verification email sent to {newEmail}. Check your inbox.
+                      </p>
+                    )}
+
+                    {emailError != null && (
+                      <p className="text-sm text-red-600 dark:text-red-400 mt-1">
+                        {emailError}
+                      </p>
+                    )}
+                  </div>
+
                   <Input
                     label="Display Name"
                     type="text"
