@@ -20,6 +20,13 @@ public interface IStytchClient
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>The user info, or null if not found.</returns>
     Task<StytchUser?> GetUserAsync(string userId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Deletes an email address from a Stytch user by email ID.
+    /// </summary>
+    /// <param name="emailId">The Stytch email ID to delete.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    Task DeleteEmailAsync(string emailId, CancellationToken cancellationToken = default);
 }
 
 /// <summary>
@@ -74,6 +81,11 @@ public class StytchUser
     public string? Email { get; set; }
 
     /// <summary>
+    /// All email addresses associated with the user.
+    /// </summary>
+    public List<StytchEmail> Emails { get; set; } = [];
+
+    /// <summary>
     /// The user's name, if available.
     /// </summary>
     public string? Name { get; set; }
@@ -82,4 +94,14 @@ public class StytchUser
     /// The user's status (active, pending, deleted).
     /// </summary>
     public string? Status { get; set; }
+}
+
+/// <summary>
+/// A Stytch email address with its ID and verification status.
+/// </summary>
+public class StytchEmail
+{
+    public required string EmailId { get; set; }
+    public required string Email { get; set; }
+    public bool Verified { get; set; }
 }

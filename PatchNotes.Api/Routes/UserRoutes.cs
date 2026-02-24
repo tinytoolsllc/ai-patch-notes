@@ -195,6 +195,101 @@ public static class UserRoutes
         .Produces(StatusCodes.Status404NotFound)
         .WithName("UpdateCurrentUser");
 
+        // POST /api/users/me/confirm-email-change - Clean up old emails after magic link verification
+        group.MapPost("/me/confirm-email-change", async (HttpContext httpContext, PatchNotesDbContext db, IStytchClient stytchClient, ILoggerFactory loggerFactory) =>
+        {
+            var logger = loggerFactory.CreateLogger("PatchNotes.Api.Routes.UserRoutes");
+            var stytchUserId = httpContext.Items["StytchUserId"] as string;
+            var sessionEmail = httpContext.Items["StytchEmail"] as string;
+
+            // Fetch user from Stytch to get the full emails array
+            StytchUser? stytchUser;
+            try
+            {
+                stytchUser = await stytchClient.GetUserAsync(stytchUserId!);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Stytch API call failed for user {StytchUserId}", stytchUserId);
+                return Results.Json(new ApiError("Stytch API call failed"), statusCode: 502);
+            }
+
+            if (stytchUser == null)
+            {
+                return Results.Json(new ApiError("Could not fetch user from Stytch"), statusCode: 502);
+            }
+
+            // If there's only one email, nothing to clean up
+            if (stytchUser.Emails.Count <= 1)
+            {
+                var existingUser = await db.Users.FirstOrDefaultAsync(u => u.StytchUserId == stytchUserId);
+                if (existingUser == null) return Results.NotFound(new ApiError("User not found"));
+
+                var session = httpContext.Items["StytchSession"] as StytchSessionResult;
+                return Results.Ok(new UserDto
+                {
+                    Id = existingUser.Id,
+                    StytchUserId = existingUser.StytchUserId,
+                    Email = existingUser.Email,
+                    Name = existingUser.Name,
+                    CreatedAt = existingUser.CreatedAt,
+                    LastLoginAt = existingUser.LastLoginAt,
+                    IsPro = existingUser.IsPro || (session?.IsAdmin ?? false),
+                    IsAdmin = session?.IsAdmin ?? false
+                });
+            }
+
+            // The session email is the new email (the one the user just verified via magic link).
+            // Delete all other emails from Stytch.
+            var newEmail = sessionEmail ?? stytchUser.Emails.Last().Email;
+            var emailsToRemove = stytchUser.Emails.Where(e => e.Email != newEmail).ToList();
+
+            foreach (var oldEmail in emailsToRemove)
+            {
+                try
+                {
+                    await stytchClient.DeleteEmailAsync(oldEmail.EmailId);
+                    logger.LogInformation("Removed old email {EmailId} ({Email}) from Stytch user {StytchUserId}",
+                        oldEmail.EmailId, oldEmail.Email, stytchUserId);
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError(ex, "Failed to delete old email {EmailId} from Stytch user {StytchUserId}",
+                        oldEmail.EmailId, stytchUserId);
+                    return Results.Json(new ApiError("Failed to remove old email from Stytch"), statusCode: 502);
+                }
+            }
+
+            // Update our DB with the new email
+            var user = await db.Users.FirstOrDefaultAsync(u => u.StytchUserId == stytchUserId);
+            if (user == null)
+            {
+                return Results.NotFound(new ApiError("User not found"));
+            }
+
+            user.Email = newEmail;
+            await db.SaveChangesAsync();
+
+            var sess = httpContext.Items["StytchSession"] as StytchSessionResult;
+            var isAdmin = sess?.IsAdmin ?? false;
+
+            return Results.Ok(new UserDto
+            {
+                Id = user.Id,
+                StytchUserId = user.StytchUserId,
+                Email = user.Email,
+                Name = user.Name,
+                CreatedAt = user.CreatedAt,
+                LastLoginAt = user.LastLoginAt,
+                IsPro = user.IsPro || isAdmin,
+                IsAdmin = isAdmin
+            });
+        })
+        .AddEndpointFilterFactory(RouteUtils.CreateAuthFilter())
+        .Produces<UserDto>(StatusCodes.Status200OK)
+        .Produces(StatusCodes.Status404NotFound)
+        .WithName("ConfirmEmailChange");
+
         // GET /api/users/me/email-preferences - Get current email preferences
         group.MapGet("/me/email-preferences", async (HttpContext httpContext, PatchNotesDbContext db) =>
         {

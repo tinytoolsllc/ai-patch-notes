@@ -6,7 +6,7 @@
   },
   "servers": [
     {
-      "url": "http://localhost:5000/"
+      "url": "http://localhost:5099/"
     }
   ],
   "paths": {
@@ -574,6 +574,29 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/api/users/me/confirm-email-change": {
+      "post": {
+        "tags": [
+          "Users"
+        ],
+        "operationId": "ConfirmEmailChange",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found"
           }
         }
       }
