@@ -26,7 +26,7 @@ const PRICING_ROWS: { label: string; free: string; pro: string }[] = [
   { label: 'Packages', free: '5', pro: 'Unlimited' },
   { label: 'AI Summaries', free: '✓', pro: '✓' },
   { label: 'Grouping & Filtering', free: '✓', pro: '✓' },
-  { label: 'No Ads', free: '✗', pro: '✓' },
+  { label: 'No Ads', free: '✓', pro: '✓' },
   { label: 'Weekly Email', free: '✗', pro: '✓' },
 ]
 

@@ -2,8 +2,7 @@
 
 Technical references for what's currently built and how to work with it.
 
-| Document | Description |
-|----------|-------------|
+| Document                                         | Description                                                                                        |
+| ------------------------------------------------ | -------------------------------------------------------------------------------------------------- |
 | [STRIPE_INTEGRATION.md](./STRIPE_INTEGRATION.md) | Stripe guide - webhooks, customer linking, trials, auth (reference for planned subscriptions epic) |
-| [ENV_VARIABLES.md](./ENV_VARIABLES.md) | Environment variable reference for API, frontend, and local dev |
-| [DEVBOX_SETUP.md](./DEVBOX_SETUP.md) | Local dev environment setup with Devbox, dnsmasq, and Caddy reverse proxy |
+| [ENV_VARIABLES.md](./ENV_VARIABLES.md)           | Environment variable reference for API, frontend, and local dev                                    |
