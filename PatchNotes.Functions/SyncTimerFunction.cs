@@ -10,13 +10,14 @@ public class SyncTimerFunction(
     TelemetryClient telemetryClient,
     ILogger<SyncTimerFunction> logger)
 {
-    // Runs every 6 hours: at midnight, 6am, noon, 6pm UTC
+    // Runs every hour, on the hour
     [Function("SyncReleases")]
     public async Task Run(
-        [TimerTrigger("0 0 */6 * * *")] TimerInfo timerInfo,
+        [TimerTrigger("0 0 * * * *")] TimerInfo timerInfo,
         CancellationToken cancellationToken)
     {
         var startedAt = DateTimeOffset.UtcNow;
+        Console.WriteLine($"[SyncReleases] Started at {startedAt:O}, IsPastDue: {timerInfo.IsPastDue}");
         logger.LogInformation("SyncReleases started at {Time}, IsPastDue: {IsPastDue}",
             startedAt, timerInfo.IsPastDue);
 
@@ -25,6 +26,11 @@ public class SyncTimerFunction(
             var result = await pipeline.RunAsync(cancellationToken);
 
             var elapsed = DateTimeOffset.UtcNow - startedAt;
+            Console.WriteLine(
+                $"[SyncReleases] Completed in {elapsed.TotalSeconds:F1}s — " +
+                $"{result.PackagesSynced} packages, {result.ReleasesAdded} new releases, " +
+                $"{result.SummariesGenerated} summaries, {result.SyncErrors.Count} sync errors, {result.SummaryErrors.Count} summary errors");
+
             logger.LogInformation(
                 "SyncReleases completed in {ElapsedSeconds:F1}s — " +
                 "{Packages} packages ({PackagesWithNewReleases} with new releases), {Releases} new releases, " +
@@ -62,6 +68,7 @@ public class SyncTimerFunction(
         catch (Exception ex)
         {
             var elapsed = DateTimeOffset.UtcNow - startedAt;
+            Console.WriteLine($"[SyncReleases] FAILED after {elapsed.TotalSeconds:F1}s: {ex.Message}");
             logger.LogError(ex, "SyncReleases failed after {ElapsedSeconds:F1}s",
                 elapsed.TotalSeconds);
 
@@ -73,6 +80,14 @@ public class SyncTimerFunction(
             });
 
             throw;
+        }
+        finally
+        {
+            Console.WriteLine("[SyncReleases] Flushing telemetry");
+            telemetryClient.Flush();
+            // Give the SDK time to transmit before the process may be killed
+            await Task.Delay(TimeSpan.FromSeconds(2), CancellationToken.None);
+            Console.WriteLine("[SyncReleases] Flush complete");
         }
 
         if (timerInfo.ScheduleStatus is not null)
