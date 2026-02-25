@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Link } from '@tanstack/react-router'
+import { useStytchUser } from '@stytch/react'
 import {
   ChevronLeft,
   ChevronRight,
@@ -17,6 +18,7 @@ import {
   Clock,
 } from 'lucide-react'
 import { Card, Button } from '../ui'
+import { useFilterStore } from '../../stores/filterStore'
 
 const SLIDE_COUNT = 4
 
@@ -366,8 +368,12 @@ const slides = [
 // Main Component
 // ---------------------------------------------------------------------------
 
-export function HeroCard({ onDismiss }: { onDismiss: () => void }) {
+export function HeroCard() {
+  const { user } = useStytchUser()
+  const { heroDismissed, dismissHero } = useFilterStore()
   const [index, setIndex] = useState(0)
+
+  if (user || heroDismissed) return null
 
   const prev = () => setIndex((i) => (i - 1 + SLIDE_COUNT) % SLIDE_COUNT)
   const next = () => setIndex((i) => (i + 1) % SLIDE_COUNT)
@@ -378,7 +384,7 @@ export function HeroCard({ onDismiss }: { onDismiss: () => void }) {
     <Card padding="none" className="relative mb-6 overflow-hidden">
       {/* Dismiss button */}
       <button
-        onClick={onDismiss}
+        onClick={dismissHero}
         className="absolute top-2 right-2 z-10 p-1 rounded-md text-text-tertiary hover:text-text-primary hover:bg-surface-tertiary transition-colors"
         aria-label="Dismiss hero"
       >
