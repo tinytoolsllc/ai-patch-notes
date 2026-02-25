@@ -515,6 +515,78 @@ public static class PackageRoutes
         .Produces(StatusCodes.Status400BadRequest)
         .WithName("BulkCreatePackages");
 
+        // GET /api/admin/packages/health - Returns all packages with sync health info (admin only)
+        var adminPackages = app.MapGroup("/api/admin/packages").WithTags("AdminPackages");
+
+        adminPackages.MapGet("/health", async (PatchNotesDbContext db) =>
+        {
+            var packages = await db.Packages
+                .AsNoTracking()
+                .OrderByDescending(p => p.IsSyncDisabled)
+                .ThenByDescending(p => p.ConsecutiveFailures)
+                .Select(p => new PackageHealthDto
+                {
+                    Id = p.Id,
+                    Name = p.Name,
+                    GithubOwner = p.GithubOwner,
+                    GithubRepo = p.GithubRepo,
+                    ConsecutiveFailures = p.ConsecutiveFailures,
+                    LastFailureAt = p.LastFailureAt,
+                    LastFailureMessage = p.LastFailureMessage,
+                    IsSyncDisabled = p.IsSyncDisabled,
+                    LastFetchedAt = p.LastFetchedAt,
+                })
+                .ToListAsync();
+
+            return Results.Ok(packages);
+        })
+        .AddEndpointFilterFactory(requireAuth)
+        .AddEndpointFilterFactory(requireAdmin)
+        .Produces<List<PackageHealthDto>>(StatusCodes.Status200OK)
+        .WithName("GetPackagesHealth");
+
+        // POST /api/admin/packages/{id}/reset-sync - Reset failure tracking for a package (admin only)
+        adminPackages.MapPost("/{id:length(21)}/reset-sync", async (string id, PatchNotesDbContext db) =>
+        {
+            var package = await db.Packages.FindAsync(id);
+            if (package == null)
+            {
+                return Results.NotFound(new ApiError("Package not found"));
+            }
+
+            package.ConsecutiveFailures = 0;
+            package.IsSyncDisabled = false;
+            package.LastFailureMessage = null;
+            await db.SaveChangesAsync();
+
+            return Results.NoContent();
+        })
+        .AddEndpointFilterFactory(requireAuth)
+        .AddEndpointFilterFactory(requireAdmin)
+        .Produces(StatusCodes.Status204NoContent)
+        .Produces(StatusCodes.Status404NotFound)
+        .WithName("ResetPackageSync");
+
+        // POST /api/admin/packages/{id}/disable-sync - Manually disable sync for a package (admin only)
+        adminPackages.MapPost("/{id:length(21)}/disable-sync", async (string id, PatchNotesDbContext db) =>
+        {
+            var package = await db.Packages.FindAsync(id);
+            if (package == null)
+            {
+                return Results.NotFound(new ApiError("Package not found"));
+            }
+
+            package.IsSyncDisabled = true;
+            await db.SaveChangesAsync();
+
+            return Results.NoContent();
+        })
+        .AddEndpointFilterFactory(requireAuth)
+        .AddEndpointFilterFactory(requireAdmin)
+        .Produces(StatusCodes.Status204NoContent)
+        .Produces(StatusCodes.Status404NotFound)
+        .WithName("DisablePackageSync");
+
         // GET /api/admin/github/search?q={query} - Search GitHub repositories (admin only)
         var adminGitHub = app.MapGroup("/api/admin/github").WithTags("AdminGitHub");
 
@@ -667,4 +739,17 @@ public class GitHubRepoSearchResultDto
     public required string Repo { get; set; }
     public string? Description { get; set; }
     public int StarCount { get; set; }
+}
+
+public class PackageHealthDto
+{
+    public required string Id { get; set; }
+    public required string Name { get; set; }
+    public required string GithubOwner { get; set; }
+    public required string GithubRepo { get; set; }
+    public int ConsecutiveFailures { get; set; }
+    public DateTimeOffset? LastFailureAt { get; set; }
+    public string? LastFailureMessage { get; set; }
+    public bool IsSyncDisabled { get; set; }
+    public DateTimeOffset? LastFetchedAt { get; set; }
 }

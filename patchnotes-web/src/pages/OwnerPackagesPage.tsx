@@ -1,5 +1,8 @@
 import { Link } from '@tanstack/react-router'
-import { Header, HeaderTitle, Container, Button, Card } from '../components/ui'
+import { Header, HeaderTitle, Container, Card } from '../components/ui'
+import { ThemeToggle } from '../components/theme'
+import { UserMenu } from '../components/auth'
+import { Logo } from '../components/landing/Logo'
 import { usePackagesByOwner } from '../api/hooks'
 import { formatDate } from '../utils/dateFormat'
 
@@ -12,13 +15,33 @@ export function OwnerPackagesPage({ owner }: OwnerPackagesPageProps) {
 
   return (
     <div className="min-h-screen bg-surface-secondary">
-      <Header>
-        <HeaderTitle>{owner}</HeaderTitle>
-        <Link to="/">
-          <Button variant="secondary" size="sm">
-            Back to Home
-          </Button>
+      <Header
+        breadcrumb={
+          <>
+            <Link to="/" className="hover:text-text-primary transition-colors">
+              Home
+            </Link>
+            <span className="text-text-tertiary">/</span>
+            <span className="text-text-primary">{owner}</span>
+          </>
+        }
+      >
+        <Link
+          to="/"
+          className="flex items-center gap-2.5 hover:opacity-80 transition-opacity"
+        >
+          <Logo size={36} />
+          <div>
+            <HeaderTitle>My Release Notes</HeaderTitle>
+            <p className="text-2xs text-text-tertiary leading-tight">
+              by Tiny Tools
+            </p>
+          </div>
         </Link>
+        <div className="flex items-center gap-2">
+          <ThemeToggle />
+          <UserMenu />
+        </div>
       </Header>
 
       <main className="py-8">
