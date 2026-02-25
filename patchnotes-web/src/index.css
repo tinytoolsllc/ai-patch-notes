@@ -56,7 +56,6 @@
   --font-family-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
   --font-family-mono: 'JetBrains Mono', ui-monospace, monospace;
 
-  --font-size-3xs: 0.5rem;
   --font-size-2xs: 0.625rem;
   --font-size-xs: 0.75rem;
   --font-size-sm: 0.875rem;
@@ -98,10 +97,6 @@
 
 @utility text-2xs {
   font-size: var(--font-size-2xs);
-}
-
-@utility text-3xs {
-  font-size: var(--font-size-3xs);
 }
 
 /* Dark mode overrides - class-based for manual toggle support */
