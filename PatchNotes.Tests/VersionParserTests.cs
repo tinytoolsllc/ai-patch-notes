@@ -92,6 +92,52 @@ public class VersionParserTests
 
     #endregion
 
+    #region Dash-Separated Monorepo Tag Parsing
+
+    [Theory]
+    [InlineData("puppeteer-core-v24.37.5", "puppeteer-core", 24, 37, 5)]
+    [InlineData("puppeteer-v24.37.5", "puppeteer", 24, 37, 5)]
+    [InlineData("browsers-v2.13.0", "browsers", 2, 13, 0)]
+    [InlineData("some-lib-v1.0.0", "some-lib", 1, 0, 0)]
+    [InlineData("my-package-v10.0.0", "my-package", 10, 0, 0)]
+    public void Parse_DashMonorepoTag_ExtractsPackageAndVersion(string tag, string expectedPackage, int major, int minor, int patch)
+    {
+        var result = VersionParser.Parse(tag);
+
+        result.Success.Should().BeTrue($"Failed to parse dash-monorepo tag: {tag}");
+        result.Version!.MonorepoPackage.Should().Be(expectedPackage);
+        result.Version.Major.Should().Be(major);
+        result.Version.Minor.Should().Be(minor);
+        result.Version.Patch.Should().Be(patch);
+        result.Version.IsPrerelease.Should().BeFalse();
+    }
+
+    [Theory]
+    [InlineData("some-lib-v1.0.0-beta.1", "some-lib", "beta.1")]
+    [InlineData("puppeteer-v24.37.5-alpha.2", "puppeteer", "alpha.2")]
+    public void Parse_DashMonorepoTagWithPrerelease_ExtractsAll(string tag, string expectedPackage, string expectedPrerelease)
+    {
+        var result = VersionParser.Parse(tag);
+
+        result.Success.Should().BeTrue($"Failed to parse dash-monorepo tag: {tag}");
+        result.Version!.MonorepoPackage.Should().Be(expectedPackage);
+        result.Version.Prerelease.Should().Be(expectedPrerelease);
+        result.Version.IsPrerelease.Should().BeTrue();
+    }
+
+    [Theory]
+    [InlineData("v1.2.3")]
+    [InlineData("1.2.3")]
+    public void Parse_StandardSemverTag_HasNoMonorepoPackage(string tag)
+    {
+        var result = VersionParser.Parse(tag);
+
+        result.Success.Should().BeTrue();
+        result.Version!.MonorepoPackage.Should().BeNull();
+    }
+
+    #endregion
+
     #region Simple Semver (MAJOR.MINOR only)
 
     [Theory]
