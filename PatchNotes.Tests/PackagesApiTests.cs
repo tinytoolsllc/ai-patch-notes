@@ -644,4 +644,248 @@ public class PackagesApiTests : IAsyncLifetime
     }
 
     #endregion
+
+    #region GET /api/admin/packages/health
+
+    [Fact]
+    public async Task GetPackagesHealth_GivenUnauthenticatedRequest_ReturnsUnauthorized()
+    {
+        var response = await _client.GetAsync("/api/admin/packages/health");
+
+        response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+    }
+
+    [Fact]
+    public async Task GetPackagesHealth_GivenNonAdminRequest_ReturnsForbidden()
+    {
+        var response = await _nonAdminClient.GetAsync("/api/admin/packages/health");
+
+        response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+    }
+
+    [Fact]
+    public async Task GetPackagesHealth_ReturnsAllPackagesWithHealthFields()
+    {
+        // Arrange
+        using var scope = _fixture.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<PatchNotesDbContext>();
+        var now = DateTimeOffset.UtcNow;
+        db.Packages.AddRange(
+            new Package
+            {
+                Name = "healthy-pkg",
+                Url = "https://github.com/o/healthy",
+                GithubOwner = "o",
+                GithubRepo = "healthy",
+                ConsecutiveFailures = 0,
+                IsSyncDisabled = false,
+            },
+            new Package
+            {
+                Name = "failing-pkg",
+                Url = "https://github.com/o/failing",
+                GithubOwner = "o",
+                GithubRepo = "failing",
+                ConsecutiveFailures = 3,
+                LastFailureAt = now.AddHours(-1),
+                LastFailureMessage = "rate limit exceeded",
+                IsSyncDisabled = false,
+            },
+            new Package
+            {
+                Name = "disabled-pkg",
+                Url = "https://github.com/o/disabled",
+                GithubOwner = "o",
+                GithubRepo = "disabled",
+                ConsecutiveFailures = 10,
+                LastFailureAt = now.AddDays(-1),
+                LastFailureMessage = "persistent error",
+                IsSyncDisabled = true,
+            }
+        );
+        await db.SaveChangesAsync();
+
+        // Act
+        var response = await _authClient.GetAsync("/api/admin/packages/health");
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var result = await response.Content.ReadFromJsonAsync<JsonElement>();
+        var items = result.EnumerateArray().ToList();
+        items.Should().HaveCount(3);
+
+        // Disabled packages should come first
+        items[0].GetProperty("isSyncDisabled").GetBoolean().Should().BeTrue();
+        items[0].GetProperty("name").GetString().Should().Be("disabled-pkg");
+        items[0].GetProperty("consecutiveFailures").GetInt32().Should().Be(10);
+        items[0].GetProperty("lastFailureMessage").GetString().Should().Be("persistent error");
+
+        // Then by consecutiveFailures descending
+        items[1].GetProperty("name").GetString().Should().Be("failing-pkg");
+        items[1].GetProperty("consecutiveFailures").GetInt32().Should().Be(3);
+
+        items[2].GetProperty("name").GetString().Should().Be("healthy-pkg");
+        items[2].GetProperty("consecutiveFailures").GetInt32().Should().Be(0);
+    }
+
+    [Fact]
+    public async Task GetPackagesHealth_ReturnsRequiredFields()
+    {
+        // Arrange
+        using var scope = _fixture.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<PatchNotesDbContext>();
+        db.Packages.Add(new Package
+        {
+            Name = "test-pkg",
+            Url = "https://github.com/owner/repo",
+            GithubOwner = "owner",
+            GithubRepo = "repo",
+            LastFetchedAt = DateTimeOffset.UtcNow,
+        });
+        await db.SaveChangesAsync();
+
+        // Act
+        var response = await _authClient.GetAsync("/api/admin/packages/health");
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var items = await response.Content.ReadFromJsonAsync<JsonElement>();
+        var pkg = items.EnumerateArray().First();
+        pkg.TryGetProperty("id", out _).Should().BeTrue();
+        pkg.TryGetProperty("name", out _).Should().BeTrue();
+        pkg.TryGetProperty("githubOwner", out _).Should().BeTrue();
+        pkg.TryGetProperty("githubRepo", out _).Should().BeTrue();
+        pkg.TryGetProperty("consecutiveFailures", out _).Should().BeTrue();
+        pkg.TryGetProperty("lastFailureAt", out _).Should().BeTrue();
+        pkg.TryGetProperty("lastFailureMessage", out _).Should().BeTrue();
+        pkg.TryGetProperty("isSyncDisabled", out _).Should().BeTrue();
+        pkg.TryGetProperty("lastFetchedAt", out _).Should().BeTrue();
+    }
+
+    #endregion
+
+    #region POST /api/admin/packages/{id}/reset-sync
+
+    [Fact]
+    public async Task ResetPackageSync_GivenUnauthenticatedRequest_ReturnsForbidden()
+    {
+        // CSRF middleware rejects requests without Origin header before auth runs
+        var response = await _client.PostAsync("/api/admin/packages/nonexistent-id-1234xx/reset-sync", null);
+
+        response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+    }
+
+    [Fact]
+    public async Task ResetPackageSync_GivenNonAdminRequest_ReturnsForbidden()
+    {
+        var response = await _nonAdminClient.PostAsync("/api/admin/packages/nonexistent-id-1234xx/reset-sync", null);
+
+        response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+    }
+
+    [Fact]
+    public async Task ResetPackageSync_ReturnsNotFound_WhenPackageDoesNotExist()
+    {
+        var response = await _authClient.PostAsync("/api/admin/packages/nonexistent-id-1234xx/reset-sync", null);
+
+        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+    }
+
+    [Fact]
+    public async Task ResetPackageSync_ResetsFailureTracking_WhenPackageExists()
+    {
+        // Arrange
+        using var scope = _fixture.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<PatchNotesDbContext>();
+        var pkg = new Package
+        {
+            Name = "broken-pkg",
+            Url = "https://github.com/o/broken",
+            GithubOwner = "o",
+            GithubRepo = "broken",
+            ConsecutiveFailures = 5,
+            LastFailureAt = DateTimeOffset.UtcNow.AddHours(-2),
+            LastFailureMessage = "some error",
+            IsSyncDisabled = true,
+        };
+        db.Packages.Add(pkg);
+        await db.SaveChangesAsync();
+        var id = pkg.Id;
+
+        // Act
+        var response = await _authClient.PostAsync($"/api/admin/packages/{id}/reset-sync", null);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
+
+        // Verify the package was reset
+        using var verifyScope = _fixture.Services.CreateScope();
+        var verifyDb = verifyScope.ServiceProvider.GetRequiredService<PatchNotesDbContext>();
+        var updated = await verifyDb.Packages.FindAsync(id);
+        updated!.ConsecutiveFailures.Should().Be(0);
+        updated.IsSyncDisabled.Should().BeFalse();
+        updated.LastFailureMessage.Should().BeNull();
+    }
+
+    #endregion
+
+    #region POST /api/admin/packages/{id}/disable-sync
+
+    [Fact]
+    public async Task DisablePackageSync_GivenUnauthenticatedRequest_ReturnsForbidden()
+    {
+        // CSRF middleware rejects requests without Origin header before auth runs
+        var response = await _client.PostAsync("/api/admin/packages/nonexistent-id-1234xx/disable-sync", null);
+
+        response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+    }
+
+    [Fact]
+    public async Task DisablePackageSync_GivenNonAdminRequest_ReturnsForbidden()
+    {
+        var response = await _nonAdminClient.PostAsync("/api/admin/packages/nonexistent-id-1234xx/disable-sync", null);
+
+        response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+    }
+
+    [Fact]
+    public async Task DisablePackageSync_ReturnsNotFound_WhenPackageDoesNotExist()
+    {
+        var response = await _authClient.PostAsync("/api/admin/packages/nonexistent-id-1234xx/disable-sync", null);
+
+        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+    }
+
+    [Fact]
+    public async Task DisablePackageSync_SetsIsSyncDisabled_WhenPackageExists()
+    {
+        // Arrange
+        using var scope = _fixture.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<PatchNotesDbContext>();
+        var pkg = new Package
+        {
+            Name = "active-pkg",
+            Url = "https://github.com/o/active",
+            GithubOwner = "o",
+            GithubRepo = "active",
+            IsSyncDisabled = false,
+        };
+        db.Packages.Add(pkg);
+        await db.SaveChangesAsync();
+        var id = pkg.Id;
+
+        // Act
+        var response = await _authClient.PostAsync($"/api/admin/packages/{id}/disable-sync", null);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
+
+        // Verify the package was disabled
+        using var verifyScope = _fixture.Services.CreateScope();
+        var verifyDb = verifyScope.ServiceProvider.GetRequiredService<PatchNotesDbContext>();
+        var updated = await verifyDb.Packages.FindAsync(id);
+        updated!.IsSyncDisabled.Should().BeTrue();
+    }
+
+    #endregion
 }
