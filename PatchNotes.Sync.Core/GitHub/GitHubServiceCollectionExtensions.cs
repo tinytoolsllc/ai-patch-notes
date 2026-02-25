@@ -40,6 +40,7 @@ public static class GitHubServiceCollectionExtensions
             var options = serviceProvider.GetRequiredService<IOptions<GitHubClientOptions>>().Value;
 
             client.BaseAddress = new Uri(options.BaseUrl);
+            client.Timeout = TimeSpan.FromSeconds(30);
             client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/vnd.github+json"));
             client.DefaultRequestHeaders.UserAgent.ParseAdd(options.UserAgent);
             client.DefaultRequestHeaders.Add("X-GitHub-Api-Version", "2022-11-28");
@@ -50,16 +51,24 @@ public static class GitHubServiceCollectionExtensions
             }
         })
         .AddHttpMessageHandler<RateLimitHandler>()
-        .AddResilienceHandler("github-rate-limit", builder =>
+        .AddResilienceHandler("github-resilience", builder =>
         {
             builder.AddRetry(new HttpRetryStrategyOptions
             {
                 MaxRetryAttempts = 3,
                 BackoffType = DelayBackoffType.Exponential,
                 Delay = TimeSpan.FromSeconds(2),
-                ShouldHandle = args => ValueTask.FromResult(
-                    args.Outcome.Result?.StatusCode is HttpStatusCode.TooManyRequests
-                    or HttpStatusCode.ServiceUnavailable),
+                ShouldHandle = args =>
+                {
+                    if (args.Outcome.Exception is HttpRequestException)
+                        return ValueTask.FromResult(true);
+                    return ValueTask.FromResult(args.Outcome.Result?.StatusCode is
+                        HttpStatusCode.TooManyRequests or
+                        HttpStatusCode.InternalServerError or
+                        HttpStatusCode.BadGateway or
+                        HttpStatusCode.ServiceUnavailable or
+                        HttpStatusCode.GatewayTimeout);
+                },
                 DelayGenerator = args =>
                 {
                     var retryAfter = args.Outcome.Result?.Headers.RetryAfter?.Delta;

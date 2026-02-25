@@ -1,6 +1,9 @@
+using System.Net;
 using System.Net.Http.Headers;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Http.Resilience;
 using Microsoft.Extensions.Options;
+using Polly;
 
 namespace PatchNotes.Sync.Core.AI;
 
@@ -34,12 +37,32 @@ public static class AiServiceCollectionExtensions
             var options = serviceProvider.GetRequiredService<IOptions<AiClientOptions>>().Value;
 
             client.BaseAddress = new Uri(options.BaseUrl.TrimEnd('/') + "/");
+            client.Timeout = TimeSpan.FromSeconds(120);
             client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
             if (!string.IsNullOrWhiteSpace(options.ApiKey))
             {
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", options.ApiKey);
             }
+        })
+        .AddResilienceHandler("ai-resilience", builder =>
+        {
+            builder.AddRetry(new HttpRetryStrategyOptions
+            {
+                MaxRetryAttempts = 3,
+                BackoffType = DelayBackoffType.Exponential,
+                Delay = TimeSpan.FromSeconds(2),
+                ShouldHandle = args =>
+                {
+                    if (args.Outcome.Exception is HttpRequestException)
+                        return ValueTask.FromResult(true);
+                    return ValueTask.FromResult(args.Outcome.Result?.StatusCode is
+                        HttpStatusCode.InternalServerError or
+                        HttpStatusCode.BadGateway or
+                        HttpStatusCode.ServiceUnavailable or
+                        HttpStatusCode.GatewayTimeout);
+                }
+            });
         });
 
         return services;
