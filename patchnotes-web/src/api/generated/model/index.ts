@@ -29,6 +29,7 @@ export * from './packageDetailInfoDto';
 export * from './packageDetailReleaseDto';
 export * from './packageDetailResponseDto';
 export * from './packageDto';
+export * from './packageHealthDto';
 export * from './packageReleaseDto';
 export * from './packageReleasePackageDto';
 export * from './paginatedResponseOfOwnerPackageDto';

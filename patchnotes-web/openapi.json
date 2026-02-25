@@ -6,7 +6,7 @@
   },
   "servers": [
     {
-      "url": "http://localhost:5000/"
+      "url": "http://localhost:5299/"
     }
   ],
   "paths": {
@@ -370,6 +370,85 @@
           },
           "400": {
             "description": "Bad Request"
+          }
+        }
+      }
+    },
+    "/api/admin/packages/health": {
+      "get": {
+        "tags": [
+          "AdminPackages"
+        ],
+        "operationId": "GetPackagesHealth",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PackageHealthDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/packages/{id}/reset-sync": {
+      "post": {
+        "tags": [
+          "AdminPackages"
+        ],
+        "operationId": "ResetPackageSync",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "maxLength": 21,
+              "minLength": 21,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
+    "/api/admin/packages/{id}/disable-sync": {
+      "post": {
+        "tags": [
+          "AdminPackages"
+        ],
+        "operationId": "DisablePackageSync",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "maxLength": 21,
+              "minLength": 21,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "404": {
+            "description": "Not Found"
           }
         }
       }
@@ -1665,6 +1744,56 @@
           }
         }
       },
+      "PackageHealthDto": {
+        "required": [
+          "id",
+          "name",
+          "githubOwner",
+          "githubRepo"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "githubOwner": {
+            "type": "string"
+          },
+          "githubRepo": {
+            "type": "string"
+          },
+          "consecutiveFailures": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "lastFailureAt": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
+          },
+          "lastFailureMessage": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "isSyncDisabled": {
+            "type": "boolean"
+          },
+          "lastFetchedAt": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
+          }
+        }
+      },
       "PackageReleaseDto": {
         "required": [
           "id",
@@ -2121,6 +2250,9 @@
     },
     {
       "name": "Packages"
+    },
+    {
+      "name": "AdminPackages"
     },
     {
       "name": "AdminGitHub"
