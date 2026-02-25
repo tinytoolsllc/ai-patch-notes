@@ -9,7 +9,7 @@ export const Header = forwardRef<HTMLElement, HeaderProps>(
       <header
         ref={ref}
         className={`
-          relative z-10
+          sticky top-0 z-10
           bg-surface-primary/80
           backdrop-blur-md
           border-b border-border-default
