@@ -96,6 +96,14 @@
     0 10px 15px -3px oklch(0 0 0 / 0.08), 0 4px 6px -4px oklch(0 0 0 / 0.08);
 }
 
+@utility text-2xs {
+  font-size: var(--font-size-2xs);
+}
+
+@utility text-3xs {
+  font-size: var(--font-size-3xs);
+}
+
 /* Dark mode overrides - class-based for manual toggle support */
 :root.dark {
   --color-surface-primary: oklch(0.16 0.02 250);
