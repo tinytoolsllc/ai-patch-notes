@@ -3,13 +3,15 @@ import {
   Header,
   HeaderTitle,
   Container,
-  Button,
   Card,
   CardHeader,
   CardTitle,
   CardContent,
   Badge,
 } from '../components/ui'
+import { ThemeToggle } from '../components/theme'
+import { UserMenu } from '../components/auth'
+import { Logo } from '../components/landing/Logo'
 import { ReleaseCard } from '../components/releases'
 import { usePackage, usePackageReleases } from '../api/hooks'
 import type { PackageReleaseDto } from '../api/generated/model'
@@ -38,7 +40,22 @@ export function PackageDetail({ packageId }: PackageDetailProps) {
     return (
       <div className="min-h-screen bg-surface-secondary">
         <Header>
-          <HeaderTitle>Loading...</HeaderTitle>
+          <Link
+            to="/"
+            className="flex items-center gap-2.5 hover:opacity-80 transition-opacity"
+          >
+            <Logo size={36} />
+            <div>
+              <HeaderTitle>My Release Notes</HeaderTitle>
+              <p className="text-2xs text-text-tertiary leading-tight">
+                by Tiny Tools
+              </p>
+            </div>
+          </Link>
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
+            <UserMenu />
+          </div>
         </Header>
         <main className="py-8">
           <Container>
@@ -53,12 +70,22 @@ export function PackageDetail({ packageId }: PackageDetailProps) {
     return (
       <div className="min-h-screen bg-surface-secondary">
         <Header>
-          <HeaderTitle>Package Not Found</HeaderTitle>
-          <Link to="/">
-            <Button variant="secondary" size="sm">
-              Back to Home
-            </Button>
+          <Link
+            to="/"
+            className="flex items-center gap-2.5 hover:opacity-80 transition-opacity"
+          >
+            <Logo size={36} />
+            <div>
+              <HeaderTitle>My Release Notes</HeaderTitle>
+              <p className="text-2xs text-text-tertiary leading-tight">
+                by Tiny Tools
+              </p>
+            </div>
           </Link>
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
+            <UserMenu />
+          </div>
         </Header>
         <main className="py-8">
           <Container>
@@ -76,13 +103,41 @@ export function PackageDetail({ packageId }: PackageDetailProps) {
 
   return (
     <div className="min-h-screen bg-surface-secondary">
-      <Header>
-        <HeaderTitle>{pkg.npmName}</HeaderTitle>
-        <Link to="/">
-          <Button variant="secondary" size="sm">
-            Back to Home
-          </Button>
+      <Header
+        breadcrumb={
+          <>
+            <Link to="/" className="hover:text-text-primary transition-colors">
+              Home
+            </Link>
+            <span className="text-text-tertiary">/</span>
+            <Link
+              to="/packages/$owner"
+              params={{ owner: pkg.githubOwner }}
+              className="hover:text-text-primary transition-colors"
+            >
+              {pkg.githubOwner}
+            </Link>
+            <span className="text-text-tertiary">/</span>
+            <span className="text-text-primary">{pkg.githubRepo}</span>
+          </>
+        }
+      >
+        <Link
+          to="/"
+          className="flex items-center gap-2.5 hover:opacity-80 transition-opacity"
+        >
+          <Logo size={36} />
+          <div>
+            <HeaderTitle>My Release Notes</HeaderTitle>
+            <p className="text-2xs text-text-tertiary leading-tight">
+              by Tiny Tools
+            </p>
+          </div>
         </Link>
+        <div className="flex items-center gap-2">
+          <ThemeToggle />
+          <UserMenu />
+        </div>
       </Header>
 
       <main className="py-8">
