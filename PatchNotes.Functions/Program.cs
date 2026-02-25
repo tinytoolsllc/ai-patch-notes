@@ -63,5 +63,6 @@ telemetry.TrackEvent("SyncFunctionStarted", new Dictionary<string, string>
     ["configValid"] = (missingKeys.Count == 0).ToString(),
     ["missingKeys"] = string.Join(", ", missingKeys),
 });
+telemetry.Flush();
 
 app.Run();
