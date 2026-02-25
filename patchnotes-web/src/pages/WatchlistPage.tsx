@@ -183,9 +183,7 @@ export function WatchlistPage() {
   return (
     <div className="min-h-screen bg-surface-secondary">
       <AppHeader
-        breadcrumbs={
-          <span className="text-text-primary">Watchlist</span>
-        }
+        breadcrumbs={<span className="text-text-primary">Watchlist</span>}
       />
 
       <main className="py-8">

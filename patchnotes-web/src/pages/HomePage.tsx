@@ -9,13 +9,7 @@ import {
   CalendarArrowDown,
   Group,
 } from 'lucide-react'
-import {
-  AppHeader,
-  Container,
-  Badge,
-  Card,
-  Tooltip,
-} from '../components/ui'
+import { AppHeader, Container, Badge, Card, Tooltip } from '../components/ui'
 import {
   formatDate,
   formatRelativeTime,

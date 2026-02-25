@@ -253,9 +253,7 @@ export function Settings() {
   return (
     <div className="min-h-screen bg-surface-secondary">
       <AppHeader
-        breadcrumbs={
-          <span className="text-text-primary">Settings</span>
-        }
+        breadcrumbs={<span className="text-text-primary">Settings</span>}
       />
 
       <main className="py-12">

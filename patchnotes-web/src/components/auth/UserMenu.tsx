@@ -1,7 +1,15 @@
 import { useState, useRef, useEffect } from 'react'
 import { useStytch, useStytchUser } from '@stytch/react'
 import { Link, useNavigate } from '@tanstack/react-router'
-import { Settings, LogOut, Sparkles, CreditCard, Shield, Sun, Moon } from 'lucide-react'
+import {
+  Settings,
+  LogOut,
+  Sparkles,
+  CreditCard,
+  Shield,
+  Sun,
+  Moon,
+} from 'lucide-react'
 import { useSubscriptionStore } from '../../stores/subscriptionStore'
 import { useGeofencing } from '../../hooks/useGeofencing'
 import { useIsAdmin } from '../../utils/auth'
@@ -233,13 +241,7 @@ function ThemeMenuButton() {
 
   return (
     <MenuButton
-      icon={
-        isDark ? (
-          <Sun className="w-4 h-4" />
-        ) : (
-          <Moon className="w-4 h-4" />
-        )
-      }
+      icon={isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
       onClick={() => setTheme(isDark ? 'light' : 'dark')}
     >
       {isDark ? 'Light mode' : 'Dark mode'}
