@@ -15,13 +15,13 @@ const FREE_FEATURES = [
   'Track up to 5 packages',
   'AI-powered release summaries',
   'Version grouping & filtering',
+  'No advertisements',
 ]
 
 const PRO_FEATURES = [
   'Everything in Free',
   'Track unlimited packages',
-  'No advertisements',
-  'Weekly email highlights',
+  'Weekly email digest',
   'Priority support',
 ]
 
