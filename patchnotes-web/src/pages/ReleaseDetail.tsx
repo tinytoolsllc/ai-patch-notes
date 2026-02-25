@@ -1,17 +1,15 @@
 import { Link } from '@tanstack/react-router'
 import { LazyMarkdown as Markdown } from '../components/LazyMarkdown'
 import {
-  Header,
-  HeaderTitle,
+  AppHeader,
+  Breadcrumb,
+  BreadcrumbSeparator,
   Container,
   Card,
   CardHeader,
   CardTitle,
   CardContent,
 } from '../components/ui'
-import { ThemeToggle } from '../components/theme'
-import { UserMenu } from '../components/auth'
-import { Logo } from '../components/landing/Logo'
 import { VersionBadge } from '../components/releases'
 import { useRelease } from '../api/hooks'
 import {
@@ -29,24 +27,7 @@ export function ReleaseDetail({ releaseId }: ReleaseDetailProps) {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-surface-secondary">
-        <Header>
-          <Link
-            to="/"
-            className="flex items-center gap-2.5 hover:opacity-80 transition-opacity"
-          >
-            <Logo size={36} />
-            <div>
-              <HeaderTitle>My Release Notes</HeaderTitle>
-              <p className="text-2xs text-text-tertiary leading-tight">
-                by Tiny Tools
-              </p>
-            </div>
-          </Link>
-          <div className="flex items-center gap-2">
-            <ThemeToggle />
-            <UserMenu />
-          </div>
-        </Header>
+        <AppHeader />
         <main className="py-8">
           <Container>
             <p className="text-text-secondary">Loading release details...</p>
@@ -59,24 +40,7 @@ export function ReleaseDetail({ releaseId }: ReleaseDetailProps) {
   if (error || !release) {
     return (
       <div className="min-h-screen bg-surface-secondary">
-        <Header>
-          <Link
-            to="/"
-            className="flex items-center gap-2.5 hover:opacity-80 transition-opacity"
-          >
-            <Logo size={36} />
-            <div>
-              <HeaderTitle>My Release Notes</HeaderTitle>
-              <p className="text-2xs text-text-tertiary leading-tight">
-                by Tiny Tools
-              </p>
-            </div>
-          </Link>
-          <div className="flex items-center gap-2">
-            <ThemeToggle />
-            <UserMenu />
-          </div>
-        </Header>
+        <AppHeader />
         <main className="py-8">
           <Container>
             <p className="text-text-secondary">
@@ -94,50 +58,24 @@ export function ReleaseDetail({ releaseId }: ReleaseDetailProps) {
 
   return (
     <div className="min-h-screen bg-surface-secondary">
-      <Header
-        breadcrumb={
+      <AppHeader
+        breadcrumbs={
           <>
-            <Link to="/" className="hover:text-text-primary transition-colors">
-              Home
-            </Link>
-            <span className="text-text-tertiary">/</span>
-            <Link
-              to="/packages/$owner"
-              params={{ owner: githubOwner }}
-              className="hover:text-text-primary transition-colors"
-            >
+            <Breadcrumb to="/packages/$owner" params={{ owner: githubOwner }}>
               {githubOwner}
-            </Link>
-            <span className="text-text-tertiary">/</span>
-            <Link
+            </Breadcrumb>
+            <BreadcrumbSeparator />
+            <Breadcrumb
               to="/packages/$owner/$repo"
               params={{ owner: githubOwner, repo: githubRepo }}
-              className="hover:text-text-primary transition-colors"
             >
               {githubRepo}
-            </Link>
-            <span className="text-text-tertiary">/</span>
-            <span className="text-text-primary">{release.tag}</span>
+            </Breadcrumb>
+            <BreadcrumbSeparator />
+            <Breadcrumb>{release.tag}</Breadcrumb>
           </>
         }
-      >
-        <Link
-          to="/"
-          className="flex items-center gap-2.5 hover:opacity-80 transition-opacity"
-        >
-          <Logo size={36} />
-          <div>
-            <HeaderTitle>My Release Notes</HeaderTitle>
-            <p className="text-2xs text-text-tertiary leading-tight">
-              by Tiny Tools
-            </p>
-          </div>
-        </Link>
-        <div className="flex items-center gap-2">
-          <ThemeToggle />
-          <UserMenu />
-        </div>
-      </Header>
+      />
 
       <main className="py-8">
         <Container>

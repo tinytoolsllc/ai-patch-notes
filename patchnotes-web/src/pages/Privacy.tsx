@@ -1,42 +1,11 @@
-import { Link } from '@tanstack/react-router'
-import { Header, HeaderTitle, Container } from '../components/ui'
-import { ThemeToggle } from '../components/theme'
-import { UserMenu } from '../components/auth'
-import { Logo } from '../components/landing/Logo'
+import { AppHeader, Breadcrumb, Container } from '../components/ui'
 
 const LAST_UPDATED = 'February 7, 2026'
 
 export function Privacy() {
   return (
     <div className="min-h-screen bg-surface-secondary">
-      <Header
-        breadcrumb={
-          <>
-            <Link to="/" className="hover:text-text-primary transition-colors">
-              Home
-            </Link>
-            <span className="text-text-tertiary">/</span>
-            <span className="text-text-primary">Privacy</span>
-          </>
-        }
-      >
-        <Link
-          to="/"
-          className="flex items-center gap-2.5 hover:opacity-80 transition-opacity"
-        >
-          <Logo size={36} />
-          <div>
-            <HeaderTitle>My Release Notes</HeaderTitle>
-            <p className="text-2xs text-text-tertiary leading-tight">
-              by Tiny Tools
-            </p>
-          </div>
-        </Link>
-        <div className="flex items-center gap-2">
-          <ThemeToggle />
-          <UserMenu />
-        </div>
-      </Header>
+      <AppHeader breadcrumbs={<Breadcrumb>Privacy</Breadcrumb>} />
 
       <main className="py-12">
         <Container>

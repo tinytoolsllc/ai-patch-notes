@@ -1,20 +1,12 @@
 /* eslint-disable react-refresh/only-export-components */
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { XCircle } from 'lucide-react'
-import { Header, HeaderTitle, Container, Button, Card } from '../components/ui'
-import { ThemeToggle } from '../components/theme'
-import { UserMenu } from '../components/auth'
+import { AppHeader, Container, Button, Card } from '../components/ui'
 
 function SubscriptionCanceled() {
   return (
     <div className="min-h-screen bg-surface-secondary">
-      <Header>
-        <HeaderTitle>My Release Notes</HeaderTitle>
-        <div className="flex items-center gap-2">
-          <ThemeToggle />
-          <UserMenu />
-        </div>
-      </Header>
+      <AppHeader />
 
       <main className="py-16">
         <Container>
