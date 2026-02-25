@@ -65,6 +65,13 @@ public static class VersionParser
         @"^release[-/]v?(\d+)\.(\d+)(?:\.(\d+))?(?:-([a-zA-Z0-9]+(?:\.[a-zA-Z0-9]+)*))?$",
         RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
+    // Dash-separated monorepo: {package-name}-vMAJOR.MINOR[.PATCH][-PRE][+BUILD]
+    // Handles tags like puppeteer-core-v24.37.5, browsers-v2.13.0
+    // Greedy match on package ensures longest prefix (puppeteer-core, not puppeteer)
+    private static readonly Regex DashMonorepoRegex = new(
+        @"^(.+)-v(\d+)\.(\d+)(?:\.(\d+))?(?:-([a-zA-Z0-9]+(?:\.[a-zA-Z0-9]+)*))?(?:\+([a-zA-Z0-9]+(?:\.[a-zA-Z0-9]+)*))?$",
+        RegexOptions.Compiled);
+
     // Standard semver: v?MAJOR.MINOR.PATCH[-PRE][+BUILD]
     private static readonly Regex SemverRegex = new(
         @"^v?(\d+)\.(\d+)\.(\d+)(?:-([a-zA-Z0-9]+(?:\.[a-zA-Z0-9]+)*))?(?:\+([a-zA-Z0-9]+(?:\.[a-zA-Z0-9]+)*))?$",
@@ -104,6 +111,13 @@ public static class VersionParser
         if (releaseMatch.Success)
         {
             return ParseReleaseMatch(releaseMatch, tag);
+        }
+
+        // Try dash-separated monorepo format (e.g., puppeteer-core-v24.37.5)
+        var dashMonorepoMatch = DashMonorepoRegex.Match(tag);
+        if (dashMonorepoMatch.Success)
+        {
+            return ParseDashMonorepoMatch(dashMonorepoMatch, tag);
         }
 
         // Try standard semver
@@ -150,6 +164,26 @@ public static class VersionParser
     }
 
     private static VersionParseResult ParseMonorepoMatch(Match match, string tag)
+    {
+        var package = match.Groups[1].Value;
+        if (!int.TryParse(match.Groups[2].Value, out var major) ||
+            !int.TryParse(match.Groups[3].Value, out var minor))
+        {
+            return VersionParseResult.Fail(tag, "Failed to parse version numbers");
+        }
+
+        var patch = 0;
+        if (match.Groups[4].Success)
+            int.TryParse(match.Groups[4].Value, out patch);
+
+        var prerelease = match.Groups[5].Success ? match.Groups[5].Value : null;
+        var build = match.Groups[6].Success ? match.Groups[6].Value : null;
+
+        return VersionParseResult.Ok(new ParsedVersion(
+            major, minor, patch, prerelease, build, tag, package));
+    }
+
+    private static VersionParseResult ParseDashMonorepoMatch(Match match, string tag)
     {
         var package = match.Groups[1].Value;
         if (!int.TryParse(match.Groups[2].Value, out var major) ||
