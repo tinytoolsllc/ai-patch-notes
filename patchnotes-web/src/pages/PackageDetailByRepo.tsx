@@ -122,9 +122,6 @@ export function PackageDetailByRepo({ owner, repo }: PackageDetailByRepoProps) {
     )
   }
 
-  const pkg = data.package
-  const githubUrl = `https://github.com/${pkg.githubOwner}/${pkg.githubRepo}`
-
   return (
     <div className="min-h-screen bg-surface-secondary">
       <PageHeader owner={owner} repo={repo} />
@@ -132,43 +129,6 @@ export function PackageDetailByRepo({ owner, repo }: PackageDetailByRepoProps) {
       <main className="py-8">
         <Container>
           <HeroCard />
-
-          {/* Package Info */}
-          <div className="mb-6">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="w-12 h-12 rounded-lg bg-brand-100 dark:bg-brand-900/30 flex items-center justify-center font-semibold text-xl text-brand-600 dark:text-brand-400">
-                {(pkg.npmName ?? pkg.name).charAt(0).toUpperCase()}
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold text-text-primary">
-                  {pkg.npmName ?? pkg.name}
-                </h1>
-                <p className="text-sm text-text-secondary">
-                  {pkg.githubOwner}/{pkg.githubRepo}
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center gap-4 text-sm mt-3">
-              <a
-                href={githubUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-text-secondary hover:text-brand-600 transition-colors"
-              >
-                View on GitHub
-              </a>
-              {pkg.npmName && (
-                <a
-                  href={`https://www.npmjs.com/package/${pkg.npmName}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-text-secondary hover:text-brand-600 transition-colors"
-                >
-                  View on npm
-                </a>
-              )}
-            </div>
-          </div>
 
           {/* Version Groups */}
           <div className="space-y-4">
