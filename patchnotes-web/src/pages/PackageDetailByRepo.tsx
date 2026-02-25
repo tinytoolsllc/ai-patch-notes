@@ -205,30 +205,54 @@ function VersionGroupCard({ group }: { group: PackageDetailGroupDto }) {
   )
 }
 
+function PageHeader({ owner, repo }: { owner: string; repo: string }) {
+  return (
+    <Header
+      breadcrumb={
+        <>
+          <Link to="/" className="hover:text-text-primary transition-colors">
+            Home
+          </Link>
+          <span className="text-text-tertiary">/</span>
+          <Link
+            to="/packages/$owner"
+            params={{ owner }}
+            className="hover:text-text-primary transition-colors"
+          >
+            {owner}
+          </Link>
+          <span className="text-text-tertiary">/</span>
+          <span className="text-text-primary">{repo}</span>
+        </>
+      }
+    >
+      <Link
+        to="/"
+        className="flex items-center gap-2.5 hover:opacity-80 transition-opacity"
+      >
+        <Logo size={36} />
+        <div>
+          <HeaderTitle>My Release Notes</HeaderTitle>
+          <p className="text-2xs text-text-tertiary leading-tight">
+            by Tiny Tools
+          </p>
+        </div>
+      </Link>
+      <div className="flex items-center gap-2">
+        <ThemeToggle />
+        <UserMenu />
+      </div>
+    </Header>
+  )
+}
+
 export function PackageDetailByRepo({ owner, repo }: PackageDetailByRepoProps) {
   const { data, isLoading, error } = usePackageByOwnerRepo(owner, repo)
 
   if (isLoading) {
     return (
       <div className="min-h-screen bg-surface-secondary">
-        <Header>
-          <Link
-            to="/"
-            className="flex items-center gap-2.5 hover:opacity-80 transition-opacity"
-          >
-            <Logo size={36} />
-            <div>
-              <HeaderTitle>My Release Notes</HeaderTitle>
-              <p className="text-2xs text-text-tertiary leading-tight">
-                by Tiny Tools
-              </p>
-            </div>
-          </Link>
-          <div className="flex items-center gap-2">
-            <ThemeToggle />
-            <UserMenu />
-          </div>
-        </Header>
+        <PageHeader owner={owner} repo={repo} />
         <main className="py-8">
           <Container>
             <p className="text-text-secondary">Loading package details...</p>
@@ -241,24 +265,7 @@ export function PackageDetailByRepo({ owner, repo }: PackageDetailByRepoProps) {
   if (error || !data) {
     return (
       <div className="min-h-screen bg-surface-secondary">
-        <Header>
-          <Link
-            to="/"
-            className="flex items-center gap-2.5 hover:opacity-80 transition-opacity"
-          >
-            <Logo size={36} />
-            <div>
-              <HeaderTitle>My Release Notes</HeaderTitle>
-              <p className="text-2xs text-text-tertiary leading-tight">
-                by Tiny Tools
-              </p>
-            </div>
-          </Link>
-          <div className="flex items-center gap-2">
-            <ThemeToggle />
-            <UserMenu />
-          </div>
-        </Header>
+        <PageHeader owner={owner} repo={repo} />
         <main className="py-8">
           <Container>
             <p className="text-text-secondary">
@@ -275,24 +282,7 @@ export function PackageDetailByRepo({ owner, repo }: PackageDetailByRepoProps) {
 
   return (
     <div className="min-h-screen bg-surface-secondary">
-      <Header>
-        <Link
-          to="/"
-          className="flex items-center gap-2.5 hover:opacity-80 transition-opacity"
-        >
-          <Logo size={36} />
-          <div>
-            <HeaderTitle>{pkg.npmName ?? pkg.name}</HeaderTitle>
-            <p className="text-2xs text-text-tertiary leading-tight">
-              by Tiny Tools
-            </p>
-          </div>
-        </Link>
-        <div className="flex items-center gap-2">
-          <ThemeToggle />
-          <UserMenu />
-        </div>
-      </Header>
+      <PageHeader owner={owner} repo={repo} />
 
       <main className="py-8">
         <Container>

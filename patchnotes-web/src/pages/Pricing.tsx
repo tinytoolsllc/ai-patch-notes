@@ -43,14 +43,24 @@ export function Pricing() {
 
   return (
     <div className="min-h-screen bg-surface-secondary">
-      <Header>
+      <Header
+        breadcrumb={
+          <>
+            <Link to="/" className="hover:text-text-primary transition-colors">
+              Home
+            </Link>
+            <span className="text-text-tertiary">/</span>
+            <span className="text-text-primary">Pricing</span>
+          </>
+        }
+      >
         <Link
           to="/"
           className="flex items-center gap-2.5 hover:opacity-80 transition-opacity"
         >
           <Logo size={36} />
           <div>
-            <HeaderTitle>My Release Notes - Pricing</HeaderTitle>
+            <HeaderTitle>My Release Notes</HeaderTitle>
             <p className="text-2xs text-text-tertiary leading-tight">
               by Tiny Tools
             </p>

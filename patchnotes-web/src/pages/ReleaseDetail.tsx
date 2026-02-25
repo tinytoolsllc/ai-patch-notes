@@ -4,12 +4,14 @@ import {
   Header,
   HeaderTitle,
   Container,
-  Button,
   Card,
   CardHeader,
   CardTitle,
   CardContent,
 } from '../components/ui'
+import { ThemeToggle } from '../components/theme'
+import { UserMenu } from '../components/auth'
+import { Logo } from '../components/landing/Logo'
 import { VersionBadge } from '../components/releases'
 import { useRelease } from '../api/hooks'
 import {
@@ -28,7 +30,22 @@ export function ReleaseDetail({ releaseId }: ReleaseDetailProps) {
     return (
       <div className="min-h-screen bg-surface-secondary">
         <Header>
-          <HeaderTitle>Loading...</HeaderTitle>
+          <Link
+            to="/"
+            className="flex items-center gap-2.5 hover:opacity-80 transition-opacity"
+          >
+            <Logo size={36} />
+            <div>
+              <HeaderTitle>My Release Notes</HeaderTitle>
+              <p className="text-2xs text-text-tertiary leading-tight">
+                by Tiny Tools
+              </p>
+            </div>
+          </Link>
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
+            <UserMenu />
+          </div>
         </Header>
         <main className="py-8">
           <Container>
@@ -43,12 +60,22 @@ export function ReleaseDetail({ releaseId }: ReleaseDetailProps) {
     return (
       <div className="min-h-screen bg-surface-secondary">
         <Header>
-          <HeaderTitle>Release Not Found</HeaderTitle>
-          <Link to="/">
-            <Button variant="secondary" size="sm">
-              Back to Home
-            </Button>
+          <Link
+            to="/"
+            className="flex items-center gap-2.5 hover:opacity-80 transition-opacity"
+          >
+            <Logo size={36} />
+            <div>
+              <HeaderTitle>My Release Notes</HeaderTitle>
+              <p className="text-2xs text-text-tertiary leading-tight">
+                by Tiny Tools
+              </p>
+            </div>
           </Link>
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
+            <UserMenu />
+          </div>
         </Header>
         <main className="py-8">
           <Container>
@@ -67,28 +94,48 @@ export function ReleaseDetail({ releaseId }: ReleaseDetailProps) {
 
   return (
     <div className="min-h-screen bg-surface-secondary">
-      <Header>
-        <div className="flex items-center gap-3">
-          <VersionBadge version={release.tag} />
-          <HeaderTitle>{displayTitle}</HeaderTitle>
-        </div>
-        <div className="flex items-center gap-2">
-          <Link
-            to="/packages/$owner/$repo"
-            params={{
-              owner: release.package.githubOwner,
-              repo: release.package.githubRepo,
-            }}
-          >
-            <Button variant="secondary" size="sm">
-              {release.package.npmName}
-            </Button>
-          </Link>
-          <Link to="/">
-            <Button variant="secondary" size="sm">
+      <Header
+        breadcrumb={
+          <>
+            <Link to="/" className="hover:text-text-primary transition-colors">
               Home
-            </Button>
-          </Link>
+            </Link>
+            <span className="text-text-tertiary">/</span>
+            <Link
+              to="/packages/$owner"
+              params={{ owner: githubOwner }}
+              className="hover:text-text-primary transition-colors"
+            >
+              {githubOwner}
+            </Link>
+            <span className="text-text-tertiary">/</span>
+            <Link
+              to="/packages/$owner/$repo"
+              params={{ owner: githubOwner, repo: githubRepo }}
+              className="hover:text-text-primary transition-colors"
+            >
+              {githubRepo}
+            </Link>
+            <span className="text-text-tertiary">/</span>
+            <span className="text-text-primary">{release.tag}</span>
+          </>
+        }
+      >
+        <Link
+          to="/"
+          className="flex items-center gap-2.5 hover:opacity-80 transition-opacity"
+        >
+          <Logo size={36} />
+          <div>
+            <HeaderTitle>My Release Notes</HeaderTitle>
+            <p className="text-2xs text-text-tertiary leading-tight">
+              by Tiny Tools
+            </p>
+          </div>
+        </Link>
+        <div className="flex items-center gap-2">
+          <ThemeToggle />
+          <UserMenu />
         </div>
       </Header>
 
