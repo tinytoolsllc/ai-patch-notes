@@ -2,8 +2,8 @@ import { useState, useEffect, useRef } from 'react'
 import { useDebouncedValue } from '@tanstack/react-pacer'
 import { Link, useNavigate } from '@tanstack/react-router'
 import {
-  Header,
-  HeaderTitle,
+  AppHeader,
+  Breadcrumb,
   Container,
   Button,
   Input,
@@ -631,43 +631,42 @@ export function Admin() {
 
   return (
     <div className="min-h-screen bg-surface-secondary">
-      <Header>
-        <HeaderTitle>Package Management</HeaderTitle>
-        <div className="flex items-center gap-3">
-          <Link to="/">
-            <Button variant="secondary" size="sm">
-              Back to Home
-            </Button>
-          </Link>
-          <Link to="/admin/emails">
-            <Button variant="secondary" size="sm">
-              Email Templates
-            </Button>
-          </Link>
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={() => {
-              setShowBulkAdd(true)
-              setShowAddForm(false)
-            }}
-          >
-            Bulk Add
-          </Button>
-          <Button
-            size="sm"
-            onClick={() => {
-              setShowAddForm(true)
-              setShowBulkAdd(false)
-            }}
-          >
-            Add Package
-          </Button>
-        </div>
-      </Header>
+      <AppHeader breadcrumbs={<Breadcrumb>Admin</Breadcrumb>} />
 
       <main className="py-8">
         <Container>
+          <div className="flex items-center justify-between mb-6">
+            <h1 className="text-xl font-semibold text-text-primary">
+              Package Management
+            </h1>
+            <div className="flex items-center gap-3">
+              <Link to="/admin/emails">
+                <Button variant="secondary" size="sm">
+                  Email Templates
+                </Button>
+              </Link>
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => {
+                  setShowBulkAdd(true)
+                  setShowAddForm(false)
+                }}
+              >
+                Bulk Add
+              </Button>
+              <Button
+                size="sm"
+                onClick={() => {
+                  setShowAddForm(true)
+                  setShowBulkAdd(false)
+                }}
+              >
+                Add Package
+              </Button>
+            </div>
+          </div>
+
           {/* Add Package Form */}
           {showAddForm && (
             <AddPackageForm onClose={() => setShowAddForm(false)} />
