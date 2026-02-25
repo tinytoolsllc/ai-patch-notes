@@ -59,7 +59,7 @@ export function AppHeader({ breadcrumbs }: AppHeaderProps) {
                 <p className="text-xl font-semibold text-text-primary">
                   My Release Notes
                 </p>
-                <p className="text-3xs text-text-tertiary leading-tight">
+                <p className="text-2xs text-text-tertiary leading-tight">
                   by Tiny Tools
                 </p>
               </div>
