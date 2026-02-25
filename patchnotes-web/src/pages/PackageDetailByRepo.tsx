@@ -1,10 +1,7 @@
 import { useState } from 'react'
 import { Link } from '@tanstack/react-router'
 import { LazyMarkdown as Markdown } from '../components/LazyMarkdown'
-import { Header, HeaderTitle, Container, Card, Badge } from '../components/ui'
-import { ThemeToggle } from '../components/theme'
-import { UserMenu } from '../components/auth'
-import { Logo } from '../components/landing/Logo'
+import { AppHeader, Container, Card, Badge } from '../components/ui'
 import { usePackageByOwnerRepo } from '../api/hooks'
 import type {
   PackageDetailGroupDto,
@@ -207,13 +204,9 @@ function VersionGroupCard({ group }: { group: PackageDetailGroupDto }) {
 
 function PageHeader({ owner, repo }: { owner: string; repo: string }) {
   return (
-    <Header
-      breadcrumb={
+    <AppHeader
+      breadcrumbs={
         <>
-          <Link to="/" className="hover:text-text-primary transition-colors">
-            Home
-          </Link>
-          <span className="text-text-tertiary">/</span>
           <Link
             to="/packages/$owner"
             params={{ owner }}
@@ -225,24 +218,7 @@ function PageHeader({ owner, repo }: { owner: string; repo: string }) {
           <span className="text-text-primary">{repo}</span>
         </>
       }
-    >
-      <Link
-        to="/"
-        className="flex items-center gap-2.5 hover:opacity-80 transition-opacity"
-      >
-        <Logo size={36} />
-        <div>
-          <HeaderTitle>My Release Notes</HeaderTitle>
-          <p className="text-2xs text-text-tertiary leading-tight">
-            by Tiny Tools
-          </p>
-        </div>
-      </Link>
-      <div className="flex items-center gap-2">
-        <ThemeToggle />
-        <UserMenu />
-      </div>
-    </Header>
+    />
   )
 }
 

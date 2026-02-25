@@ -8,30 +8,16 @@ import {
   ArrowDownAZ,
   CalendarArrowDown,
   Group,
-  Sparkles,
-  List,
 } from 'lucide-react'
-import {
-  Header,
-  HeaderTitle,
-  Container,
-  Button,
-  Badge,
-  Card,
-  Tooltip,
-} from '../components/ui'
+import { AppHeader, Container, Badge, Card, Tooltip } from '../components/ui'
 import {
   formatDate,
   formatRelativeTime,
   detectPrereleaseType,
   type PrereleaseType,
 } from '../utils/dateFormat'
-import { ThemeToggle } from '../components/theme'
-import { UserMenu } from '../components/auth'
 import { HeroCard } from '../components/landing/HeroCard'
-import { Logo } from '../components/landing/Logo'
 import { useFilterStore } from '../stores/filterStore'
-import { useSubscriptionStore } from '../stores/subscriptionStore'
 import { useWatchlist, useFeed } from '../api/hooks'
 import type { FeedGroupDto } from '../api/hooks'
 
@@ -383,7 +369,6 @@ export function HomePage() {
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set())
 
   const { user } = useStytchUser()
-  const { isPro, startCheckout } = useSubscriptionStore()
 
   const { data: watchlist, isLoading: watchlistLoading } = useWatchlist()
 
@@ -401,14 +386,6 @@ export function HomePage() {
     () => buildDisplayGroups(feedData?.groups ?? []),
     [feedData]
   )
-
-  const handleUpgrade = () => {
-    if (!user) {
-      window.location.href = '/login'
-      return
-    }
-    startCheckout()
-  }
 
   const toggleExpanded = useCallback((groupId: string) => {
     setExpandedGroups((prev) => {
@@ -445,44 +422,7 @@ export function HomePage() {
 
   return (
     <div className="min-h-screen bg-surface-secondary">
-      <Header>
-        <Link
-          to="/"
-          className="flex items-center gap-2.5 hover:opacity-80 transition-opacity"
-        >
-          <Logo size={36} />
-          <div>
-            <HeaderTitle>My Release Notes</HeaderTitle>
-            <p className="text-2xs text-text-tertiary leading-tight">
-              by Tiny Tools
-            </p>
-          </div>
-        </Link>
-        <div className="flex items-center gap-2">
-          {user && (
-            <Link
-              to="/watchlist"
-              className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-text-secondary hover:text-text-primary transition-colors rounded-lg hover:bg-surface-secondary"
-            >
-              <List className="w-4 h-4" />
-              Watchlist
-            </Link>
-          )}
-          {user && !isPro && (
-            <Button
-              variant="primary"
-              size="sm"
-              onClick={handleUpgrade}
-              className="flex items-center gap-1.5"
-            >
-              <Sparkles className="w-4 h-4" />
-              Upgrade
-            </Button>
-          )}
-          <ThemeToggle />
-          <UserMenu />
-        </div>
-      </Header>
+      <AppHeader />
 
       <main className="py-8">
         <Container>
