@@ -49,7 +49,7 @@ export function Login() {
       />
 
       {/* Header */}
-      <header className="relative z-10 flex items-center justify-between px-6 py-4">
+      <header className="sticky top-0 z-10 flex items-center justify-between px-6 py-4">
         <Link
           to="/"
           className="flex items-center gap-2 text-text-secondary hover:text-text-primary transition-colors"
