@@ -1,10 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link, useNavigate } from '@tanstack/react-router'
 import { useStytchUser } from '@stytch/react'
-import { Header, HeaderTitle, Container, Button, Input } from '../components/ui'
-import { ThemeToggle } from '../components/theme'
-import { UserMenu } from '../components/auth'
-import { Logo } from '../components/landing/Logo'
+import { AppHeader, Container, Button, Input } from '../components/ui'
 import { Checkbox } from '../components/ui/Checkbox'
 import {
   useGetCurrentUser,
@@ -255,24 +252,7 @@ export function Settings() {
 
   return (
     <div className="min-h-screen bg-surface-secondary">
-      <Header>
-        <Link
-          to="/"
-          className="flex items-center gap-2.5 hover:opacity-80 transition-opacity"
-        >
-          <Logo size={36} />
-          <div>
-            <HeaderTitle>My Release Notes - Settings</HeaderTitle>
-            <p className="text-2xs text-text-tertiary leading-tight">
-              by Tiny Tools
-            </p>
-          </div>
-        </Link>
-        <div className="flex items-center gap-3">
-          <ThemeToggle />
-          <UserMenu />
-        </div>
-      </Header>
+      <AppHeader breadcrumbs={[{ label: 'Settings', href: '/settings' }]} />
 
       <main className="py-12">
         <Container>

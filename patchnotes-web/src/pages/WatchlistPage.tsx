@@ -3,10 +3,7 @@ import { Link, useNavigate } from '@tanstack/react-router'
 import { useStytchUser } from '@stytch/react'
 import { useDebouncedValue } from '@tanstack/react-pacer'
 import { Search, X, Trash2, Plus, Star, Loader2 } from 'lucide-react'
-import { Header, HeaderTitle, Container, Button, Card } from '../components/ui'
-import { ThemeToggle } from '../components/theme'
-import { UserMenu } from '../components/auth'
-import { Logo } from '../components/landing/Logo'
+import { AppHeader, Container, Button, Card } from '../components/ui'
 import {
   useWatchlist,
   useRemoveFromWatchlist,
@@ -185,24 +182,7 @@ export function WatchlistPage() {
 
   return (
     <div className="min-h-screen bg-surface-secondary">
-      <Header>
-        <Link
-          to="/"
-          className="flex items-center gap-2.5 hover:opacity-80 transition-opacity"
-        >
-          <Logo size={36} />
-          <div>
-            <HeaderTitle>Watchlist</HeaderTitle>
-            <p className="text-2xs text-text-tertiary leading-tight">
-              by Tiny Tools
-            </p>
-          </div>
-        </Link>
-        <div className="flex items-center gap-2">
-          <ThemeToggle />
-          <UserMenu />
-        </div>
-      </Header>
+      <AppHeader />
 
       <main className="py-8">
         <Container>

@@ -1,10 +1,6 @@
 import { useState } from 'react'
-import { Link } from '@tanstack/react-router'
 import { LazyMarkdown as Markdown } from '../components/LazyMarkdown'
-import { Header, HeaderTitle, Container, Card, Badge } from '../components/ui'
-import { ThemeToggle } from '../components/theme'
-import { UserMenu } from '../components/auth'
-import { Logo } from '../components/landing/Logo'
+import { AppHeader, Container, Card, Badge } from '../components/ui'
 import { usePackageByOwnerRepo } from '../api/hooks'
 import type {
   PackageDetailGroupDto,
@@ -211,24 +207,12 @@ export function PackageDetailByRepo({ owner, repo }: PackageDetailByRepoProps) {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-surface-secondary">
-        <Header>
-          <Link
-            to="/"
-            className="flex items-center gap-2.5 hover:opacity-80 transition-opacity"
-          >
-            <Logo size={36} />
-            <div>
-              <HeaderTitle>My Release Notes</HeaderTitle>
-              <p className="text-2xs text-text-tertiary leading-tight">
-                by Tiny Tools
-              </p>
-            </div>
-          </Link>
-          <div className="flex items-center gap-2">
-            <ThemeToggle />
-            <UserMenu />
-          </div>
-        </Header>
+        <AppHeader
+          breadcrumbs={[
+            { label: owner, href: `/packages/${owner}` },
+            { label: repo, href: `/packages/${owner}/${repo}` },
+          ]}
+        />
         <main className="py-8">
           <Container>
             <p className="text-text-secondary">Loading package details...</p>
@@ -241,24 +225,12 @@ export function PackageDetailByRepo({ owner, repo }: PackageDetailByRepoProps) {
   if (error || !data) {
     return (
       <div className="min-h-screen bg-surface-secondary">
-        <Header>
-          <Link
-            to="/"
-            className="flex items-center gap-2.5 hover:opacity-80 transition-opacity"
-          >
-            <Logo size={36} />
-            <div>
-              <HeaderTitle>My Release Notes</HeaderTitle>
-              <p className="text-2xs text-text-tertiary leading-tight">
-                by Tiny Tools
-              </p>
-            </div>
-          </Link>
-          <div className="flex items-center gap-2">
-            <ThemeToggle />
-            <UserMenu />
-          </div>
-        </Header>
+        <AppHeader
+          breadcrumbs={[
+            { label: owner, href: `/packages/${owner}` },
+            { label: repo, href: `/packages/${owner}/${repo}` },
+          ]}
+        />
         <main className="py-8">
           <Container>
             <p className="text-text-secondary">
@@ -275,24 +247,15 @@ export function PackageDetailByRepo({ owner, repo }: PackageDetailByRepoProps) {
 
   return (
     <div className="min-h-screen bg-surface-secondary">
-      <Header>
-        <Link
-          to="/"
-          className="flex items-center gap-2.5 hover:opacity-80 transition-opacity"
-        >
-          <Logo size={36} />
-          <div>
-            <HeaderTitle>{pkg.npmName ?? pkg.name}</HeaderTitle>
-            <p className="text-2xs text-text-tertiary leading-tight">
-              by Tiny Tools
-            </p>
-          </div>
-        </Link>
-        <div className="flex items-center gap-2">
-          <ThemeToggle />
-          <UserMenu />
-        </div>
-      </Header>
+      <AppHeader
+        breadcrumbs={[
+          { label: pkg.githubOwner, href: `/packages/${pkg.githubOwner}` },
+          {
+            label: pkg.githubRepo,
+            href: `/packages/${pkg.githubOwner}/${pkg.githubRepo}`,
+          },
+        ]}
+      />
 
       <main className="py-8">
         <Container>

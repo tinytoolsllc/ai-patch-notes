@@ -1,9 +1,7 @@
-import { Link, useNavigate } from '@tanstack/react-router'
+import { useNavigate } from '@tanstack/react-router'
 import {
-  Header,
-  HeaderTitle,
+  AppHeader,
   Container,
-  Button,
   Card,
   CardHeader,
   CardTitle,
@@ -37,9 +35,7 @@ export function PackageDetail({ packageId }: PackageDetailProps) {
   if (packageLoading) {
     return (
       <div className="min-h-screen bg-surface-secondary">
-        <Header>
-          <HeaderTitle>Loading...</HeaderTitle>
-        </Header>
+        <AppHeader />
         <main className="py-8">
           <Container>
             <p className="text-text-secondary">Loading package details...</p>
@@ -52,14 +48,7 @@ export function PackageDetail({ packageId }: PackageDetailProps) {
   if (packageError || !pkg) {
     return (
       <div className="min-h-screen bg-surface-secondary">
-        <Header>
-          <HeaderTitle>Package Not Found</HeaderTitle>
-          <Link to="/">
-            <Button variant="secondary" size="sm">
-              Back to Home
-            </Button>
-          </Link>
-        </Header>
+        <AppHeader />
         <main className="py-8">
           <Container>
             <p className="text-text-secondary">
@@ -76,14 +65,7 @@ export function PackageDetail({ packageId }: PackageDetailProps) {
 
   return (
     <div className="min-h-screen bg-surface-secondary">
-      <Header>
-        <HeaderTitle>{pkg.npmName}</HeaderTitle>
-        <Link to="/">
-          <Button variant="secondary" size="sm">
-            Back to Home
-          </Button>
-        </Link>
-      </Header>
+      <AppHeader />
 
       <main className="py-8">
         <Container>
