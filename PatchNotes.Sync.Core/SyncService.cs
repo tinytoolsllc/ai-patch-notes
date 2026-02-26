@@ -338,7 +338,9 @@ public class SyncService
     /// <returns>Number of releases updated.</returns>
     public async Task<int> BackfillVersionFieldsAsync(CancellationToken cancellationToken = default)
     {
-        var releases = await _db.Releases.ToListAsync(cancellationToken);
+        var releases = await _db.Releases
+            .Where(r => r.MajorVersion == 0 && r.MinorVersion == 0 && r.PatchVersion == 0)
+            .ToListAsync(cancellationToken);
         var updated = 0;
 
         foreach (var release in releases)
