@@ -180,7 +180,7 @@ public static class WatchlistRoutes
         .WithName("AddToWatchlist");
 
         // POST /api/watchlist/github/{owner}/{repo} — add a GitHub repo to watchlist, creating package if needed
-        group.MapPost("/github/{owner}/{repo}", async (string owner, string repo, HttpContext httpContext, PatchNotesDbContext db, IConfiguration configuration, ILoggerFactory loggerFactory) =>
+        group.MapPost("/github/{owner}/{repo}", async (string owner, string repo, HttpContext httpContext, PatchNotesDbContext db, IConfiguration configuration, ILoggerFactory loggerFactory, IHttpClientFactory httpClientFactory, IHostApplicationLifetime appLifetime) =>
         {
             var logger = loggerFactory.CreateLogger("PatchNotes.Api.Routes.WatchlistRoutes");
             var stytchUserId = httpContext.Items["StytchUserId"] as string;
@@ -251,19 +251,19 @@ public static class WatchlistRoutes
                     {
                         try
                         {
-                            using var http = new HttpClient();
+                            using var http = httpClientFactory.CreateClient();
                             using var request = new HttpRequestMessage(HttpMethod.Post, syncUrl);
                             if (!string.IsNullOrEmpty(syncKey))
                                 request.Headers.Add("x-functions-key", syncKey);
                             request.Content = new StringContent("");
                             request.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
-                            await http.SendAsync(request);
+                            await http.SendAsync(request, appLifetime.ApplicationStopping);
                         }
                         catch (Exception ex)
                         {
                             logger.LogWarning(ex, "Failed to ping SyncNewPackages function");
                         }
-                    });
+                    }, appLifetime.ApplicationStopping);
                 }
             }
 
