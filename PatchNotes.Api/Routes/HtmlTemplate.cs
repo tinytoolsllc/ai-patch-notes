@@ -56,13 +56,18 @@ public static class HtmlTemplate
         a:hover { color: var(--color-brand-700); text-decoration: underline; }
 
         .header { position: sticky; top: 0; z-index: 40; background: color-mix(in oklch, var(--color-surface-primary) 80%, transparent); backdrop-filter: blur(12px); border-bottom: 1px solid var(--color-border-default); }
-        .header-inner { max-width: 72rem; margin: 0 auto; padding: 0 1.5rem; height: 3.5rem; display: flex; align-items: center; gap: 1rem; }
-        .logo { font-weight: 700; font-size: 1rem; color: var(--color-text-primary); text-decoration: none; }
-        .logo:hover { text-decoration: none; }
+        .header-inner { max-width: 72rem; margin: 0 auto; padding: 0 1.5rem; height: 4rem; display: flex; align-items: center; justify-content: space-between; }
+        .header-left { display: flex; align-items: center; gap: 0.375rem; }
+        .logo-link { display: flex; align-items: center; gap: 0.625rem; text-decoration: none; }
+        .logo-link:hover { opacity: 0.8; text-decoration: none; }
+        .logo-text { font-weight: 600; font-size: 1.25rem; color: var(--color-text-primary); }
+        .logo-sub { font-size: 0.625rem; color: var(--color-text-tertiary); line-height: 1.1; }
         .breadcrumb-sep { color: var(--color-text-tertiary); margin: 0 0.25rem; }
-        .breadcrumb { color: var(--color-text-secondary); text-decoration: none; }
+        .breadcrumb { color: var(--color-text-secondary); text-decoration: none; font-size: 0.875rem; }
         .breadcrumb:hover { color: var(--color-text-primary); text-decoration: none; }
-        .breadcrumb-current { color: var(--color-text-primary); font-weight: 600; }
+        .breadcrumb-current { color: var(--color-text-primary); font-weight: 600; font-size: 0.875rem; }
+        .sign-in { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.375rem 0.75rem; font-size: 0.875rem; font-weight: 500; color: var(--color-text-primary); background: var(--color-surface-primary); border: 1px solid var(--color-border-default); border-radius: 0.5rem; text-decoration: none; transition: background 0.15s; }
+        .sign-in:hover { background: var(--color-surface-tertiary); text-decoration: none; }
 
         .container { max-width: 72rem; margin: 0 auto; padding: 0 1.5rem; }
         main { padding: 2rem 0; flex: 1; }
@@ -201,11 +206,32 @@ public static class HtmlTemplate
         return sb.ToString();
     }
 
+    private const string LogoSvg = """
+        <svg width="36" height="36" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <rect x="10" y="8" width="44" height="52" rx="4" fill="oklch(0.93 0.02 250)" stroke="oklch(0.48 0.18 250)" stroke-width="2"/>
+          <circle cx="18" cy="8" r="2" fill="oklch(0.48 0.18 250)"/>
+          <circle cx="28" cy="8" r="2" fill="oklch(0.48 0.18 250)"/>
+          <circle cx="38" cy="8" r="2" fill="oklch(0.48 0.18 250)"/>
+          <circle cx="48" cy="8" r="2" fill="oklch(0.48 0.18 250)"/>
+          <path d="M24 30L32 26L40 30L40 40L32 44L24 40Z" fill="oklch(0.86 0.04 250)" stroke="oklch(0.48 0.18 250)" stroke-width="1.5" stroke-linejoin="round"/>
+          <path d="M24 30L32 26L40 30L32 34Z" fill="oklch(0.76 0.08 250)" stroke="oklch(0.48 0.18 250)" stroke-width="1.5" stroke-linejoin="round"/>
+          <line x1="32" y1="34" x2="32" y2="44" stroke="oklch(0.48 0.18 250)" stroke-width="1.5"/>
+          <line x1="18" y1="50" x2="32" y2="50" stroke="oklch(0.64 0.13 250)" stroke-width="1.5" stroke-linecap="round"/>
+          <line x1="18" y1="54" x2="28" y2="54" stroke="oklch(0.76 0.08 250)" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        """;
+
     public static string Header(params (string Text, string? Href)[] breadcrumbs)
     {
-        var sb = new StringBuilder(512);
+        var sb = new StringBuilder(1024);
         sb.Append("<header class=\"header\"><div class=\"header-inner\">");
-        sb.Append($"<a href=\"{BaseUrl}\" class=\"logo\">My Release Notes</a>");
+
+        // Left side: logo + breadcrumbs
+        sb.Append("<div class=\"header-left\">");
+        sb.Append($"<a href=\"{BaseUrl}\" class=\"logo-link\">");
+        sb.Append(LogoSvg);
+        sb.Append("<div><p class=\"logo-text\">My Release Notes</p><p class=\"logo-sub\">by Tiny Tools</p></div>");
+        sb.Append("</a>");
 
         foreach (var (text, href) in breadcrumbs)
         {
@@ -219,6 +245,10 @@ public static class HtmlTemplate
                 sb.Append($"<span class=\"breadcrumb-current\">{Encode(text)}</span>");
             }
         }
+        sb.Append("</div>");
+
+        // Right side: sign in
+        sb.Append($"<a href=\"{BaseUrl}/login\" class=\"sign-in\">Sign in</a>");
 
         sb.Append("</div></header>");
         return sb.ToString();
