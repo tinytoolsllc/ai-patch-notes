@@ -93,7 +93,8 @@ builder.Services.AddCors(options =>
                   {
                       if (!Uri.TryCreate(origin, UriKind.Absolute, out var uri))
                           return false;
-                      var isAllowed = uri.Scheme == "https" && uri.Host.EndsWith(".myreleasenotes.ai");
+                      var allowedHosts = new HashSet<string> { "app.myreleasenotes.ai", "www.myreleasenotes.ai", "myreleasenotes.ai" };
+                      var isAllowed = uri.Scheme == "https" && allowedHosts.Contains(uri.Host);
                       if (builder.Environment.IsDevelopment())
                       {
                           isAllowed = isAllowed
