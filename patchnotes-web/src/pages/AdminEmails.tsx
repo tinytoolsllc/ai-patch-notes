@@ -389,7 +389,7 @@ export function AdminEmails() {
                       title={`Preview of ${currentTemplate.name} template`}
                       className="w-full border-0 rounded bg-white"
                       style={{ minHeight: '400px' }}
-                      sandbox="allow-same-origin"
+                      sandbox=""
                     />
                   </div>
                 </Card>
