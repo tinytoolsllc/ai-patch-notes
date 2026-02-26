@@ -62,6 +62,12 @@ public static class StripeWebhook
                     return Results.Ok(new { received = true, ignored = true });
                 }
             }
+            else
+            {
+                // Unknown object type without metadata — skip to be safe
+                logger.LogWarning("Stripe event {EventType} data object does not support metadata, skipping", stripeEvent.Type);
+                return Results.Ok(new { received = true, ignored = true });
+            }
 
             try
             {
