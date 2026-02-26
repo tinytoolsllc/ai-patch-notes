@@ -5,6 +5,7 @@ import {
   useState,
   useCallback,
   useEffect,
+  useRef,
   type ReactNode,
 } from 'react'
 import { setGlobalErrorHandler } from '../queryClient'
@@ -36,8 +37,16 @@ const TOAST_DURATION = 5000
 
 export function ToastProvider({ children }: { children: ReactNode }) {
   const [toasts, setToasts] = useState<Toast[]>([])
+  const timeoutRefs = useRef<Map<string, ReturnType<typeof setTimeout>>>(
+    new Map()
+  )
 
   const removeToast = useCallback((id: string) => {
+    const timeout = timeoutRefs.current.get(id)
+    if (timeout) {
+      clearTimeout(timeout)
+      timeoutRefs.current.delete(id)
+    }
     setToasts((prev) => prev.filter((t) => t.id !== id))
   }, [])
 
@@ -45,10 +54,21 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     (message: string, type: ToastType = 'info') => {
       const id = `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`
       setToasts((prev) => [...prev, { id, message, type }])
-      setTimeout(() => removeToast(id), TOAST_DURATION)
+      const timeout = setTimeout(() => {
+        timeoutRefs.current.delete(id)
+        removeToast(id)
+      }, TOAST_DURATION)
+      timeoutRefs.current.set(id, timeout)
     },
     [removeToast]
   )
+
+  useEffect(() => {
+    const timeouts = timeoutRefs.current
+    return () => {
+      timeouts.forEach((t) => clearTimeout(t))
+    }
+  }, [])
 
   const showError = useCallback(
     (message: string) => {
