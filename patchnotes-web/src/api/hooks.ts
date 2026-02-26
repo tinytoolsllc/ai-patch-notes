@@ -11,17 +11,12 @@ import {
   useGetPackagesByOwner,
   useGetPackageByOwnerRepo,
   getGetPackagesQueryKey,
-  getGetPackageByOwnerRepoQueryOptions,
   createPackage,
   deletePackage,
   updatePackage,
   bulkCreatePackages,
 } from './generated/packages/packages'
-import {
-  useGetRelease,
-  useGetReleases,
-  getGetReleaseQueryOptions,
-} from './generated/releases/releases'
+import { useGetRelease, useGetReleases } from './generated/releases/releases'
 import {
   useGetWatchlist,
   getGetWatchlistQueryKey,
@@ -34,23 +29,10 @@ import {
   searchGitHubRepositoriesUser,
   getSearchGitHubRepositoriesUserQueryKey,
 } from './generated/git-hub-search/git-hub-search'
-import { useSearchGitHubRepositories } from './generated/admin-git-hub/admin-git-hub'
 import {
   resetPackageSummaries,
   resetPackageReleases,
 } from './generated/admin-packages/admin-packages'
-import {
-  useUpdateEmailTemplate,
-  getGetEmailTemplatesQueryKey,
-} from './generated/email-templates/email-templates'
-import {
-  useGetCurrentUser,
-  useUpdateCurrentUser,
-  useGetEmailPreferences,
-  useUpdateEmailPreferences,
-  getGetEmailPreferencesQueryKey,
-  getGetCurrentUserQueryKey,
-} from './generated/users/users'
 
 import {
   GetPackagesResponse,
@@ -347,20 +329,22 @@ export function useGithubSearch(query: string) {
 
 // ── Re-exports (used directly by pages) ─────────────────────
 
+export { useGetPackages } from './generated/packages/packages'
+export { getGetPackageByOwnerRepoQueryOptions } from './generated/packages/packages'
+export { getGetReleaseQueryOptions } from './generated/releases/releases'
+export { useSearchGitHubRepositories } from './generated/admin-git-hub/admin-git-hub'
 export {
-  useGetPackages,
-  useSearchGitHubRepositories,
   useUpdateEmailTemplate,
   getGetEmailTemplatesQueryKey,
+} from './generated/email-templates/email-templates'
+export {
   useGetCurrentUser,
   useUpdateCurrentUser,
   useGetEmailPreferences,
   useUpdateEmailPreferences,
   getGetEmailPreferencesQueryKey,
   getGetCurrentUserQueryKey,
-  getGetPackageByOwnerRepoQueryOptions,
-  getGetReleaseQueryOptions,
-}
+} from './generated/users/users'
 
 // ── Feed Types ──────────────────────────────────────────────
 
