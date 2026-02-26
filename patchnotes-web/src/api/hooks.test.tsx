@@ -20,6 +20,8 @@ import {
   useRemoveFromWatchlist,
   useAddFromGithub,
   useGithubSearch,
+  useResetSummaries,
+  useResetReleases,
 } from './hooks'
 
 function createWrapper() {
@@ -277,5 +279,61 @@ describe('useGithubSearch', () => {
 
     expect(result.current.isFetching).toBe(false)
     expect(result.current.data).toBeUndefined()
+  })
+})
+
+describe('useResetSummaries', () => {
+  it('resets summaries for a package successfully', async () => {
+    const { result } = renderHook(() => useResetSummaries(), {
+      wrapper: createWrapper(),
+    })
+
+    result.current.mutate('pkg-react-test-id')
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true))
+  })
+
+  it('handles error when reset fails', async () => {
+    server.use(
+      http.post('/api/admin/packages/:id/reset-summaries', () => {
+        return new HttpResponse(null, { status: 404 })
+      })
+    )
+
+    const { result } = renderHook(() => useResetSummaries(), {
+      wrapper: createWrapper(),
+    })
+
+    result.current.mutate('nonexistent')
+
+    await waitFor(() => expect(result.current.isError).toBe(true))
+  })
+})
+
+describe('useResetReleases', () => {
+  it('resets releases for a package successfully', async () => {
+    const { result } = renderHook(() => useResetReleases(), {
+      wrapper: createWrapper(),
+    })
+
+    result.current.mutate('pkg-react-test-id')
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true))
+  })
+
+  it('handles error when reset fails', async () => {
+    server.use(
+      http.post('/api/admin/packages/:id/reset-releases', () => {
+        return new HttpResponse(null, { status: 404 })
+      })
+    )
+
+    const { result } = renderHook(() => useResetReleases(), {
+      wrapper: createWrapper(),
+    })
+
+    result.current.mutate('nonexistent')
+
+    await waitFor(() => expect(result.current.isError).toBe(true))
   })
 })

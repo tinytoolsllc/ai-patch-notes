@@ -29,6 +29,10 @@ import {
   searchGitHubRepositoriesUser,
   getSearchGitHubRepositoriesUserQueryKey,
 } from './generated/git-hub-search/git-hub-search'
+import {
+  resetPackageSummaries,
+  resetPackageReleases,
+} from './generated/admin-packages/admin-packages'
 
 import {
   GetPackagesResponse,
@@ -208,6 +212,28 @@ export function useBulkAddPackages() {
         tagPrefix?: string
       }[]
     ) => bulkCreatePackages(items),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: getGetPackagesQueryKey() })
+    },
+  })
+}
+
+export function useResetSummaries() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (id: string) => resetPackageSummaries(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: getGetPackagesQueryKey() })
+    },
+  })
+}
+
+export function useResetReleases() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (id: string) => resetPackageReleases(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: getGetPackagesQueryKey() })
     },

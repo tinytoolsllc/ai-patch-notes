@@ -313,6 +313,16 @@ export const handlers = [
     return HttpResponse.json(results)
   }),
 
+  // POST /admin/packages/:id/reset-summaries
+  http.post(`${API_BASE}/admin/packages/:id/reset-summaries`, () => {
+    return new HttpResponse(null, { status: 204 })
+  }),
+
+  // POST /admin/packages/:id/reset-releases
+  http.post(`${API_BASE}/admin/packages/:id/reset-releases`, () => {
+    return new HttpResponse(null, { status: 204 })
+  }),
+
   // GET /subscription/status
   http.get(`${API_BASE}/subscription/status`, () => {
     return HttpResponse.json({ isPro: false, status: null, expiresAt: null })
