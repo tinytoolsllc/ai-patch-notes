@@ -1,6 +1,6 @@
 import { useStytch, useStytchUser } from '@stytch/react'
 import { useNavigate } from '@tanstack/react-router'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Container } from '../components/ui'
 import { api } from '../api/client'
 
@@ -8,6 +8,7 @@ export function Authenticate() {
   const stytch = useStytch()
   const { user, isInitialized } = useStytchUser()
   const navigate = useNavigate()
+  const hasAuthenticated = useRef(false)
 
   const { token, tokenType } = useMemo(() => {
     const params = new URLSearchParams(window.location.search)
@@ -28,6 +29,9 @@ export function Authenticate() {
       navigate({ to: '/' })
       return
     }
+
+    if (hasAuthenticated.current) return
+    hasAuthenticated.current = true
 
     const authenticate = async () => {
       if (!token) return // TypeScript guard - error state already handles this
