@@ -225,6 +225,7 @@ public static class HtmlPageRoutes
             (repo, null)));
 
         sb.Append("<main><div class=\"container\">");
+        sb.Append(HtmlTemplate.HeroCard());
 
         if (groups.Count > 0)
         {
