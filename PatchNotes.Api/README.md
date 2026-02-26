@@ -83,6 +83,28 @@ The API runs on `http://localhost:5031` by default.
 | POST | `/webhooks/stytch` | Handle Stytch webhook events (Svix signature verified) | No |
 | POST | `/webhooks/stripe` | Handle Stripe webhook events | No |
 
+### Admin
+
+| Method | Endpoint | Description | Auth |
+|--------|----------|-------------|------|
+| GET | `/api/admin/packages/health` | Package sync health info | Admin |
+| POST | `/api/admin/packages/{id}/reset-sync` | Reset failure tracking | Admin |
+| POST | `/api/admin/packages/{id}/disable-sync` | Disable sync for a package | Admin |
+| POST | `/api/admin/packages/{id}/reset-summaries` | Mark releases stale and delete summaries | Admin |
+| POST | `/api/admin/packages/{id}/reset-releases` | Delete all releases/summaries, reset sync | Admin |
+| POST | `/api/packages/bulk` | Bulk add packages | Admin |
+| GET | `/api/admin/github/search` | Search GitHub repositories | Admin |
+
+### HTML Pages (Server-Rendered)
+
+Pre-rendered HTML pages for SEO. Cookie-based branching: anonymous users get full HTML; authenticated users (Stytch cookie) get a spinner with preloaded data that redirects to the SPA.
+
+| Method | Endpoint | Description | Auth |
+|--------|----------|-------------|------|
+| GET | `/html/packages/{owner}` | Owner package listing | No |
+| GET | `/html/packages/{owner}/{repo}` | Package detail with version groups and summaries | No |
+| GET | `/html/releases/{id}` | Release detail with rendered markdown | No |
+
 ### Status
 
 | Method | Endpoint | Description | Auth |
@@ -115,7 +137,10 @@ PatchNotes.Api/
 │   ├── UserRoutes.cs         # User profile + email preferences
 │   ├── WatchlistRoutes.cs    # Watchlist management
 │   ├── SubscriptionRoutes.cs # Stripe subscription endpoints
+│   ├── HtmlPageRoutes.cs     # Server-rendered HTML for SEO routes
+│   ├── HtmlTemplate.cs       # Shared HTML template (head, CSS, header, footer)
 │   ├── StatusPageRoutes.cs   # Status page
+│   ├── SitemapRoutes.cs      # Sitemap XML generation
 │   └── RouteUtils.cs         # Shared utilities (auth, URL parsing)
 ├── Stytch/
 │   ├── StytchClient.cs       # Stytch API client
@@ -133,3 +158,4 @@ PatchNotes.Api/
 - **Stripe.net** - Stripe payments
 - **Stytch.net** - User authentication
 - **Svix** - Webhook signature verification
+- **Markdig** - Markdown to HTML rendering (for server-rendered pages)
