@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useRef } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import {
@@ -148,6 +148,19 @@ export function AdminEmails() {
     message: string
   } | null>(null)
 
+  const statusTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  function clearStatusTimeout() {
+    if (statusTimeoutRef.current) {
+      clearTimeout(statusTimeoutRef.current)
+      statusTimeoutRef.current = null
+    }
+  }
+
+  useEffect(() => {
+    return () => clearStatusTimeout()
+  }, [])
+
   const queryClient = useQueryClient()
   const updateMutation = useUpdateEmailTemplate({
     mutation: {
@@ -160,11 +173,13 @@ export function AdminEmails() {
           type: 'success',
           message: 'Template saved successfully',
         })
-        setTimeout(() => setSaveStatus(null), 3000)
+        clearStatusTimeout()
+        statusTimeoutRef.current = setTimeout(() => setSaveStatus(null), 3000)
       },
       onError: () => {
         setSaveStatus({ type: 'error', message: 'Failed to save template' })
-        setTimeout(() => setSaveStatus(null), 5000)
+        clearStatusTimeout()
+        statusTimeoutRef.current = setTimeout(() => setSaveStatus(null), 5000)
       },
     },
   })
