@@ -602,6 +602,59 @@ public static class PackageRoutes
         .Produces(StatusCodes.Status404NotFound)
         .WithName("DisablePackageSync");
 
+        // POST /api/admin/packages/{id}/reset-summaries - Mark all releases as stale and delete summaries (admin only)
+        adminPackages.MapPost("/{id:length(21)}/reset-summaries", async (string id, PatchNotesDbContext db) =>
+        {
+            var package = await db.Packages.FindAsync(id);
+            if (package == null)
+            {
+                return Results.NotFound(new ApiError("Package not found"));
+            }
+
+            await db.Releases
+                .Where(r => r.PackageId == id)
+                .ExecuteUpdateAsync(s => s.SetProperty(r => r.SummaryStale, true));
+
+            await db.ReleaseSummaries
+                .Where(s => s.PackageId == id)
+                .ExecuteDeleteAsync();
+
+            return Results.NoContent();
+        })
+        .AddEndpointFilterFactory(requireAuth)
+        .AddEndpointFilterFactory(requireAdmin)
+        .Produces(StatusCodes.Status204NoContent)
+        .Produces(StatusCodes.Status404NotFound)
+        .WithName("ResetPackageSummaries");
+
+        // POST /api/admin/packages/{id}/reset-releases - Delete all releases/summaries and reset LastFetchedAt (admin only)
+        adminPackages.MapPost("/{id:length(21)}/reset-releases", async (string id, PatchNotesDbContext db) =>
+        {
+            var package = await db.Packages.FindAsync(id);
+            if (package == null)
+            {
+                return Results.NotFound(new ApiError("Package not found"));
+            }
+
+            await db.Releases
+                .Where(r => r.PackageId == id)
+                .ExecuteDeleteAsync();
+
+            await db.ReleaseSummaries
+                .Where(s => s.PackageId == id)
+                .ExecuteDeleteAsync();
+
+            package.LastFetchedAt = null;
+            await db.SaveChangesAsync();
+
+            return Results.NoContent();
+        })
+        .AddEndpointFilterFactory(requireAuth)
+        .AddEndpointFilterFactory(requireAdmin)
+        .Produces(StatusCodes.Status204NoContent)
+        .Produces(StatusCodes.Status404NotFound)
+        .WithName("ResetPackageReleases");
+
         // GET /api/admin/github/search?q={query} - Search GitHub repositories (admin only)
         var adminGitHub = app.MapGroup("/api/admin/github").WithTags("AdminGitHub");
 

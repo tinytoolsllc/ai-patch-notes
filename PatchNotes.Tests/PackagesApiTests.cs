@@ -888,4 +888,157 @@ public class PackagesApiTests : IAsyncLifetime
     }
 
     #endregion
+
+    #region POST /api/admin/packages/{id}/reset-summaries
+
+    [Fact]
+    public async Task ResetSummaries_GivenUnauthenticatedRequest_ReturnsForbidden()
+    {
+        // CSRF middleware rejects requests without Origin header before auth runs
+        var response = await _client.PostAsync("/api/admin/packages/nonexistent-id-1234xx/reset-summaries", null);
+
+        response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+    }
+
+    [Fact]
+    public async Task ResetSummaries_GivenNonAdminRequest_ReturnsForbidden()
+    {
+        var response = await _nonAdminClient.PostAsync("/api/admin/packages/nonexistent-id-1234xx/reset-summaries", null);
+
+        response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+    }
+
+    [Fact]
+    public async Task ResetSummaries_ReturnsNotFound_WhenPackageDoesNotExist()
+    {
+        var response = await _authClient.PostAsync("/api/admin/packages/nonexistent-id-1234xx/reset-summaries", null);
+
+        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+    }
+
+    [Fact]
+    public async Task ResetSummaries_MarksReleasesStaleAndDeletesSummaries()
+    {
+        // Arrange
+        using var scope = _fixture.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<PatchNotesDbContext>();
+        var pkg = new Package
+        {
+            Name = "summary-reset-pkg",
+            Url = "https://github.com/o/sr",
+            GithubOwner = "o",
+            GithubRepo = "sr",
+        };
+        db.Packages.Add(pkg);
+        db.Releases.AddRange(
+            new Release { PackageId = pkg.Id, Tag = "v1.0.0", PublishedAt = DateTimeOffset.UtcNow.AddDays(-10), FetchedAt = DateTimeOffset.UtcNow, MajorVersion = 1, SummaryStale = false },
+            new Release { PackageId = pkg.Id, Tag = "v1.0.1", PublishedAt = DateTimeOffset.UtcNow.AddDays(-5), FetchedAt = DateTimeOffset.UtcNow, MajorVersion = 1, SummaryStale = false },
+            new Release { PackageId = pkg.Id, Tag = "v2.0.0", PublishedAt = DateTimeOffset.UtcNow.AddDays(-1), FetchedAt = DateTimeOffset.UtcNow, MajorVersion = 2, SummaryStale = false }
+        );
+        db.ReleaseSummaries.AddRange(
+            new ReleaseSummary { PackageId = pkg.Id, MajorVersion = 1, IsPrerelease = false, Summary = "v1 summary", GeneratedAt = DateTimeOffset.UtcNow },
+            new ReleaseSummary { PackageId = pkg.Id, MajorVersion = 2, IsPrerelease = false, Summary = "v2 summary", GeneratedAt = DateTimeOffset.UtcNow }
+        );
+        await db.SaveChangesAsync();
+        var id = pkg.Id;
+
+        // Act
+        var response = await _authClient.PostAsync($"/api/admin/packages/{id}/reset-summaries", null);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
+
+        using var verifyScope = _fixture.Services.CreateScope();
+        var verifyDb = verifyScope.ServiceProvider.GetRequiredService<PatchNotesDbContext>();
+
+        // All releases should now be stale
+        var releases = verifyDb.Releases.Where(r => r.PackageId == id).ToList();
+        releases.Should().HaveCount(3);
+        releases.Should().AllSatisfy(r => r.SummaryStale.Should().BeTrue());
+
+        // All summaries should be deleted
+        var summaries = verifyDb.ReleaseSummaries.Where(s => s.PackageId == id).ToList();
+        summaries.Should().BeEmpty();
+    }
+
+    #endregion
+
+    #region POST /api/admin/packages/{id}/reset-releases
+
+    [Fact]
+    public async Task ResetReleases_GivenUnauthenticatedRequest_ReturnsForbidden()
+    {
+        // CSRF middleware rejects requests without Origin header before auth runs
+        var response = await _client.PostAsync("/api/admin/packages/nonexistent-id-1234xx/reset-releases", null);
+
+        response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+    }
+
+    [Fact]
+    public async Task ResetReleases_GivenNonAdminRequest_ReturnsForbidden()
+    {
+        var response = await _nonAdminClient.PostAsync("/api/admin/packages/nonexistent-id-1234xx/reset-releases", null);
+
+        response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+    }
+
+    [Fact]
+    public async Task ResetReleases_ReturnsNotFound_WhenPackageDoesNotExist()
+    {
+        var response = await _authClient.PostAsync("/api/admin/packages/nonexistent-id-1234xx/reset-releases", null);
+
+        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+    }
+
+    [Fact]
+    public async Task ResetReleases_DeletesReleasesAndSummariesAndClearsLastFetchedAt()
+    {
+        // Arrange
+        using var scope = _fixture.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<PatchNotesDbContext>();
+        var pkg = new Package
+        {
+            Name = "release-reset-pkg",
+            Url = "https://github.com/o/rr",
+            GithubOwner = "o",
+            GithubRepo = "rr",
+            LastFetchedAt = DateTimeOffset.UtcNow,
+        };
+        db.Packages.Add(pkg);
+        db.Releases.AddRange(
+            new Release { PackageId = pkg.Id, Tag = "v1.0.0", PublishedAt = DateTimeOffset.UtcNow.AddDays(-10), FetchedAt = DateTimeOffset.UtcNow, MajorVersion = 1 },
+            new Release { PackageId = pkg.Id, Tag = "v2.0.0", PublishedAt = DateTimeOffset.UtcNow.AddDays(-1), FetchedAt = DateTimeOffset.UtcNow, MajorVersion = 2 }
+        );
+        db.ReleaseSummaries.Add(
+            new ReleaseSummary { PackageId = pkg.Id, MajorVersion = 1, IsPrerelease = false, Summary = "v1 summary", GeneratedAt = DateTimeOffset.UtcNow }
+        );
+        await db.SaveChangesAsync();
+        var id = pkg.Id;
+
+        // Act
+        var response = await _authClient.PostAsync($"/api/admin/packages/{id}/reset-releases", null);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
+
+        using var verifyScope = _fixture.Services.CreateScope();
+        var verifyDb = verifyScope.ServiceProvider.GetRequiredService<PatchNotesDbContext>();
+
+        // All releases should be deleted
+        var releases = verifyDb.Releases.Where(r => r.PackageId == id).ToList();
+        releases.Should().BeEmpty();
+
+        // All summaries should be deleted
+        var summaries = verifyDb.ReleaseSummaries.Where(s => s.PackageId == id).ToList();
+        summaries.Should().BeEmpty();
+
+        // LastFetchedAt should be cleared
+        var updated = await verifyDb.Packages.FindAsync(id);
+        updated!.LastFetchedAt.Should().BeNull();
+
+        // Package itself should still exist
+        updated.Name.Should().Be("release-reset-pkg");
+    }
+
+    #endregion
 }
