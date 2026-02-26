@@ -1,5 +1,5 @@
 {
   "$schema": "https://unpkg.com/knip@5/schema.json",
   "ignoreDependencies": ["lint-staged"],
-  "ignore": ["src/test/**", "src/api/generated/**"]
+  "ignore": ["src/test/**", "src/api/generated/**", "orval.config.ts"]
 }
