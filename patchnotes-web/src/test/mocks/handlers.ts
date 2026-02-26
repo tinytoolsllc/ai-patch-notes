@@ -211,7 +211,12 @@ export const handlers = [
     const releases = mockPackageReleases.filter(
       (r) => r.package.id === packageId
     )
-    return HttpResponse.json(releases)
+    return HttpResponse.json({
+      items: releases,
+      total: releases.length,
+      limit: 20,
+      offset: 0,
+    })
   }),
 
   // GET /watchlist

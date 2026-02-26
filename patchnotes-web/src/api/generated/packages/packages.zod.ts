@@ -104,7 +104,13 @@ export const GetPackageReleasesParams = zod.object({
   "id": zod.string().min(getPackageReleasesPathIdMin).max(getPackageReleasesPathIdMax)
 })
 
-export const GetPackageReleasesResponseItem = zod.object({
+export const GetPackageReleasesQueryParams = zod.object({
+  "limit": zod.number().optional(),
+  "offset": zod.number().optional()
+})
+
+export const GetPackageReleasesResponse = zod.object({
+  "items": zod.array(zod.object({
   "id": zod.string(),
   "tag": zod.string(),
   "title": zod.string().nullish(),
@@ -119,8 +125,11 @@ export const GetPackageReleasesResponseItem = zod.object({
   "githubOwner": zod.string(),
   "githubRepo": zod.string()
 })
+})),
+  "total": zod.number().optional(),
+  "limit": zod.number().optional(),
+  "offset": zod.number().optional()
 })
-export const GetPackageReleasesResponse = zod.array(GetPackageReleasesResponseItem)
 
 export const GetPackagesByOwnerParams = zod.object({
   "owner": zod.string()
