@@ -39,7 +39,7 @@ public class SyncService
         CancellationToken cancellationToken = default)
     {
         var result = new SyncResult();
-        var packages = await _db.Packages.ToListAsync(cancellationToken);
+        var packages = await _db.Packages.Where(p => !p.IsSyncDisabled).ToListAsync(cancellationToken);
 
         _logger.LogInformation("Starting sync for {Count} packages", packages.Count);
 
@@ -88,6 +88,11 @@ public class SyncService
                         entry.State = EntityState.Unchanged;
                     }
                 }
+
+                package.ConsecutiveFailures++;
+                package.LastFailureAt = DateTimeOffset.UtcNow;
+                package.LastFailureMessage = ex.Message.Length > 1024 ? ex.Message[..1024] : ex.Message;
+                await _db.SaveChangesAsync(cancellationToken);
             }
         }
 
@@ -239,6 +244,8 @@ public class SyncService
         // completes successfully — no orphans if processing threw mid-loop
         _db.Releases.AddRange(newReleases);
         package.LastFetchedAt = fetchedAt;
+        package.ConsecutiveFailures = 0;
+        package.LastFailureMessage = null;
         await _db.SaveChangesAsync(cancellationToken);
 
         // Optionally include existing releases that are missing summaries

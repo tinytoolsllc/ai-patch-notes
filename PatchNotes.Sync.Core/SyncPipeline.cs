@@ -61,7 +61,7 @@ public class SyncPipeline
             }
 
             var db = scope.ServiceProvider.GetRequiredService<PatchNotesDbContext>();
-            var packages = await db.Packages.ToListAsync(ct);
+            var packages = await db.Packages.Where(p => !p.IsSyncDisabled).ToListAsync(ct);
 
             _logger.LogInformation("Pipeline: syncing {Count} packages", packages.Count);
 
