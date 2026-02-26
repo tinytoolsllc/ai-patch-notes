@@ -59,6 +59,7 @@ jobs:
           Stytch__ProjectId: "project-test-00000000-0000-0000-0000-000000000000"
           Stytch__Secret: "secret-test-00000000-0000-0000-0000-000000000000"
           Stytch__WebhookSecret: "whsec_dummy"
+          Stripe__SecretKey: "sk_test_placeholder"
           ConnectionStrings__PatchNotes: "Data Source=:memory:"
         run: |
           dotnet run --project PatchNotes.Api --configuration Release --no-build --no-launch-profile &
