@@ -327,6 +327,25 @@ export function useGithubSearch(query: string) {
   })
 }
 
+// ── Re-exports (used directly by pages) ─────────────────────
+
+export { useGetPackages } from './generated/packages/packages'
+export { getGetPackageByOwnerRepoQueryOptions } from './generated/packages/packages'
+export { getGetReleaseQueryOptions } from './generated/releases/releases'
+export { useSearchGitHubRepositories } from './generated/admin-git-hub/admin-git-hub'
+export {
+  useUpdateEmailTemplate,
+  getGetEmailTemplatesQueryKey,
+} from './generated/email-templates/email-templates'
+export {
+  useGetCurrentUser,
+  useUpdateCurrentUser,
+  useGetEmailPreferences,
+  useUpdateEmailPreferences,
+  getGetEmailPreferencesQueryKey,
+  getGetCurrentUserQueryKey,
+} from './generated/users/users'
+
 // ── Feed Types ──────────────────────────────────────────────
 
 export interface FeedReleaseDto {

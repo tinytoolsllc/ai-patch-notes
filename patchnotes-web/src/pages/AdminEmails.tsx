@@ -13,7 +13,7 @@ import { api } from '../api/client'
 import {
   useUpdateEmailTemplate,
   getGetEmailTemplatesQueryKey,
-} from '../api/generated/email-templates/email-templates'
+} from '../api/hooks'
 
 // ── Types ────────────────────────────────────────────────────
 
