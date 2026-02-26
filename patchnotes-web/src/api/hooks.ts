@@ -29,10 +29,23 @@ import {
   searchGitHubRepositoriesUser,
   getSearchGitHubRepositoriesUserQueryKey,
 } from './generated/git-hub-search/git-hub-search'
+import { useSearchGitHubRepositories } from './generated/admin-git-hub/admin-git-hub'
 import {
   resetPackageSummaries,
   resetPackageReleases,
 } from './generated/admin-packages/admin-packages'
+import {
+  useUpdateEmailTemplate,
+  getGetEmailTemplatesQueryKey,
+} from './generated/email-templates/email-templates'
+import {
+  useGetCurrentUser,
+  useUpdateCurrentUser,
+  useGetEmailPreferences,
+  useUpdateEmailPreferences,
+  getGetEmailPreferencesQueryKey,
+  getGetCurrentUserQueryKey,
+} from './generated/users/users'
 
 import {
   GetPackagesResponse,
@@ -325,6 +338,21 @@ export function useGithubSearch(query: string) {
     enabled: query.length >= 2,
     staleTime: 60_000,
   })
+}
+
+// ── Re-exports (used directly by pages) ─────────────────────
+
+export {
+  useGetPackages,
+  useSearchGitHubRepositories,
+  useUpdateEmailTemplate,
+  getGetEmailTemplatesQueryKey,
+  useGetCurrentUser,
+  useUpdateCurrentUser,
+  useGetEmailPreferences,
+  useUpdateEmailPreferences,
+  getGetEmailPreferencesQueryKey,
+  getGetCurrentUserQueryKey,
 }
 
 // ── Feed Types ──────────────────────────────────────────────

@@ -23,10 +23,32 @@ export default defineConfig([
     },
     rules: {
       'react-hooks/todo': 'warn',
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: [
+                '*/api/generated/*',
+                '!*/api/generated/model',
+                '!*/api/generated/model/*',
+              ],
+              message:
+                'Import from api/hooks.ts instead of generated code directly. Only type imports from generated/model/ are allowed. See api/hooks.ts for available hooks.',
+            },
+          ],
+        },
+      ],
     },
     languageOptions: {
       ecmaVersion: 2020,
       globals: globals.browser,
+    },
+  },
+  {
+    files: ['src/api/hooks.ts', 'src/routes/**/*.{ts,tsx}'],
+    rules: {
+      'no-restricted-imports': 'off',
     },
   },
   eslintConfigPrettier,

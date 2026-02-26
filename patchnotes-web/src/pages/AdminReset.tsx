@@ -13,8 +13,8 @@ import {
   useDeletePackage,
   useResetSummaries,
   useResetReleases,
+  useGetPackages,
 } from '../api/hooks'
-import { useGetPackages } from '../api/generated/packages/packages'
 import type { PackageDto } from '../api/generated/model'
 import { useIsAdmin } from '../utils/auth'
 

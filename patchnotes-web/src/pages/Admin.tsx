@@ -15,12 +15,12 @@ import {
   useDeletePackage,
   useUpdatePackage,
   useBulkAddPackages,
+  useSearchGitHubRepositories,
 } from '../api/hooks'
 import type {
   PackageDto,
   GitHubRepoSearchResultDto,
 } from '../api/generated/model'
-import { useSearchGitHubRepositories } from '../api/generated/admin-git-hub/admin-git-hub'
 import { useIsAdmin } from '../utils/auth'
 
 function formatDate(dateString: string | null | undefined): string {

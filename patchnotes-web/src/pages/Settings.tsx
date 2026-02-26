@@ -9,8 +9,8 @@ import {
   useGetEmailPreferences,
   useUpdateEmailPreferences,
   getGetEmailPreferencesQueryKey,
-} from '../api/generated/users/users'
-import { getGetCurrentUserQueryKey } from '../api/generated/users/users'
+  getGetCurrentUserQueryKey,
+} from '../api/hooks'
 import { useQueryClient } from '@tanstack/react-query'
 
 const DAY_NAMES = [
