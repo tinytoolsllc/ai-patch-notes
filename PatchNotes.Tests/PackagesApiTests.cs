@@ -888,4 +888,123 @@ public class PackagesApiTests : IAsyncLifetime
     }
 
     #endregion
+
+    #region GET /api/packages/{id}/releases
+
+    [Fact]
+    public async Task GetPackageReleases_ReturnsNotFound_WhenPackageDoesNotExist()
+    {
+        var fakeId = new string('a', 21);
+        var response = await _client.GetAsync($"/api/packages/{fakeId}/releases");
+
+        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+    }
+
+    [Fact]
+    public async Task GetPackageReleases_ReturnsEmptyPage_WhenNoReleases()
+    {
+        // Arrange
+        using var scope = _fixture.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<PatchNotesDbContext>();
+        var pkg = new Package { Name = "pkg", Url = "https://github.com/o/r", NpmName = "pkg", GithubOwner = "o", GithubRepo = "r" };
+        db.Packages.Add(pkg);
+        await db.SaveChangesAsync();
+
+        // Act
+        var response = await _client.GetAsync($"/api/packages/{pkg.Id}/releases");
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var result = await response.Content.ReadFromJsonAsync<JsonElement>();
+        result.GetProperty("items").GetArrayLength().Should().Be(0);
+        result.GetProperty("total").GetInt32().Should().Be(0);
+        result.GetProperty("limit").GetInt32().Should().Be(20);
+        result.GetProperty("offset").GetInt32().Should().Be(0);
+    }
+
+    [Fact]
+    public async Task GetPackageReleases_GivenReleasesExist_ReturnsPaginatedResponse()
+    {
+        // Arrange
+        using var scope = _fixture.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<PatchNotesDbContext>();
+        var pkg = new Package { Name = "pkg", Url = "https://github.com/o/r", NpmName = "pkg", GithubOwner = "o", GithubRepo = "r" };
+        db.Packages.Add(pkg);
+        await db.SaveChangesAsync();
+
+        db.Releases.AddRange(
+            new Release { PackageId = pkg.Id, Tag = "v1.0.0", PublishedAt = DateTimeOffset.UtcNow.AddDays(-3), FetchedAt = DateTimeOffset.UtcNow },
+            new Release { PackageId = pkg.Id, Tag = "v2.0.0", PublishedAt = DateTimeOffset.UtcNow.AddDays(-1), FetchedAt = DateTimeOffset.UtcNow },
+            new Release { PackageId = pkg.Id, Tag = "v1.5.0", PublishedAt = DateTimeOffset.UtcNow.AddDays(-2), FetchedAt = DateTimeOffset.UtcNow }
+        );
+        await db.SaveChangesAsync();
+
+        // Act
+        var response = await _client.GetAsync($"/api/packages/{pkg.Id}/releases");
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var result = await response.Content.ReadFromJsonAsync<JsonElement>();
+        result.GetProperty("total").GetInt32().Should().Be(3);
+        result.GetProperty("limit").GetInt32().Should().Be(20);
+        result.GetProperty("offset").GetInt32().Should().Be(0);
+        var items = result.GetProperty("items");
+        items.GetArrayLength().Should().Be(3);
+        // ordered by publishedAt desc
+        items[0].GetProperty("tag").GetString().Should().Be("v2.0.0");
+        items[1].GetProperty("tag").GetString().Should().Be("v1.5.0");
+        items[2].GetProperty("tag").GetString().Should().Be("v1.0.0");
+    }
+
+    [Fact]
+    public async Task GetPackageReleases_GivenLimitAndOffset_PaginatesCorrectly()
+    {
+        // Arrange
+        using var scope = _fixture.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<PatchNotesDbContext>();
+        var pkg = new Package { Name = "pkg", Url = "https://github.com/o/r", NpmName = "pkg", GithubOwner = "o", GithubRepo = "r" };
+        db.Packages.Add(pkg);
+        await db.SaveChangesAsync();
+
+        db.Releases.AddRange(
+            new Release { PackageId = pkg.Id, Tag = "v3.0.0", PublishedAt = DateTimeOffset.UtcNow.AddDays(-1), FetchedAt = DateTimeOffset.UtcNow },
+            new Release { PackageId = pkg.Id, Tag = "v2.0.0", PublishedAt = DateTimeOffset.UtcNow.AddDays(-2), FetchedAt = DateTimeOffset.UtcNow },
+            new Release { PackageId = pkg.Id, Tag = "v1.0.0", PublishedAt = DateTimeOffset.UtcNow.AddDays(-3), FetchedAt = DateTimeOffset.UtcNow }
+        );
+        await db.SaveChangesAsync();
+
+        // Act
+        var response = await _client.GetAsync($"/api/packages/{pkg.Id}/releases?limit=1&offset=1");
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var result = await response.Content.ReadFromJsonAsync<JsonElement>();
+        result.GetProperty("total").GetInt32().Should().Be(3);
+        result.GetProperty("limit").GetInt32().Should().Be(1);
+        result.GetProperty("offset").GetInt32().Should().Be(1);
+        var items = result.GetProperty("items");
+        items.GetArrayLength().Should().Be(1);
+        items[0].GetProperty("tag").GetString().Should().Be("v2.0.0");
+    }
+
+    [Fact]
+    public async Task GetPackageReleases_GivenLimitExceeds100_ClampsToMax100()
+    {
+        // Arrange
+        using var scope = _fixture.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<PatchNotesDbContext>();
+        var pkg = new Package { Name = "pkg", Url = "https://github.com/o/r", NpmName = "pkg", GithubOwner = "o", GithubRepo = "r" };
+        db.Packages.Add(pkg);
+        await db.SaveChangesAsync();
+
+        // Act
+        var response = await _client.GetAsync($"/api/packages/{pkg.Id}/releases?limit=999");
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var result = await response.Content.ReadFromJsonAsync<JsonElement>();
+        result.GetProperty("limit").GetInt32().Should().Be(100);
+    }
+
+    #endregion
 }

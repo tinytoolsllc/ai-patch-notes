@@ -85,8 +85,8 @@ public static class PackageRoutes
         .Produces(StatusCodes.Status404NotFound)
         .WithName("GetPackage");
 
-        // GET /api/packages/{id}/releases - Get all releases for a package (by nanoid)
-        group.MapGet("/{id:length(21)}/releases", async (string id, PatchNotesDbContext db) =>
+        // GET /api/packages/{id}/releases - Get releases for a package (by nanoid, paginated)
+        group.MapGet("/{id:length(21)}/releases", async (string id, int? limit, int? offset, PatchNotesDbContext db) =>
         {
             var packageExists = await db.Packages.AnyAsync(p => p.Id == id);
             if (!packageExists)
@@ -94,10 +94,17 @@ public static class PackageRoutes
                 return Results.NotFound(new ApiError("Package not found"));
             }
 
+            var take = Math.Clamp(limit ?? 20, 1, 100);
+            var skip = Math.Max(offset ?? 0, 0);
+
+            var total = await db.Releases.CountAsync(r => r.PackageId == id);
+
             var releases = await db.Releases
                 .AsNoTracking()
                 .Where(r => r.PackageId == id)
                 .OrderByDescending(r => r.PublishedAt)
+                .Skip(skip)
+                .Take(take)
                 .Select(r => new PackageReleaseDto
                 {
                     Id = r.Id,
@@ -118,9 +125,15 @@ public static class PackageRoutes
                 })
                 .ToListAsync();
 
-            return Results.Ok(releases);
+            return Results.Ok(new PaginatedResponse<PackageReleaseDto>
+            {
+                Items = releases,
+                Total = total,
+                Limit = take,
+                Offset = skip
+            });
         })
-        .Produces<List<PackageReleaseDto>>(StatusCodes.Status200OK)
+        .Produces<PaginatedResponse<PackageReleaseDto>>(StatusCodes.Status200OK)
         .Produces(StatusCodes.Status404NotFound)
         .WithName("GetPackageReleases");
 
