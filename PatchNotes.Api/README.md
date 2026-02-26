@@ -97,7 +97,7 @@ The API runs on `http://localhost:5031` by default.
 
 ### HTML Pages (Server-Rendered)
 
-Pre-rendered HTML pages for SEO. Cookie-based branching: anonymous users get full HTML; authenticated users (Stytch cookie) get a spinner with preloaded data that redirects to the SPA.
+Pre-rendered HTML pages for SEO routes. A Cloudflare Worker (`cloudflare-worker/worker.js`) intercepts `/packages/*` and `/releases/*` on `www.myreleasenotes.ai`, checks for a Stytch session cookie, and routes anonymous users/bots to these API endpoints. Authenticated users are passed through to the SPA.
 
 | Method | Endpoint | Description | Auth |
 |--------|----------|-------------|------|

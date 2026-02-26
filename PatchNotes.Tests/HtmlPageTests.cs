@@ -9,20 +9,17 @@ public class HtmlPageTests : IAsyncLifetime
 {
     private PatchNotesApiFixture _fixture = null!;
     private HttpClient _client = null!;
-    private HttpClient _authClient = null!;
 
     public async Task InitializeAsync()
     {
         _fixture = new PatchNotesApiFixture();
         await _fixture.InitializeAsync();
         _client = _fixture.CreateClient();
-        _authClient = _fixture.CreateAuthenticatedClient();
     }
 
     public async Task DisposeAsync()
     {
         _client.Dispose();
-        _authClient.Dispose();
         await _fixture.DisposeAsync();
         _fixture.Dispose();
     }
@@ -110,33 +107,22 @@ public class HtmlPageTests : IAsyncLifetime
     }
 
     [Fact]
-    public async Task GetPackageHtml_WithCookie_ReturnsSpinnerAndPreloadedData()
+    public async Task GetPackageHtml_ContainsHeroCard()
     {
         // Arrange
         using var scope = _fixture.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<PatchNotesDbContext>();
-        var pkg = new Package { Name = "Express", Url = "https://github.com/expressjs/express", NpmName = "express", GithubOwner = "expressjs", GithubRepo = "express" };
-        db.Packages.Add(pkg);
-        db.Releases.Add(new Release
-        {
-            PackageId = pkg.Id, Tag = "v5.0.0", Title = "Express 5",
-            PublishedAt = DateTimeOffset.UtcNow, FetchedAt = DateTimeOffset.UtcNow, MajorVersion = 5,
-        });
+        db.Packages.Add(new Package { Name = "Express", Url = "https://github.com/expressjs/express", NpmName = "express", GithubOwner = "expressjs", GithubRepo = "express" });
         await db.SaveChangesAsync();
 
-        // Act - send request with stytch_session cookie
-        var request = new HttpRequestMessage(HttpMethod.Get, "/html/packages/expressjs/express");
-        request.Headers.Add("Cookie", "stytch_session=fake-session-token");
-        var response = await _client.SendAsync(request);
+        // Act
+        var response = await _client.GetAsync("/html/packages/expressjs/express");
+        var html = await response.Content.ReadAsStringAsync();
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var html = await response.Content.ReadAsStringAsync();
-        html.Should().Contain("spinner");
-        html.Should().Contain("__PRELOADED_DATA__");
-        html.Should().Contain("expressjs");
-        // Should NOT contain full rendered content (no release list, no summary)
-        html.Should().NotContain("application/ld+json");
+        html.Should().Contain("data-nosnippet");
+        html.Should().Contain("Never miss a release");
+        html.Should().Contain("Get Started Free");
     }
 
     #endregion
@@ -214,34 +200,6 @@ public class HtmlPageTests : IAsyncLifetime
     }
 
     [Fact]
-    public async Task GetReleaseHtml_WithCookie_ReturnsSpinnerAndPreloadedData()
-    {
-        // Arrange
-        using var scope = _fixture.Services.CreateScope();
-        var db = scope.ServiceProvider.GetRequiredService<PatchNotesDbContext>();
-        var pkg = new Package { Name = "Svelte", Url = "https://github.com/sveltejs/svelte", GithubOwner = "sveltejs", GithubRepo = "svelte" };
-        db.Packages.Add(pkg);
-        var release = new Release
-        {
-            PackageId = pkg.Id, Tag = "v5.0.0", Body = "# New compiler",
-            PublishedAt = DateTimeOffset.UtcNow, FetchedAt = DateTimeOffset.UtcNow, MajorVersion = 5,
-        };
-        db.Releases.Add(release);
-        await db.SaveChangesAsync();
-
-        // Act
-        var request = new HttpRequestMessage(HttpMethod.Get, $"/html/releases/{release.Id}");
-        request.Headers.Add("Cookie", "stytch_session=fake-session-token");
-        var response = await _client.SendAsync(request);
-
-        // Assert
-        var html = await response.Content.ReadAsStringAsync();
-        html.Should().Contain("spinner");
-        html.Should().Contain("__PRELOADED_DATA__");
-        html.Should().Contain("sveltejs");
-    }
-
-    [Fact]
     public async Task GetReleaseHtml_WithNoBody_ShowsNoNotesMessage()
     {
         // Arrange
@@ -305,27 +263,6 @@ public class HtmlPageTests : IAsyncLifetime
         html.Should().Contain("Runtime");
         html.Should().Contain("EF Core");
         html.Should().Contain("v9.0.0");
-    }
-
-    [Fact]
-    public async Task GetOwnerHtml_WithCookie_ReturnsSpinnerAndPreloadedData()
-    {
-        // Arrange
-        using var scope = _fixture.Services.CreateScope();
-        var db = scope.ServiceProvider.GetRequiredService<PatchNotesDbContext>();
-        db.Packages.Add(new Package { Name = "Bun", Url = "https://github.com/oven-sh/bun", GithubOwner = "oven-sh", GithubRepo = "bun" });
-        await db.SaveChangesAsync();
-
-        // Act
-        var request = new HttpRequestMessage(HttpMethod.Get, "/html/packages/oven-sh");
-        request.Headers.Add("Cookie", "stytch_session=fake-session-token");
-        var response = await _client.SendAsync(request);
-
-        // Assert
-        var html = await response.Content.ReadAsStringAsync();
-        html.Should().Contain("spinner");
-        html.Should().Contain("__PRELOADED_DATA__");
-        html.Should().Contain("oven-sh");
     }
 
     #endregion

@@ -13,14 +13,12 @@ public static class HtmlPageRoutes
         .UseAdvancedExtensions()
         .Build();
 
-    private const string StytchCookieName = "stytch_session";
-
     public static WebApplication MapHtmlPageRoutes(this WebApplication app)
     {
         var group = app.MapGroup("/html").WithTags("HtmlPages");
 
         // GET /html/packages/{owner}/{repo} - Package detail HTML page
-        group.MapGet("/packages/{owner}/{repo}", async (string owner, string repo, HttpContext httpContext, PatchNotesDbContext db, IConfiguration config) =>
+        group.MapGet("/packages/{owner}/{repo}", async (string owner, string repo, PatchNotesDbContext db) =>
         {
             var package = await db.Packages
                 .AsNoTracking()
@@ -66,7 +64,6 @@ public static class HtmlPageRoutes
                     s => (s.MajorVersion, s.IsPrerelease),
                     s => s.Summary);
 
-            // Attach summaries to groups
             foreach (var g in groups)
             {
                 summaries.TryGetValue((g.MajorVersion, g.IsPrerelease), out var summary);
@@ -76,14 +73,6 @@ public static class HtmlPageRoutes
             var title = $"{owner}/{repo} | My Release Notes";
             var description = $"Track GitHub releases for {owner}/{repo}. AI-powered summaries and notifications.";
             var path = $"/packages/{owner}/{repo}";
-
-            if (HasStytchCookie(httpContext))
-            {
-                var responseDto = new PackageDetailResponseDto { Package = package, Groups = groups };
-                var preloadedData = JsonSerializer.Serialize(responseDto);
-                var spaBaseUrl = config["App:SpaBaseUrl"] ?? "https://www.myreleasenotes.ai";
-                return Results.Content(HtmlTemplate.WrapAuthenticated(title, path, preloadedData, spaBaseUrl), "text/html");
-            }
 
             var bodyHtml = BuildPackageDetailHtml(owner, repo, package.NpmName, groups);
             var jsonLd = JsonSerializer.Serialize(new
@@ -103,7 +92,7 @@ public static class HtmlPageRoutes
         .ExcludeFromDescription();
 
         // GET /html/releases/{id} - Release detail HTML page
-        group.MapGet("/releases/{id}", async (string id, HttpContext httpContext, PatchNotesDbContext db, IConfiguration config) =>
+        group.MapGet("/releases/{id}", async (string id, PatchNotesDbContext db) =>
         {
             var release = await db.Releases
                 .AsNoTracking()
@@ -132,13 +121,6 @@ public static class HtmlPageRoutes
             var description = $"Release notes for {owner}/{repo} {release.Tag}.";
             var path = $"/releases/{release.Id}";
 
-            if (HasStytchCookie(httpContext))
-            {
-                var preloadedData = JsonSerializer.Serialize(release);
-                var spaBaseUrl = config["App:SpaBaseUrl"] ?? "https://www.myreleasenotes.ai";
-                return Results.Content(HtmlTemplate.WrapAuthenticated(title, path, preloadedData, spaBaseUrl), "text/html");
-            }
-
             var bodyHtml = BuildReleaseDetailHtml(release, displayTitle);
             var jsonLd = JsonSerializer.Serialize(new
             {
@@ -162,7 +144,7 @@ public static class HtmlPageRoutes
         .ExcludeFromDescription();
 
         // GET /html/packages/{owner} - Owner package listing HTML page
-        group.MapGet("/packages/{owner}", async (string owner, HttpContext httpContext, PatchNotesDbContext db, IConfiguration config) =>
+        group.MapGet("/packages/{owner}", async (string owner, PatchNotesDbContext db) =>
         {
             var packages = await db.Packages
                 .AsNoTracking()
@@ -190,16 +172,6 @@ public static class HtmlPageRoutes
             var description = $"Track GitHub releases for {owner} packages. AI-powered summaries and notifications.";
             var path = $"/packages/{owner}";
 
-            if (HasStytchCookie(httpContext))
-            {
-                var preloadedData = JsonSerializer.Serialize(new PaginatedResponse<OwnerPackageDto>
-                {
-                    Items = packages, Total = packages.Count, Limit = packages.Count, Offset = 0,
-                });
-                var spaBaseUrl = config["App:SpaBaseUrl"] ?? "https://www.myreleasenotes.ai";
-                return Results.Content(HtmlTemplate.WrapAuthenticated(title, path, preloadedData, spaBaseUrl), "text/html");
-            }
-
             var bodyHtml = BuildOwnerListHtml(owner, packages);
             return Results.Content(HtmlTemplate.Wrap(title, description, path, bodyHtml), "text/html");
         })
@@ -209,11 +181,6 @@ public static class HtmlPageRoutes
         .ExcludeFromDescription();
 
         return app;
-    }
-
-    private static bool HasStytchCookie(HttpContext httpContext)
-    {
-        return httpContext.Request.Cookies.ContainsKey(StytchCookieName);
     }
 
     private static string BuildPackageDetailHtml(

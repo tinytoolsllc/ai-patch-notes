@@ -144,10 +144,6 @@ public static class HtmlTemplate
         .hero-highlight .hl-desc { font-size: 0.75rem; color: var(--color-text-secondary); }
         .hero-cta { display: inline-flex; align-items: center; padding: 0.5rem 1.5rem; margin-top: 1rem; font-size: 0.75rem; font-weight: 600; color: white; background: var(--color-brand-600); border-radius: 0.5rem; text-decoration: none; transition: background 0.15s; }
         .hero-cta:hover { background: var(--color-brand-700); color: white; text-decoration: none; }
-
-        .spinner-container { min-height: 80vh; display: flex; align-items: center; justify-content: center; }
-        .spinner { width: 2rem; height: 2rem; border: 3px solid var(--color-brand-500); border-top-color: transparent; border-radius: 50%; animation: spin 0.8s linear infinite; }
-        @keyframes spin { to { transform: rotate(360deg); } }
         """;
 
     public static string Wrap(string title, string description, string path, string bodyHtml, string? jsonLd = null)
@@ -186,33 +182,6 @@ public static class HtmlTemplate
         sb.Append("</head><body>");
         sb.Append(bodyHtml);
         sb.Append(Footer());
-        sb.Append("</body></html>");
-        return sb.ToString();
-    }
-
-    public static string WrapAuthenticated(string title, string path, string preloadedDataJson, string spaBaseUrl)
-    {
-        var sb = new StringBuilder(4096);
-        sb.Append("<!DOCTYPE html><html lang=\"en\"><head>");
-        sb.Append("<meta charset=\"UTF-8\">");
-        sb.Append("<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">");
-        sb.Append($"<title>{Encode(title)}</title>");
-
-        // Fonts
-        sb.Append("<link rel=\"preconnect\" href=\"https://fonts.googleapis.com\">");
-        sb.Append("<link rel=\"preconnect\" href=\"https://fonts.gstatic.com\" crossorigin>");
-        sb.Append("<link href=\"https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap\" rel=\"stylesheet\">");
-
-        sb.Append(ThemeScript);
-        sb.Append("<style>");
-        sb.Append(Css);
-        sb.Append("</style>");
-
-        sb.Append("</head><body>");
-        sb.Append("<div class=\"spinner-container\"><div class=\"spinner\"></div></div>");
-        sb.Append($"<script>window.__PRELOADED_DATA__={preloadedDataJson};</script>");
-        // Redirect to the SPA at the same path
-        sb.Append($"<script>window.location.replace(\"{Encode(spaBaseUrl)}{Encode(path)}\");</script>");
         sb.Append("</body></html>");
         return sb.ToString();
     }
