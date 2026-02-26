@@ -1933,6 +1933,32 @@
           }
         }
       },
+      "PaginatedResponseOfReleaseDto": {
+        "required": [
+          "items"
+        ],
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReleaseDto"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "limit": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "offset": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
       "ReleaseDto": {
         "required": [
           "id",
@@ -2252,32 +2278,6 @@
               "null",
               "string"
             ]
-          }
-        }
-      },
-      "PaginatedResponseOfReleaseDto": {
-        "required": [
-          "items"
-        ],
-        "type": "object",
-        "properties": {
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ReleaseDto"
-            }
-          },
-          "total": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "limit": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "offset": {
-            "type": "integer",
-            "format": "int32"
           }
         }
       }
