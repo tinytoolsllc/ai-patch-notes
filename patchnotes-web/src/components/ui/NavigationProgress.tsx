@@ -6,8 +6,8 @@ export function NavigationProgress() {
   if (!isLoading) return null
 
   return (
-    <div className="fixed top-0 left-0 right-0 z-50 h-0.5">
-      <div className="h-full bg-primary animate-progress origin-left" />
+    <div className="fixed top-0 left-0 right-0 z-50 h-1">
+      <div className="h-full bg-brand-500 animate-progress origin-left" />
     </div>
   )
 }
