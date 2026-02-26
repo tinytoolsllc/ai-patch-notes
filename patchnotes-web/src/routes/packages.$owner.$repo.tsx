@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { seoHead } from '../seo'
-import { getGetPackageByOwnerRepoQueryOptions } from '../api/generated/packages/packages'
+import { getGetPackageByOwnerRepoQueryOptions } from '../api/hooks'
 
 export const Route = createFileRoute('/packages/$owner/$repo')({
   loader: ({ context, params }) =>

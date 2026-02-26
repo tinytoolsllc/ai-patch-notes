@@ -11,12 +11,17 @@ import {
   useGetPackagesByOwner,
   useGetPackageByOwnerRepo,
   getGetPackagesQueryKey,
+  getGetPackageByOwnerRepoQueryOptions,
   createPackage,
   deletePackage,
   updatePackage,
   bulkCreatePackages,
 } from './generated/packages/packages'
-import { useGetRelease, useGetReleases } from './generated/releases/releases'
+import {
+  useGetRelease,
+  useGetReleases,
+  getGetReleaseQueryOptions,
+} from './generated/releases/releases'
 import {
   useGetWatchlist,
   getGetWatchlistQueryKey,
@@ -353,6 +358,8 @@ export {
   useUpdateEmailPreferences,
   getGetEmailPreferencesQueryKey,
   getGetCurrentUserQueryKey,
+  getGetPackageByOwnerRepoQueryOptions,
+  getGetReleaseQueryOptions,
 }
 
 // ── Feed Types ──────────────────────────────────────────────

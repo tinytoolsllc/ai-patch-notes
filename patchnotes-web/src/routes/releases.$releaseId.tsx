@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { seoHead } from '../seo'
-import { getGetReleaseQueryOptions } from '../api/generated/releases/releases'
+import { getGetReleaseQueryOptions } from '../api/hooks'
 
 export const Route = createFileRoute('/releases/$releaseId')({
   loader: ({ context, params }) =>

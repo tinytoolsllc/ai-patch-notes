@@ -46,7 +46,7 @@ export default defineConfig([
     },
   },
   {
-    files: ['src/api/hooks.ts', 'src/routes/**/*.{ts,tsx}'],
+    files: ['src/api/hooks.ts'],
     rules: {
       'no-restricted-imports': 'off',
     },
