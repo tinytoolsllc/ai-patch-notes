@@ -80,7 +80,7 @@ public class User : IHasCreatedAt, IHasUpdatedAt
     public bool IsPro =>
         SubscriptionStatus == "active" ||
         SubscriptionStatus == "trialing" ||
-        SubscriptionStatus == "past_due" ||
+        (SubscriptionStatus == "past_due" && SubscriptionExpiresAt > DateTimeOffset.UtcNow) ||
         (SubscriptionStatus == "canceled" && SubscriptionExpiresAt > DateTimeOffset.UtcNow);
 
     public ICollection<Watchlist> Watchlists { get; set; } = [];
