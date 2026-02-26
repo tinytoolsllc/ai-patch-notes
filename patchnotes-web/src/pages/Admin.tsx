@@ -645,6 +645,11 @@ export function Admin() {
                   Email Templates
                 </Button>
               </Link>
+              <Link to="/admin/reset">
+                <Button variant="secondary" size="sm">
+                  Reset Data
+                </Button>
+              </Link>
               <Button
                 variant="secondary"
                 size="sm"
