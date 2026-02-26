@@ -111,10 +111,16 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-// Seed email templates at startup to avoid race condition on first-access lazy seeding
+// Seed email templates at startup to avoid race condition on first-access lazy seeding.
+// For SQLite (dev/test/OpenAPI export), ensure schema exists before seeding since
+// migrations are not used in those environments.
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<PatchNotesDbContext>();
+    if (db.Database.ProviderName == "Microsoft.EntityFrameworkCore.Sqlite")
+    {
+        await db.Database.EnsureCreatedAsync();
+    }
     await EmailTemplateRoutes.SeedDefaultTemplatesAsync(db);
 }
 
