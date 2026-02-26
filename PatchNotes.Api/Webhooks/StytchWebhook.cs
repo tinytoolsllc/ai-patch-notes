@@ -20,13 +20,15 @@ public static class StytchWebhook
     public static WebApplication MapStytchWebhook(this WebApplication app)
     {
         // POST /webhooks/stytch - Handle Stytch webhook events
-        app.MapPost("/webhooks/stytch", async (HttpContext httpContext, PatchNotesDbContext db, IStytchClient stytchClient, IConfiguration configuration) =>
+        app.MapPost("/webhooks/stytch", async (HttpContext httpContext, PatchNotesDbContext db, IStytchClient stytchClient, IConfiguration configuration, ILoggerFactory loggerFactory) =>
         {
+            var logger = loggerFactory.CreateLogger("PatchNotes.Api.Webhooks.StytchWebhook");
+
             // CRITICAL: Fail early if webhook secret is not configured
             var stytchWebhookSecret = configuration["Stytch:WebhookSecret"];
             if (string.IsNullOrEmpty(stytchWebhookSecret))
             {
-                Console.WriteLine("Stytch:WebhookSecret is not configured. Rejecting webhook to prevent unverified payloads");
+                logger.LogError("Stytch:WebhookSecret is not configured. Rejecting webhook to prevent unverified payloads");
                 return Results.StatusCode(503);
             }
 
@@ -68,7 +70,7 @@ public static class StytchWebhook
             }
             catch (JsonException ex)
             {
-                Console.WriteLine($"Stytch webhook JSON parse error: {ex.Message}");
+                logger.LogWarning(ex, "Stytch webhook JSON parse error: {Message}", ex.Message);
                 return Results.BadRequest(new { error = "Invalid webhook payload" });
             }
 
@@ -77,7 +79,7 @@ public static class StytchWebhook
                 return Results.BadRequest(new { error = "Invalid webhook payload" });
             }
 
-            Console.WriteLine($"Stytch webhook received: object_type={stytchEvent.object_type}, action={stytchEvent.action}, id={stytchEvent.id}");
+            logger.LogInformation("Stytch webhook received: object_type={ObjectType}, action={Action}", stytchEvent.object_type, stytchEvent.action);
 
             // Handle different Stytch webhook events based on object_type and action
             // IMPORTANT: Don't trust data in the webhook payload - fetch fresh data from Stytch API
@@ -93,17 +95,17 @@ public static class StytchWebhook
                         }
                         catch (Exception ex)
                         {
-                            Console.WriteLine($"Stytch API call failed for user {stytchEvent.id}: {ex.Message}");
+                            logger.LogDebug("Stytch API call failed for user {UserId}: {Message}", stytchEvent.id, ex.Message);
                             return Results.Json(new { error = "Failed to fetch user data" }, statusCode: 502);
                         }
 
                         if (stytchUser == null)
                         {
-                            Console.WriteLine($"Stytch API returned null for user {stytchEvent.id}");
+                            logger.LogDebug("Stytch API returned null for user {UserId}", stytchEvent.id);
                             return Results.Json(new { error = "Failed to fetch user data" }, statusCode: 502);
                         }
 
-                        Console.WriteLine($"Stytch user fetched: userId={stytchUser.UserId}, email={stytchUser.Email}, name={stytchUser.Name}");
+                        logger.LogDebug("Stytch user fetched: userId={UserId}, email={Email}, name={Name}", stytchUser.UserId, stytchUser.Email, stytchUser.Name);
 
                         // Step 3: Find or create user in DB
                         User? user;
@@ -113,13 +115,13 @@ public static class StytchWebhook
                         }
                         catch (Exception ex)
                         {
-                            Console.WriteLine($"DB query failed for StytchUserId={stytchEvent.id}: {ex.Message}");
+                            logger.LogDebug("DB query failed for StytchUserId={UserId}: {Message}", stytchEvent.id, ex.Message);
                             return Results.Json(new { error = "Internal server error" }, statusCode: 500);
                         }
 
                         if (user == null)
                         {
-                            Console.WriteLine($"Creating new user for StytchUserId={stytchEvent.id}");
+                            logger.LogDebug("Creating new user for StytchUserId={UserId}", stytchEvent.id);
                             user = new User
                             {
                                 StytchUserId = stytchUser.UserId,
@@ -130,7 +132,7 @@ public static class StytchWebhook
                         }
                         else
                         {
-                            Console.WriteLine($"Updating existing user {user.Id} for StytchUserId={stytchEvent.id}");
+                            logger.LogDebug("Updating existing user {UserId} for StytchUserId={StytchUserId}", user.Id, stytchEvent.id);
                             user.Email = stytchUser.Email ?? user.Email;
                             user.Name = stytchUser.Name ?? user.Name;
                         }
@@ -139,11 +141,11 @@ public static class StytchWebhook
                         try
                         {
                             await db.SaveChangesAsync();
-                            Console.WriteLine($"DB save succeeded for StytchUserId={stytchEvent.id}");
+                            logger.LogDebug("DB save succeeded for StytchUserId={UserId}", stytchEvent.id);
                         }
                         catch (Exception ex)
                         {
-                            Console.WriteLine($"DB save failed for StytchUserId={stytchEvent.id}: {ex.Message} | Inner: {ex.InnerException?.Message}");
+                            logger.LogDebug("DB save failed for StytchUserId={UserId}: {Message} | Inner: {InnerMessage}", stytchEvent.id, ex.Message, ex.InnerException?.Message);
                             return Results.Json(new { error = "Internal server error" }, statusCode: 500);
                         }
 
@@ -159,23 +161,23 @@ public static class StytchWebhook
                             {
                                 db.Users.Remove(user);
                                 await db.SaveChangesAsync();
-                                Console.WriteLine($"Deleted user for StytchUserId={stytchEvent.id}");
+                                logger.LogDebug("Deleted user for StytchUserId={UserId}", stytchEvent.id);
                             }
                             else
                             {
-                                Console.WriteLine($"Delete webhook: no user found for StytchUserId={stytchEvent.id}");
+                                logger.LogDebug("Delete webhook: no user found for StytchUserId={UserId}", stytchEvent.id);
                             }
                         }
                         catch (Exception ex)
                         {
-                            Console.WriteLine($"Delete user failed for StytchUserId={stytchEvent.id}: {ex.Message}");
+                            logger.LogDebug("Delete user failed for StytchUserId={UserId}: {Message}", stytchEvent.id, ex.Message);
                             return Results.Json(new { error = "Internal server error" }, statusCode: 500);
                         }
                         break;
                     }
 
                 default:
-                    Console.WriteLine($"Unhandled Stytch webhook: object_type={stytchEvent.object_type}, action={stytchEvent.action}");
+                    logger.LogInformation("Unhandled Stytch webhook: object_type={ObjectType}, action={Action}", stytchEvent.object_type, stytchEvent.action);
                     break;
             }
 
