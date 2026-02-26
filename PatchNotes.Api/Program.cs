@@ -36,10 +36,13 @@ if (StripeConfiguration.ApiVersion != expectedStripeApiVersion)
 }
 
 var stripeSecretKey = builder.Configuration["Stripe:SecretKey"];
-if (!string.IsNullOrEmpty(stripeSecretKey))
+if (string.IsNullOrEmpty(stripeSecretKey))
 {
-    StripeConfiguration.ApiKey = stripeSecretKey;
+    throw new InvalidOperationException(
+        "Missing required Stripe configuration: Stripe:SecretKey. " +
+        "Please configure this value in appsettings.json or environment variables.");
 }
+StripeConfiguration.ApiKey = stripeSecretKey;
 
 builder.Services.Configure<DefaultWatchlistOptions>(builder.Configuration.GetSection(DefaultWatchlistOptions.SectionName));
 

@@ -86,6 +86,7 @@ public class PatchNotesApiFixture : WebApplicationFactory<Program>, IAsyncLifeti
         builder.UseSetting("Stytch:ProjectId", "test-project-id");
         builder.UseSetting("Stytch:Secret", "test-secret");
         builder.UseSetting("Stytch:WebhookSecret", "test-webhook-secret");
+        builder.UseSetting("Stripe:SecretKey", "sk_test_placeholder");
         builder.UseSetting("AllowedOrigins:0", "http://localhost");
 
         _additionalConfig?.Invoke(builder);
