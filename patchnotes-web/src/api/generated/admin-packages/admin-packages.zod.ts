@@ -38,3 +38,21 @@ export const DisablePackageSyncParams = zod.object({
   "id": zod.string().min(disablePackageSyncPathIdMin).max(disablePackageSyncPathIdMax)
 })
 
+export const resetPackageSummariesPathIdMin = 21;
+export const resetPackageSummariesPathIdMax = 21;
+
+
+
+export const ResetPackageSummariesParams = zod.object({
+  "id": zod.string().min(resetPackageSummariesPathIdMin).max(resetPackageSummariesPathIdMax)
+})
+
+export const resetPackageReleasesPathIdMin = 21;
+export const resetPackageReleasesPathIdMax = 21;
+
+
+
+export const ResetPackageReleasesParams = zod.object({
+  "id": zod.string().min(resetPackageReleasesPathIdMin).max(resetPackageReleasesPathIdMax)
+})
+
