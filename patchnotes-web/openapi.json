@@ -6,7 +6,7 @@
   },
   "servers": [
     {
-      "url": "http://localhost:5299/"
+      "url": "http://localhost:2101/"
     }
   ],
   "paths": {
@@ -444,6 +444,62 @@
           "AdminPackages"
         ],
         "operationId": "DisablePackageSync",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "maxLength": 21,
+              "minLength": 21,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
+    "/api/admin/packages/{id}/reset-summaries": {
+      "post": {
+        "tags": [
+          "AdminPackages"
+        ],
+        "operationId": "ResetPackageSummaries",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "maxLength": 21,
+              "minLength": 21,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
+    "/api/admin/packages/{id}/reset-releases": {
+      "post": {
+        "tags": [
+          "AdminPackages"
+        ],
+        "operationId": "ResetPackageReleases",
         "parameters": [
           {
             "name": "id",
