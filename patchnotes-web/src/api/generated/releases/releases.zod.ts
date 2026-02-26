@@ -31,10 +31,13 @@ export const GetReleasesQueryParams = zod.object({
   "days": zod.number().optional(),
   "excludePrerelease": zod.boolean().optional(),
   "majorVersion": zod.number().optional(),
-  "watchlist": zod.boolean().optional()
+  "watchlist": zod.boolean().optional(),
+  "limit": zod.number().optional(),
+  "offset": zod.number().optional()
 })
 
-export const GetReleasesResponseItem = zod.object({
+export const GetReleasesResponse = zod.object({
+  "items": zod.array(zod.object({
   "id": zod.string(),
   "tag": zod.string(),
   "title": zod.string().nullish(),
@@ -47,6 +50,9 @@ export const GetReleasesResponseItem = zod.object({
   "githubOwner": zod.string(),
   "githubRepo": zod.string()
 })
+})),
+  "total": zod.number().optional(),
+  "limit": zod.number().optional(),
+  "offset": zod.number().optional()
 })
-export const GetReleasesResponse = zod.array(GetReleasesResponseItem)
 
