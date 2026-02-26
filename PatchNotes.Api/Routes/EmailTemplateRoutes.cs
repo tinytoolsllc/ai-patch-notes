@@ -15,12 +15,6 @@ public static class EmailTemplateRoutes
         // GET /api/admin/email-templates - List all templates
         group.MapGet("/", async (PatchNotesDbContext db) =>
         {
-            // Seed defaults on first access
-            if (!await db.EmailTemplates.AnyAsync())
-            {
-                await SeedDefaultTemplatesAsync(db);
-            }
-
             var templates = await db.EmailTemplates
                 .OrderBy(t => t.Name)
                 .Select(t => new EmailTemplateDto

@@ -111,6 +111,14 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
+// Seed email templates at startup to avoid race condition on first-access lazy seeding
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<PatchNotesDbContext>();
+    await db.Database.EnsureCreatedAsync();
+    await EmailTemplateRoutes.SeedDefaultTemplatesAsync(db);
+}
+
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
