@@ -302,4 +302,168 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       > => {
       return useMutation(getDisablePackageSyncMutationOptions(options), queryClient);
     }
+    export type resetPackageSummariesResponse204 = {
+  data: void
+  status: 204
+}
+
+export type resetPackageSummariesResponse404 = {
+  data: void
+  status: 404
+}
+
+export type resetPackageSummariesResponseSuccess = (resetPackageSummariesResponse204) & {
+  headers: Headers;
+};
+export type resetPackageSummariesResponseError = (resetPackageSummariesResponse404) & {
+  headers: Headers;
+};
+
+export type resetPackageSummariesResponse = (resetPackageSummariesResponseSuccess | resetPackageSummariesResponseError)
+
+export const getResetPackageSummariesUrl = (id: string,) => {
+
+
+  
+
+  return `/api/admin/packages/${id}/reset-summaries`
+}
+
+export const resetPackageSummaries = async (id: string, options?: RequestInit): Promise<resetPackageSummariesResponse> => {
+  
+  return customFetch<resetPackageSummariesResponse>(getResetPackageSummariesUrl(id),
+  {      
+    ...options,
+    method: 'POST'
+    
+    
+  }
+);}
+  
+
+
+
+export const getResetPackageSummariesMutationOptions = <TError = void,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof resetPackageSummaries>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof resetPackageSummaries>>, TError,{id: string}, TContext> => {
+
+const mutationKey = ['resetPackageSummaries'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof resetPackageSummaries>>, {id: string}> = (props) => {
+          const {id} = props ?? {};
+
+          return  resetPackageSummaries(id,requestOptions)
+        }
+
+
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ResetPackageSummariesMutationResult = NonNullable<Awaited<ReturnType<typeof resetPackageSummaries>>>
+    
+    export type ResetPackageSummariesMutationError = void
+
+    export const useResetPackageSummaries = <TError = void,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof resetPackageSummaries>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof resetPackageSummaries>>,
+        TError,
+        {id: string},
+        TContext
+      > => {
+      return useMutation(getResetPackageSummariesMutationOptions(options), queryClient);
+    }
+    export type resetPackageReleasesResponse204 = {
+  data: void
+  status: 204
+}
+
+export type resetPackageReleasesResponse404 = {
+  data: void
+  status: 404
+}
+
+export type resetPackageReleasesResponseSuccess = (resetPackageReleasesResponse204) & {
+  headers: Headers;
+};
+export type resetPackageReleasesResponseError = (resetPackageReleasesResponse404) & {
+  headers: Headers;
+};
+
+export type resetPackageReleasesResponse = (resetPackageReleasesResponseSuccess | resetPackageReleasesResponseError)
+
+export const getResetPackageReleasesUrl = (id: string,) => {
+
+
+  
+
+  return `/api/admin/packages/${id}/reset-releases`
+}
+
+export const resetPackageReleases = async (id: string, options?: RequestInit): Promise<resetPackageReleasesResponse> => {
+  
+  return customFetch<resetPackageReleasesResponse>(getResetPackageReleasesUrl(id),
+  {      
+    ...options,
+    method: 'POST'
+    
+    
+  }
+);}
+  
+
+
+
+export const getResetPackageReleasesMutationOptions = <TError = void,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof resetPackageReleases>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof resetPackageReleases>>, TError,{id: string}, TContext> => {
+
+const mutationKey = ['resetPackageReleases'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof resetPackageReleases>>, {id: string}> = (props) => {
+          const {id} = props ?? {};
+
+          return  resetPackageReleases(id,requestOptions)
+        }
+
+
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ResetPackageReleasesMutationResult = NonNullable<Awaited<ReturnType<typeof resetPackageReleases>>>
+    
+    export type ResetPackageReleasesMutationError = void
+
+    export const useResetPackageReleases = <TError = void,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof resetPackageReleases>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof resetPackageReleases>>,
+        TError,
+        {id: string},
+        TContext
+      > => {
+      return useMutation(getResetPackageReleasesMutationOptions(options), queryClient);
+    }
     
