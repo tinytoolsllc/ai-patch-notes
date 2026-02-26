@@ -34,6 +34,7 @@ export * from './packageReleaseDto';
 export * from './packageReleasePackageDto';
 export * from './paginatedResponseOfOwnerPackageDto';
 export * from './paginatedResponseOfPackageDto';
+export * from './paginatedResponseOfReleaseDto';
 export * from './releaseDto';
 export * from './releasePackageDto';
 export * from './releaseSummaryDto';
