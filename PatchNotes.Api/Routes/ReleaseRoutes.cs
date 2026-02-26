@@ -50,7 +50,7 @@ public static class ReleaseRoutes
 
         // GET /api/releases - Query releases for selected packages
         group.MapGet("/", async (string? packages, int? days, bool? excludePrerelease, int? majorVersion,
-            bool? watchlist, HttpContext httpContext, PatchNotesDbContext db, IStytchClient stytchClient,
+            bool? watchlist, int? limit, int? offset, HttpContext httpContext, PatchNotesDbContext db, IStytchClient stytchClient,
             IOptions<DefaultWatchlistOptions> watchlistOptions) =>
         {
             var daysToQuery = days ?? 7;
@@ -113,8 +113,15 @@ public static class ReleaseRoutes
                 query = query.Where(r => r.MajorVersion == majorVersion.Value);
             }
 
+            var take = Math.Clamp(limit ?? 20, 1, 100);
+            var skip = Math.Max(offset ?? 0, 0);
+
+            var total = await query.CountAsync();
+
             var releases = await query
                 .OrderByDescending(r => r.PublishedAt)
+                .Skip(skip)
+                .Take(take)
                 .Select(r => new ReleaseDto
                 {
                     Id = r.Id,
@@ -133,9 +140,15 @@ public static class ReleaseRoutes
                 })
                 .ToListAsync();
 
-            return Results.Ok(releases);
+            return Results.Ok(new PaginatedResponse<ReleaseDto>
+            {
+                Items = releases,
+                Total = total,
+                Limit = take,
+                Offset = skip
+            });
         })
-        .Produces<List<ReleaseDto>>(StatusCodes.Status200OK)
+        .Produces<PaginatedResponse<ReleaseDto>>(StatusCodes.Status200OK)
         .WithName("GetReleases");
 
         return app;

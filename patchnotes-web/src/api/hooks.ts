@@ -94,7 +94,7 @@ export function useReleases(options?: ReleasesOptions) {
 
   return useGetReleases(params, {
     query: {
-      select: (res) => validateResponse(GetReleasesResponse, res.data),
+      select: (res) => validateResponse(GetReleasesResponse, res.data).items,
     },
   })
 }

@@ -38,7 +38,8 @@ public class ReleasesApiTests : IAsyncLifetime
         var response = await _client.GetAsync("/api/releases");
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var releases = await response.Content.ReadFromJsonAsync<JsonElement>();
+        var json = await response.Content.ReadFromJsonAsync<JsonElement>();
+        var releases = json.GetProperty("items");
         releases.GetArrayLength().Should().Be(0);
     }
 
@@ -77,7 +78,8 @@ public class ReleasesApiTests : IAsyncLifetime
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var releases = await response.Content.ReadFromJsonAsync<JsonElement>();
+        var json = await response.Content.ReadFromJsonAsync<JsonElement>();
+        var releases = json.GetProperty("items");
         releases.GetArrayLength().Should().Be(1);
         releases[0].GetProperty("tag").GetString().Should().Be("v1.0.0");
     }
@@ -104,7 +106,8 @@ public class ReleasesApiTests : IAsyncLifetime
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var releases = await response.Content.ReadFromJsonAsync<JsonElement>();
+        var json = await response.Content.ReadFromJsonAsync<JsonElement>();
+        var releases = json.GetProperty("items");
         releases.GetArrayLength().Should().Be(3);
     }
 
@@ -130,7 +133,8 @@ public class ReleasesApiTests : IAsyncLifetime
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var releases = await response.Content.ReadFromJsonAsync<JsonElement>();
+        var json = await response.Content.ReadFromJsonAsync<JsonElement>();
+        var releases = json.GetProperty("items");
         releases.GetArrayLength().Should().Be(1);
         releases[0].GetProperty("tag").GetString().Should().Be("v1.0.0");
     }
@@ -159,7 +163,8 @@ public class ReleasesApiTests : IAsyncLifetime
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var releases = await response.Content.ReadFromJsonAsync<JsonElement>();
+        var json = await response.Content.ReadFromJsonAsync<JsonElement>();
+        var releases = json.GetProperty("items");
         releases.GetArrayLength().Should().Be(2);
     }
 
@@ -185,7 +190,8 @@ public class ReleasesApiTests : IAsyncLifetime
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var releases = await response.Content.ReadFromJsonAsync<JsonElement>();
+        var json = await response.Content.ReadFromJsonAsync<JsonElement>();
+        var releases = json.GetProperty("items");
         releases.GetArrayLength().Should().Be(3);
         releases[0].GetProperty("tag").GetString().Should().Be("v2.0.0");
         releases[1].GetProperty("tag").GetString().Should().Be("v1.5.0");
@@ -218,7 +224,8 @@ public class ReleasesApiTests : IAsyncLifetime
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var releases = await response.Content.ReadFromJsonAsync<JsonElement>();
+        var json = await response.Content.ReadFromJsonAsync<JsonElement>();
+        var releases = json.GetProperty("items");
         var release = releases[0];
         release.GetProperty("tag").GetString().Should().Be("v1.0.0");
         release.GetProperty("title").GetString().Should().Be("First Release");
@@ -291,7 +298,8 @@ public class ReleasesWatchlistFilterTests : IAsyncLifetime
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var releases = await response.Content.ReadFromJsonAsync<JsonElement>();
+        var json = await response.Content.ReadFromJsonAsync<JsonElement>();
+        var releases = json.GetProperty("items");
         releases.GetArrayLength().Should().Be(1);
         releases[0].GetProperty("tag").GetString().Should().Be("v1.0.0");
     }
@@ -319,7 +327,8 @@ public class ReleasesWatchlistFilterTests : IAsyncLifetime
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var releases = await response.Content.ReadFromJsonAsync<JsonElement>();
+        var json = await response.Content.ReadFromJsonAsync<JsonElement>();
+        var releases = json.GetProperty("items");
         releases.GetArrayLength().Should().Be(1);
         releases[0].GetProperty("tag").GetString().Should().Be("v2.0.0");
     }
@@ -353,7 +362,8 @@ public class ReleasesWatchlistFilterTests : IAsyncLifetime
 
         // Assert - should only return watched package releases, not default or other
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var releases = await response.Content.ReadFromJsonAsync<JsonElement>();
+        var json = await response.Content.ReadFromJsonAsync<JsonElement>();
+        var releases = json.GetProperty("items");
         releases.GetArrayLength().Should().Be(1);
         releases[0].GetProperty("tag").GetString().Should().Be("v1.0.0");
     }
@@ -381,7 +391,8 @@ public class ReleasesWatchlistFilterTests : IAsyncLifetime
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var releases = await response.Content.ReadFromJsonAsync<JsonElement>();
+        var json = await response.Content.ReadFromJsonAsync<JsonElement>();
+        var releases = json.GetProperty("items");
         releases.GetArrayLength().Should().Be(1);
         releases[0].GetProperty("tag").GetString().Should().Be("v1.0.0");
     }
@@ -405,7 +416,8 @@ public class ReleasesWatchlistFilterTests : IAsyncLifetime
 
         // Assert - empty default watchlist means empty results, not all releases
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var releases = await response.Content.ReadFromJsonAsync<JsonElement>();
+        var json = await response.Content.ReadFromJsonAsync<JsonElement>();
+        var releases = json.GetProperty("items");
         releases.GetArrayLength().Should().Be(0);
     }
 
@@ -436,7 +448,8 @@ public class ReleasesWatchlistFilterTests : IAsyncLifetime
 
         // Assert - only the explicit package's releases, not the user's watchlist
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var releases = await response.Content.ReadFromJsonAsync<JsonElement>();
+        var json = await response.Content.ReadFromJsonAsync<JsonElement>();
+        var releases = json.GetProperty("items");
         releases.GetArrayLength().Should().Be(1);
         releases[0].GetProperty("tag").GetString().Should().Be("v2.0.0");
     }
@@ -468,7 +481,8 @@ public class ReleasesWatchlistFilterTests : IAsyncLifetime
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var releases = await response.Content.ReadFromJsonAsync<JsonElement>();
+        var json = await response.Content.ReadFromJsonAsync<JsonElement>();
+        var releases = json.GetProperty("items");
         releases.GetArrayLength().Should().Be(1);
         releases[0].GetProperty("tag").GetString().Should().Be("v1.0.0");
     }
@@ -502,7 +516,8 @@ public class ReleasesWatchlistFilterTests : IAsyncLifetime
 
         // Assert - authenticated but empty watchlist returns empty, not all
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var releases = await response.Content.ReadFromJsonAsync<JsonElement>();
+        var json = await response.Content.ReadFromJsonAsync<JsonElement>();
+        var releases = json.GetProperty("items");
         releases.GetArrayLength().Should().Be(0);
     }
 
@@ -541,7 +556,8 @@ public class ReleasesWatchlistFilterTests : IAsyncLifetime
 
         // Assert - user has watchlist, filters to it, but no releases → empty (NOT default)
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var releases = await response.Content.ReadFromJsonAsync<JsonElement>();
+        var json = await response.Content.ReadFromJsonAsync<JsonElement>();
+        var releases = json.GetProperty("items");
         releases.GetArrayLength().Should().Be(0);
     }
 }

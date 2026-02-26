@@ -11,4 +11,6 @@ days?: number;
 excludePrerelease?: boolean;
 majorVersion?: number;
 watchlist?: boolean;
+limit?: number;
+offset?: number;
 };
