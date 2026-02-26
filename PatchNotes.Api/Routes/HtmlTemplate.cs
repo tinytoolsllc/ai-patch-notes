@@ -134,6 +134,17 @@ public static class HtmlTemplate
         footer a:hover { color: var(--color-text-primary); }
         footer nav { display: flex; justify-content: center; gap: 1.5rem; margin-bottom: 0.75rem; }
 
+        .hero { text-align: center; padding: 1.5rem 2rem; margin-bottom: 1.5rem; }
+        .hero h3 { font-size: 1rem; font-weight: 600; color: var(--color-text-primary); }
+        .hero p { font-size: 0.75rem; color: var(--color-text-tertiary); margin-top: 0.25rem; }
+        .hero-highlights { display: flex; justify-content: center; gap: 2rem; margin-top: 1rem; flex-wrap: wrap; }
+        .hero-highlight { display: flex; flex-direction: column; align-items: center; text-align: center; max-width: 12rem; }
+        .hero-icon { width: 2.5rem; height: 2.5rem; border-radius: 50%; background: var(--color-brand-600); color: white; display: flex; align-items: center; justify-content: center; margin-bottom: 0.375rem; }
+        .hero-highlight .hl-title { font-size: 0.875rem; font-weight: 500; color: var(--color-text-primary); }
+        .hero-highlight .hl-desc { font-size: 0.75rem; color: var(--color-text-secondary); }
+        .hero-cta { display: inline-flex; align-items: center; padding: 0.5rem 1.5rem; margin-top: 1rem; font-size: 0.75rem; font-weight: 600; color: white; background: var(--color-brand-600); border-radius: 0.5rem; text-decoration: none; transition: background 0.15s; }
+        .hero-cta:hover { background: var(--color-brand-700); color: white; text-decoration: none; }
+
         .spinner-container { min-height: 80vh; display: flex; align-items: center; justify-content: center; }
         .spinner { width: 2rem; height: 2rem; border: 3px solid var(--color-brand-500); border-top-color: transparent; border-radius: 50%; animation: spin 0.8s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
@@ -252,6 +263,38 @@ public static class HtmlTemplate
 
         sb.Append("</div></header>");
         return sb.ToString();
+    }
+
+    /// <summary>
+    /// Renders the hero/marketing card shown on package detail pages.
+    /// Wrapped in data-nosnippet so search engines exclude it from snippets.
+    /// </summary>
+    public static string HeroCard()
+    {
+        return """
+            <div data-nosnippet class="card hero">
+              <h3>Never miss a release that matters</h3>
+              <p>AI-powered summaries of every GitHub release.</p>
+              <div class="hero-highlights">
+                <div class="hero-highlight">
+                  <div class="hero-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m13 2-2 2.5h3L12 7"/><path d="M10 14v.5"/><path d="M14 14v.5"/><path d="M8.5 8.5c-.83 1-1.5 2.5-1.5 4.5 0 4 2.5 5.5 5 5.5s5-1.5 5-5.5c0-2-.67-3.5-1.5-4.5"/></svg></div>
+                  <p class="hl-title">AI Summaries</p>
+                  <p class="hl-desc">Changelogs condensed into clear, actionable insights.</p>
+                </div>
+                <div class="hero-highlight">
+                  <div class="hero-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M12 8v8"/><path d="m8 12 4-4 4 4"/></svg></div>
+                  <p class="hl-title">Always Free</p>
+                  <p class="hl-desc">Track up to 5 packages at no cost, forever.</p>
+                </div>
+                <div class="hero-highlight">
+                  <div class="hero-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+                  <p class="hl-title">Weekly Digest</p>
+                  <p class="hl-desc">A curated summary of every release, delivered weekly.</p>
+                </div>
+              </div>
+              <a href="https://www.myreleasenotes.ai/login" class="hero-cta">Get Started Free</a>
+            </div>
+            """;
     }
 
     public static string Footer()
