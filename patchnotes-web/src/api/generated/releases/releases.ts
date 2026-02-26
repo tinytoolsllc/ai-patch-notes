@@ -21,6 +21,7 @@ import type {
 
 import type {
   GetReleasesParams,
+  PaginatedResponseOfReleaseDto,
   ReleaseDto
 } from '.././model';
 
@@ -143,7 +144,7 @@ export function useGetRelease<TData = Awaited<ReturnType<typeof getRelease>>, TE
 
 
 export type getReleasesResponse200 = {
-  data: ReleaseDto[]
+  data: PaginatedResponseOfReleaseDto
   status: 200
 }
 
