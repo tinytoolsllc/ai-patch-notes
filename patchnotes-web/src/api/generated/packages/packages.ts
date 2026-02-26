@@ -27,14 +27,15 @@ import type {
   AddPackageRequest,
   BulkAddPackageItem,
   BulkAddPackageResult,
+  GetPackageReleasesParams,
   GetPackagesByOwnerParams,
   GetPackagesParams,
   PackageDetailDto,
   PackageDetailResponseDto,
   PackageDto,
-  PackageReleaseDto,
   PaginatedResponseOfOwnerPackageDto,
   PaginatedResponseOfPackageDto,
+  PaginatedResponseOfPackageReleaseDto,
   UpdatePackageRequest
 } from '.././model';
 
@@ -527,7 +528,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       return useMutation(getDeletePackageMutationOptions(options), queryClient);
     }
     export type getPackageReleasesResponse200 = {
-  data: PackageReleaseDto[]
+  data: PaginatedResponseOfPackageReleaseDto
   status: 200
 }
 
@@ -545,17 +546,26 @@ export type getPackageReleasesResponseError = (getPackageReleasesResponse404) & 
 
 export type getPackageReleasesResponse = (getPackageReleasesResponseSuccess | getPackageReleasesResponseError)
 
-export const getGetPackageReleasesUrl = (id: string,) => {
+export const getGetPackageReleasesUrl = (id: string,
+    params?: GetPackageReleasesParams,) => {
+  const normalizedParams = new URLSearchParams();
 
+  Object.entries(params || {}).forEach(([key, value]) => {
+    
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  });
 
-  
+  const stringifiedParams = normalizedParams.toString();
 
-  return `/api/packages/${id}/releases`
+  return stringifiedParams.length > 0 ? `/api/packages/${id}/releases?${stringifiedParams}` : `/api/packages/${id}/releases`
 }
 
-export const getPackageReleases = async (id: string, options?: RequestInit): Promise<getPackageReleasesResponse> => {
+export const getPackageReleases = async (id: string,
+    params?: GetPackageReleasesParams, options?: RequestInit): Promise<getPackageReleasesResponse> => {
   
-  return customFetch<getPackageReleasesResponse>(getGetPackageReleasesUrl(id),
+  return customFetch<getPackageReleasesResponse>(getGetPackageReleasesUrl(id,params),
   {      
     ...options,
     method: 'GET'
@@ -568,23 +578,25 @@ export const getPackageReleases = async (id: string, options?: RequestInit): Pro
 
 
 
-export const getGetPackageReleasesQueryKey = (id: string,) => {
+export const getGetPackageReleasesQueryKey = (id: string,
+    params?: GetPackageReleasesParams,) => {
     return [
-    `/api/packages/${id}/releases`
+    `/api/packages/${id}/releases`, ...(params ? [params] : [])
     ] as const;
     }
 
     
-export const getGetPackageReleasesQueryOptions = <TData = Awaited<ReturnType<typeof getPackageReleases>>, TError = void>(id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPackageReleases>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+export const getGetPackageReleasesQueryOptions = <TData = Awaited<ReturnType<typeof getPackageReleases>>, TError = void>(id: string,
+    params?: GetPackageReleasesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPackageReleases>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getGetPackageReleasesQueryKey(id);
+  const queryKey =  queryOptions?.queryKey ?? getGetPackageReleasesQueryKey(id,params);
 
   
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getPackageReleases>>> = ({ signal }) => getPackageReleases(id, { signal, ...requestOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getPackageReleases>>> = ({ signal }) => getPackageReleases(id,params, { signal, ...requestOptions });
 
       
 
@@ -598,7 +610,8 @@ export type GetPackageReleasesQueryError = void
 
 
 export function useGetPackageReleases<TData = Awaited<ReturnType<typeof getPackageReleases>>, TError = void>(
- id: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPackageReleases>>, TError, TData>> & Pick<
+ id: string,
+    params: undefined |  GetPackageReleasesParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPackageReleases>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof getPackageReleases>>,
           TError,
@@ -608,7 +621,8 @@ export function useGetPackageReleases<TData = Awaited<ReturnType<typeof getPacka
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetPackageReleases<TData = Awaited<ReturnType<typeof getPackageReleases>>, TError = void>(
- id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPackageReleases>>, TError, TData>> & Pick<
+ id: string,
+    params?: GetPackageReleasesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPackageReleases>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof getPackageReleases>>,
           TError,
@@ -618,16 +632,18 @@ export function useGetPackageReleases<TData = Awaited<ReturnType<typeof getPacka
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetPackageReleases<TData = Awaited<ReturnType<typeof getPackageReleases>>, TError = void>(
- id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPackageReleases>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ id: string,
+    params?: GetPackageReleasesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPackageReleases>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
 export function useGetPackageReleases<TData = Awaited<ReturnType<typeof getPackageReleases>>, TError = void>(
- id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPackageReleases>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ id: string,
+    params?: GetPackageReleasesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPackageReleases>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient 
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const queryOptions = getGetPackageReleasesQueryOptions(id,options)
+  const queryOptions = getGetPackageReleasesQueryOptions(id,params,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 

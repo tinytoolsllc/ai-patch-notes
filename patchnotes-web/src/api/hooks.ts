@@ -108,9 +108,10 @@ export function useRelease(id: string) {
 }
 
 export function usePackageReleases(packageId: string) {
-  return useGetPackageReleases(packageId, {
+  return useGetPackageReleases(packageId, undefined, {
     query: {
-      select: (res) => validateResponse(GetPackageReleasesResponse, res.data),
+      select: (res) =>
+        validateResponse(GetPackageReleasesResponse, res.data).items,
     },
   })
 }
