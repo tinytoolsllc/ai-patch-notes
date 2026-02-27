@@ -172,27 +172,35 @@ export function HomePage() {
   }, [])
 
   // Sort groups
-  const sortedGroups = [...versionGroups].sort((a, b) => {
-    if (sortBy === 'name') {
-      return a.displayName.localeCompare(b.displayName)
-    }
-    // Sort by date (most recent first)
-    return (
-      new Date(b.lastUpdated ?? 0).getTime() -
-      new Date(a.lastUpdated ?? 0).getTime()
-    )
-  })
+  const sortedGroups = useMemo(
+    () =>
+      [...versionGroups].sort((a, b) => {
+        if (sortBy === 'name') {
+          return a.displayName.localeCompare(b.displayName)
+        }
+        // Sort by date (most recent first)
+        return (
+          new Date(b.lastUpdated ?? 0).getTime() -
+          new Date(a.lastUpdated ?? 0).getTime()
+        )
+      }),
+    [versionGroups, sortBy]
+  )
 
   // Group by package for display
-  const groupedByPackageMap = sortedGroups.reduce(
-    (acc, group) => {
-      if (!acc[group.displayName]) {
-        acc[group.displayName] = []
-      }
-      acc[group.displayName].push(group)
-      return acc
-    },
-    {} as Record<string, VersionGroup[]>
+  const groupedByPackageMap = useMemo(
+    () =>
+      sortedGroups.reduce(
+        (acc, group) => {
+          if (!acc[group.displayName]) {
+            acc[group.displayName] = []
+          }
+          acc[group.displayName].push(group)
+          return acc
+        },
+        {} as Record<string, VersionGroup[]>
+      ),
+    [sortedGroups]
   )
 
   return (
