@@ -45,3 +45,12 @@ export const UpdateEmailTemplateResponse = zod.object({
   "updatedAt": zod.iso.datetime({"offset":true}).optional()
 })
 
+export const SendTestEmailParams = zod.object({
+  "name": zod.string()
+})
+
+export const SendTestEmailBody = zod.object({
+  "recipientEmail": zod.string(),
+  "testData": zod.unknown()
+})
+
