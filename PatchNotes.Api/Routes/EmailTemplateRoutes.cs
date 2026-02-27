@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using PatchNotes.Data;
 
@@ -103,6 +104,90 @@ public static class EmailTemplateRoutes
         .Produces<EmailTemplateDto>(StatusCodes.Status200OK)
         .Produces(StatusCodes.Status404NotFound)
         .WithName("UpdateEmailTemplate");
+
+        // POST /api/admin/email-templates/{name}/test - Send a test email
+        group.MapPost("/{name}/test", async (
+            string name,
+            SendTestEmailRequest request,
+            PatchNotesDbContext db,
+            IConfiguration configuration,
+            IHttpClientFactory httpClientFactory,
+            ILoggerFactory loggerFactory,
+            CancellationToken cancellationToken) =>
+        {
+            var logger = loggerFactory.CreateLogger("PatchNotes.Api.Routes.EmailTemplateRoutes");
+
+            if (string.IsNullOrWhiteSpace(request.RecipientEmail))
+            {
+                return Results.BadRequest(new ApiError("Recipient email is required"));
+            }
+
+            var templateExists = await db.EmailTemplates.AnyAsync(t => t.Name == name, cancellationToken);
+            if (!templateExists)
+            {
+                return Results.NotFound(new ApiError("Template not found"));
+            }
+
+            var emailFunctionUrl = configuration["EmailFunction:Url"];
+            var emailFunctionKey = configuration["EmailFunction:Key"];
+
+            if (string.IsNullOrEmpty(emailFunctionUrl))
+            {
+                return Results.Json(
+                    new ApiError("Email function URL not configured"),
+                    statusCode: StatusCodes.Status503ServiceUnavailable);
+            }
+
+            try
+            {
+                using var http = httpClientFactory.CreateClient();
+                using var httpRequest = new HttpRequestMessage(HttpMethod.Post, emailFunctionUrl);
+
+                if (!string.IsNullOrEmpty(emailFunctionKey))
+                    httpRequest.Headers.Add("x-functions-key", emailFunctionKey);
+
+                var payload = new
+                {
+                    templateName = name,
+                    recipientEmail = request.RecipientEmail,
+                    testData = request.TestData
+                };
+
+                httpRequest.Content = new StringContent(
+                    JsonSerializer.Serialize(payload),
+                    System.Text.Encoding.UTF8,
+                    "application/json");
+
+                var response = await http.SendAsync(httpRequest, cancellationToken);
+                var responseBody = await response.Content.ReadAsStringAsync(cancellationToken);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    logger.LogWarning(
+                        "Email function returned {StatusCode}: {Body}",
+                        response.StatusCode, responseBody);
+                    return Results.Json(
+                        new ApiError("Email function error", responseBody),
+                        statusCode: (int)response.StatusCode);
+                }
+
+                return Results.NoContent();
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Failed to call email function for test email");
+                return Results.Json(
+                    new ApiError("Failed to send test email"),
+                    statusCode: StatusCodes.Status502BadGateway);
+            }
+        })
+        .AddEndpointFilterFactory(requireAuth)
+        .AddEndpointFilterFactory(requireAdmin)
+        .Produces(StatusCodes.Status204NoContent)
+        .Produces(StatusCodes.Status400BadRequest)
+        .Produces(StatusCodes.Status404NotFound)
+        .Produces(StatusCodes.Status503ServiceUnavailable)
+        .WithName("SendTestEmail");
 
         return app;
     }
@@ -225,3 +310,5 @@ public class EmailTemplateDto
 }
 
 public record UpdateEmailTemplateRequest(string? Subject, string? JsxSource);
+
+public record SendTestEmailRequest(string RecipientEmail, JsonElement TestData);

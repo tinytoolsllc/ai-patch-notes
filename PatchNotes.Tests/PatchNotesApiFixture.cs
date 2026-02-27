@@ -215,6 +215,11 @@ public class MockNpmHandler : HttpMessageHandler
         _responses[$"https://registry.npmjs.org/{packageName}"] = (HttpStatusCode.OK, content);
     }
 
+    public void SetupResponse(string url, HttpStatusCode statusCode, string content)
+    {
+        _responses[url] = (statusCode, content);
+    }
+
     public void Clear()
     {
         _responses.Clear();
