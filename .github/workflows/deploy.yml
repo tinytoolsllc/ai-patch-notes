@@ -97,6 +97,48 @@ jobs:
           name: email-function
           path: publish/email-function
 
+  build-swa-api:
+    name: Build SWA API
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: patchnotes-web/api
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile --dir ${{ github.workspace }}
+
+      - name: Build
+        run: pnpm build
+
+      - name: Prepare deployment package
+        working-directory: ${{ github.workspace }}
+        run: |
+          pnpm --filter patchnotes-web-api deploy publish/swa-api --prod
+          cp patchnotes-web/api/host.json publish/swa-api/
+          cd publish/swa-api
+          echo "node-linker=hoisted" > .npmrc
+          echo "" > pnpm-workspace.yaml
+          pnpm install --prod --no-frozen-lockfile
+          rm .npmrc pnpm-workspace.yaml
+
+      - name: Upload SWA API artifact
+        uses: actions/upload-artifact@v6
+        with:
+          name: swa-api
+          path: publish/swa-api
+
   build-frontend:
     name: Build Frontend
     runs-on: ubuntu-latest
@@ -198,7 +240,7 @@ jobs:
 
   deploy-frontend:
     name: Deploy Frontend to Static Web Apps
-    needs: build-frontend
+    needs: [build-frontend, build-swa-api]
     runs-on: ubuntu-latest
     environment:
       name: production
@@ -212,6 +254,12 @@ jobs:
           name: frontend
           path: patchnotes-web/dist
 
+      - name: Download SWA API artifact
+        uses: actions/download-artifact@v7
+        with:
+          name: swa-api
+          path: swa-api
+
       - name: Deploy to Azure Static Web Apps
         uses: azure/static-web-apps-deploy@v1
         with:
@@ -219,9 +267,10 @@ jobs:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           action: upload
           app_location: patchnotes-web/dist
-          api_location: patchnotes-web/api
+          api_location: swa-api
           output_location: ""
           skip_app_build: true
+          skip_api_build: true
 
   deploy-sync-function:
     name: Deploy Sync Function
