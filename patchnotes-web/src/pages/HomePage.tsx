@@ -38,19 +38,21 @@ function buildDisplayGroups(groups: FeedGroupDto[]): VersionGroup[] {
     const hasSummary = !!g.summary
     // Use AI summary if available, otherwise build a placeholder
     let displaySummary = g.summary ?? ''
+    const releaseCount = g.releaseCount ?? 0
     if (!displaySummary) {
       const titles = g.releases
         .slice(0, 3)
         .map((r) => r.title || r.tag)
         .join(', ')
-      const extra = g.releaseCount > 3 ? ` and ${g.releaseCount - 3} more` : ''
-      displaySummary = `${g.releaseCount} release${g.releaseCount !== 1 ? 's' : ''} in this version: ${titles}${extra}.`
+      const extra = releaseCount > 3 ? ` and ${releaseCount - 3} more` : ''
+      displaySummary = `${releaseCount} release${releaseCount !== 1 ? 's' : ''} in this version: ${titles}${extra}.`
     }
 
     return {
       ...g,
       id: `${g.packageId}-${g.majorVersion}-${g.isPrerelease}`,
       displayName,
+      releaseCount,
       prereleaseType: g.isPrerelease
         ? detectPrereleaseType(g.releases)
         : undefined,
