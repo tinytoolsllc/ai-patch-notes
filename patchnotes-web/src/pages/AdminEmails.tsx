@@ -8,6 +8,7 @@ import {
   Button,
   Card,
 } from '../components/ui'
+import { useStytchUser } from '@stytch/react'
 import { useIsAdmin } from '../utils/auth'
 import { api } from '../api/client'
 import {
@@ -148,6 +149,15 @@ export function AdminEmails() {
     message: string
   } | null>(null)
 
+  const [showTestEmailCard, setShowTestEmailCard] = useState(false)
+  const [testEmailAddress, setTestEmailAddress] = useState('')
+  const [testSendStatus, setTestSendStatus] = useState<{
+    type: 'sending' | 'success' | 'error'
+    message: string
+  } | null>(null)
+
+  const { user: stytchUser } = useStytchUser()
+
   const statusTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const clearStatusTimeout = () => {
     if (statusTimeoutRef.current) {
@@ -237,6 +247,35 @@ export function AdminEmails() {
         jsxSource: editJsxSource,
       },
     })
+  }
+
+  async function handleSendTestEmail() {
+    if (!currentTemplate || !testEmailAddress) return
+
+    setTestSendStatus({ type: 'sending', message: 'Sending test email...' })
+
+    try {
+      await api.post(`/admin/email-templates/${currentTemplate.name}/test`, {
+        recipientEmail: testEmailAddress,
+        testData: sampleData,
+      })
+      setTestSendStatus({
+        type: 'success',
+        message: `Test email sent to ${testEmailAddress}`,
+      })
+      clearStatusTimeout()
+      statusTimeoutRef.current = setTimeout(() => {
+        setTestSendStatus(null)
+        setShowTestEmailCard(false)
+      }, 3000)
+    } catch {
+      setTestSendStatus({
+        type: 'error',
+        message: 'Failed to send test email',
+      })
+      clearStatusTimeout()
+      statusTimeoutRef.current = setTimeout(() => setTestSendStatus(null), 5000)
+    }
   }
 
   if (authLoading || !isAdmin) {
@@ -349,16 +388,93 @@ export function AdminEmails() {
                       </Button>
                     </>
                   ) : (
-                    <Button
-                      variant="secondary"
-                      size="sm"
-                      onClick={enterEditMode}
-                    >
-                      Edit
-                    </Button>
+                    <>
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        onClick={() => {
+                          const email = stytchUser?.emails?.[0]?.email ?? ''
+                          setTestEmailAddress(email)
+                          setShowTestEmailCard(true)
+                          setTestSendStatus(null)
+                        }}
+                      >
+                        Send Test Email
+                      </Button>
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        onClick={enterEditMode}
+                      >
+                        Edit
+                      </Button>
+                    </>
                   )}
                 </div>
               </div>
+
+              {showTestEmailCard && !isEditing && (
+                <Card>
+                  <div className="space-y-3">
+                    <h3 className="text-sm font-semibold text-text-primary">
+                      Send Test Email
+                    </h3>
+                    <p className="text-xs text-text-secondary">
+                      Sends a real email using the{' '}
+                      <strong>{selectedTemplate}</strong> template with the
+                      sample data shown below.
+                    </p>
+                    <div>
+                      <label className="text-xs font-medium text-text-secondary">
+                        Recipient Email
+                      </label>
+                      <input
+                        type="email"
+                        value={testEmailAddress}
+                        onChange={(e) => setTestEmailAddress(e.target.value)}
+                        placeholder="admin@example.com"
+                        className="w-full mt-1 px-3 py-2 text-sm text-text-primary bg-surface-secondary border border-border-default rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500"
+                      />
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="primary"
+                        size="sm"
+                        onClick={handleSendTestEmail}
+                        disabled={
+                          !testEmailAddress ||
+                          testSendStatus?.type === 'sending'
+                        }
+                      >
+                        {testSendStatus?.type === 'sending'
+                          ? 'Sending...'
+                          : 'Send'}
+                      </Button>
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        onClick={() => {
+                          setShowTestEmailCard(false)
+                          setTestSendStatus(null)
+                        }}
+                      >
+                        Cancel
+                      </Button>
+                      {testSendStatus && testSendStatus.type !== 'sending' && (
+                        <span
+                          className={`text-sm ${
+                            testSendStatus.type === 'success'
+                              ? 'text-green-600'
+                              : 'text-red-600'
+                          }`}
+                        >
+                          {testSendStatus.message}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </Card>
+              )}
 
               {showSource ? (
                 /* JSX Source Code */
