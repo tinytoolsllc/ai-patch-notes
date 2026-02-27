@@ -21,6 +21,7 @@ vi.mock('@tanstack/react-router', () => ({
     </a>
   ),
   useNavigate: () => vi.fn(),
+  useLocation: () => ({ pathname: '/' }),
 }))
 
 // Override the global @stytch/react mock so we can control auth state per-test

@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { useStytch, useStytchUser } from '@stytch/react'
-import { Link, useNavigate } from '@tanstack/react-router'
+import { Link, useNavigate, useLocation } from '@tanstack/react-router'
 import {
   Settings,
   LogOut,
@@ -297,6 +297,7 @@ export function UserMenu() {
     useSubscriptionStore()
   const { isAllowed: isGeofencingAllowed } = useGeofencing()
   const { isAdmin } = useIsAdmin()
+  const location = useLocation()
 
   // Check subscription status when user is available
   useEffect(() => {
@@ -339,6 +340,7 @@ export function UserMenu() {
     return (
       <Link
         to="/login"
+        search={{ returnUrl: location.pathname }}
         className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium cursor-default
           text-text-primary bg-surface-primary border border-border-default
           hover:border-border-default hover:bg-surface-tertiary

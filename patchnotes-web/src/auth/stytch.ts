@@ -21,25 +21,32 @@ if (import.meta.env.DEV) {
   products.push(Products.passwords)
 }
 
-export const stytchLoginConfig = {
-  products,
-  emailMagicLinksOptions: {
-    loginRedirectURL: `${window.location.origin}/authenticate`,
-    loginExpirationMinutes: 30,
-    signupRedirectURL: `${window.location.origin}/authenticate`,
-    signupExpirationMinutes: 30,
-  },
-  oauthOptions: {
-    providers: [{ type: 'github' as const, custom_scopes: ['user:email'] }],
-    loginRedirectURL: `${window.location.origin}/authenticate`,
-    signupRedirectURL: `${window.location.origin}/authenticate`,
-  },
-  ...(import.meta.env.DEV && {
-    passwordOptions: {
-      loginRedirectURL: `${window.location.origin}/authenticate`,
-      resetPasswordRedirectURL: `${window.location.origin}/authenticate`,
+export function getStytchLoginConfig(returnUrl?: string) {
+  const base = `${window.location.origin}/authenticate`
+  const redirectURL = returnUrl
+    ? `${base}?returnUrl=${encodeURIComponent(returnUrl)}`
+    : base
+
+  return {
+    products,
+    emailMagicLinksOptions: {
+      loginRedirectURL: redirectURL,
+      loginExpirationMinutes: 30,
+      signupRedirectURL: redirectURL,
+      signupExpirationMinutes: 30,
     },
-  }),
+    oauthOptions: {
+      providers: [{ type: 'github' as const, custom_scopes: ['user:email'] }],
+      loginRedirectURL: redirectURL,
+      signupRedirectURL: redirectURL,
+    },
+    ...(import.meta.env.DEV && {
+      passwordOptions: {
+        loginRedirectURL: redirectURL,
+        resetPasswordRedirectURL: redirectURL,
+      },
+    }),
+  }
 }
 
 // Theme-aware presentation for Stytch login component

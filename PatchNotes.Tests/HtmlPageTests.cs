@@ -223,6 +223,41 @@ public class HtmlPageTests : IAsyncLifetime
         html.Should().Contain("No release notes available");
     }
 
+    [Fact]
+    public async Task GetPackageHtml_SignInLinkIncludesReturnUrl()
+    {
+        // Arrange
+        using var scope = _fixture.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<PatchNotesDbContext>();
+        db.Packages.Add(new Package { Name = "Svelte", Url = "https://github.com/sveltejs/svelte", NpmName = "svelte", GithubOwner = "sveltejs", GithubRepo = "svelte" });
+        await db.SaveChangesAsync();
+
+        // Act
+        var response = await _client.GetAsync("/html/packages/sveltejs/svelte");
+        var html = await response.Content.ReadAsStringAsync();
+
+        // Assert — header sign-in link should include returnUrl
+        html.Should().Contain("returnUrl=%2Fpackages%2Fsveltejs%2Fsvelte");
+    }
+
+    [Fact]
+    public async Task GetPackageHtml_HeroCtaIncludesReturnUrl()
+    {
+        // Arrange
+        using var scope = _fixture.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<PatchNotesDbContext>();
+        db.Packages.Add(new Package { Name = "Preact", Url = "https://github.com/preactjs/preact", NpmName = "preact", GithubOwner = "preactjs", GithubRepo = "preact" });
+        await db.SaveChangesAsync();
+
+        // Act
+        var response = await _client.GetAsync("/html/packages/preactjs/preact");
+        var html = await response.Content.ReadAsStringAsync();
+
+        // Assert — hero CTA should include returnUrl
+        html.Should().Contain("returnUrl=%2Fpackages%2Fpreactjs%2Fpreact");
+        html.Should().Contain("Get Started Free");
+    }
+
     #endregion
 
     #region GET /html/packages/{owner}

@@ -203,7 +203,7 @@ public static class HtmlTemplate
         </svg>
         """;
 
-    public static string Header(params (string Text, string? Href)[] breadcrumbs)
+    public static string Header(string path, params (string Text, string? Href)[] breadcrumbs)
     {
         var sb = new StringBuilder(1024);
         sb.Append("<header class=\"header\"><div class=\"header-inner\">");
@@ -230,7 +230,8 @@ public static class HtmlTemplate
         sb.Append("</div>");
 
         // Right side: sign in
-        sb.Append($"<a href=\"{BaseUrl}/login\" class=\"sign-in\">Sign in</a>");
+        var loginUrl = $"{BaseUrl}/login?returnUrl={Uri.EscapeDataString(path)}";
+        sb.Append($"<a href=\"{Encode(loginUrl)}\" class=\"sign-in\">Sign in</a>");
 
         sb.Append("</div></header>");
         return sb.ToString();
@@ -240,9 +241,10 @@ public static class HtmlTemplate
     /// Renders the hero/marketing card shown on package detail pages.
     /// Wrapped in data-nosnippet so search engines exclude it from snippets.
     /// </summary>
-    public static string HeroCard()
+    public static string HeroCard(string path)
     {
-        return """
+        var loginUrl = Encode($"{BaseUrl}/login?returnUrl={Uri.EscapeDataString(path)}");
+        return $"""
             <div data-nosnippet class="card hero">
               <h3>Never miss a release that matters</h3>
               <p>AI-powered summaries of every GitHub release.</p>
@@ -263,7 +265,7 @@ public static class HtmlTemplate
                   <p class="hl-desc">A curated summary of every release, delivered weekly.</p>
                 </div>
               </div>
-              <a href="https://www.myreleasenotes.ai/login" class="hero-cta">Get Started Free</a>
+              <a href="{loginUrl}" class="hero-cta">Get Started Free</a>
             </div>
             """;
     }

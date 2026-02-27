@@ -28,6 +28,7 @@ vi.mock('@tanstack/react-router', () => ({
     </a>
   ),
   useNavigate: () => vi.fn(),
+  useLocation: () => ({ pathname: '/watchlist' }),
 }))
 
 const mockStytchUser = vi.hoisted(() => vi.fn())

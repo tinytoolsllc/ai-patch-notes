@@ -110,7 +110,7 @@ export function Settings() {
   // Redirect if not authenticated
   useEffect(() => {
     if (isInitialized && !user) {
-      navigate({ to: '/login' })
+      navigate({ to: '/login', search: { returnUrl: '/settings' } })
     }
   }, [isInitialized, user, navigate])
 
