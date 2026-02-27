@@ -282,7 +282,7 @@ export function WatchlistPage() {
                     key={pkg.id}
                     pkg={pkg}
                     onRemove={() => handleRemove(pkg.id)}
-                    isRemoving={false}
+                    isRemoving={removeFromWatchlist.isPending && removeFromWatchlist.variables === pkg.id}
                   />
                 ))
               )}
