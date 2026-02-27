@@ -32,82 +32,24 @@ const SAMPLE_DATA: Record<string, Record<string, unknown>> = {
   welcome: { name: 'Jane Doe' },
   digest: {
     name: 'Jane Doe',
-    releases: [
+    count: '2',
+    packages: [
       {
         packageName: 'react',
-        version: '19.1.0',
+        releaseCount: 3,
+        latestVersion: '19.1.0',
+        oldestVersion: '19.0.1',
         summary: 'New compiler features and performance improvements',
       },
       {
         packageName: 'lodash',
-        version: '5.0.0',
+        releaseCount: 1,
+        latestVersion: '5.0.0',
+        oldestVersion: '5.0.0',
         summary: 'ES module support and tree-shaking improvements',
       },
     ],
   },
-}
-
-// ── Preview HTML Generator ───────────────────────────────────
-
-function generatePreviewHtml(
-  template: EmailTemplateDto,
-  sampleData: Record<string, unknown>
-): string {
-  const subject = template.subject.replace(/\{\{(\w+)\}\}/g, (_, key) =>
-    String(sampleData[key] ?? `{{${key}}}`)
-  )
-
-  // Generate a simple HTML preview from the template name and sample data
-  switch (template.name) {
-    case 'welcome': {
-      return `<!DOCTYPE html>
-<html><head><meta charset="utf-8"></head>
-<body style="background-color:#f6f9fc;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;margin:0;padding:20px">
-  <div style="background-color:#ffffff;margin:0 auto;padding:40px 20px;max-width:560px;border-radius:8px">
-    <h1 style="color:#1a1a1a;font-size:24px;font-weight:bold;margin:0 0 16px">${subject}</h1>
-    <p style="color:#4a4a4a;font-size:16px;line-height:26px">
-      You're all set to receive release notifications for the packages you care about.
-    </p>
-    <p style="color:#4a4a4a;font-size:16px;line-height:26px">
-      Head to your <a href="#" style="color:#5469d4">dashboard</a> to start watching packages.
-    </p>
-    <hr style="border:none;border-top:1px solid #e6ebf1;margin:32px 0" />
-    <p style="color:#8898aa;font-size:12px">PatchNotes — Release notifications for developers</p>
-  </div>
-</body></html>`
-    }
-    case 'digest': {
-      const name = String(sampleData.name ?? 'there')
-      const releases =
-        (sampleData.releases as Array<{
-          packageName: string
-          version: string
-          summary: string
-        }>) ?? []
-      const releaseList = releases
-        .map(
-          (r) =>
-            `<li style="color:#4a4a4a;font-size:16px;line-height:26px;margin-bottom:8px"><strong>${r.packageName} ${r.version}</strong>: ${r.summary}</li>`
-        )
-        .join('\n')
-      return `<!DOCTYPE html>
-<html><head><meta charset="utf-8"></head>
-<body style="background-color:#f6f9fc;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;margin:0;padding:20px">
-  <div style="background-color:#ffffff;margin:0 auto;padding:40px 20px;max-width:560px;border-radius:8px">
-    <h1 style="color:#1a1a1a;font-size:24px;font-weight:bold;margin:0 0 16px">Your Weekly PatchNotes Digest</h1>
-    <p style="color:#4a4a4a;font-size:16px;line-height:26px">Hi ${name}, here's what happened this week with the packages you're watching:</p>
-    <ul style="padding:0 0 0 20px">${releaseList}</ul>
-    <p style="color:#4a4a4a;font-size:16px;line-height:26px">
-      <a href="#" style="color:#5469d4">View all updates on PatchNotes</a>
-    </p>
-    <hr style="border:none;border-top:1px solid #e6ebf1;margin:32px 0" />
-    <p style="color:#8898aa;font-size:12px">PatchNotes — Release notifications for developers</p>
-  </div>
-</body></html>`
-    }
-    default:
-      return `<html><body><p>No preview available for template "${template.name}"</p></body></html>`
-  }
 }
 
 // ── Template Tab ─────────────────────────────────────────────
@@ -225,10 +167,24 @@ export function AdminEmails() {
     [selectedTemplate]
   )
 
-  const previewHtml = useMemo(() => {
-    if (!currentTemplate) return ''
-    return generatePreviewHtml(currentTemplate, sampleData)
-  }, [currentTemplate, sampleData])
+  const {
+    data: previewData,
+    isLoading: previewLoading,
+    error: previewError,
+  } = useQuery({
+    queryKey: [
+      '/api/admin/email-templates/preview',
+      currentTemplate?.jsxSource,
+      selectedTemplate,
+    ],
+    queryFn: () =>
+      api.post<{ html: string }>('/admin/email-templates/preview', {
+        jsxSource: currentTemplate!.jsxSource,
+        props: sampleData,
+      }),
+    enabled: !!currentTemplate && isAdmin,
+  })
+  const previewHtml = previewData?.html ?? ''
 
   const subjectPreview = useMemo(() => {
     if (!currentTemplate) return ''
@@ -547,13 +503,27 @@ export function AdminEmails() {
                     </p>
                   </div>
                   <div className="p-4 bg-neutral-100">
-                    <iframe
-                      srcDoc={previewHtml}
-                      title={`Preview of ${currentTemplate.name} template`}
-                      className="w-full border-0 rounded bg-white"
-                      style={{ minHeight: '400px' }}
-                      sandbox=""
-                    />
+                    {previewLoading ? (
+                      <div className="flex items-center justify-center py-16">
+                        <span className="text-text-secondary text-sm">
+                          Rendering preview...
+                        </span>
+                      </div>
+                    ) : previewError ? (
+                      <div className="flex items-center justify-center py-16">
+                        <span className="text-red-600 text-sm">
+                          Failed to render preview
+                        </span>
+                      </div>
+                    ) : (
+                      <iframe
+                        srcDoc={previewHtml}
+                        title={`Preview of ${currentTemplate.name} template`}
+                        className="w-full border-0 rounded bg-white"
+                        style={{ minHeight: '400px' }}
+                        sandbox=""
+                      />
+                    )}
                   </div>
                 </Card>
               )}

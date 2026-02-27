@@ -129,6 +129,12 @@ describe("sendDigest", () => {
         await sendDigest(makeTimer(), context);
 
         expect(mockSend).toHaveBeenCalledTimes(2);
+        expect(mockSend).toHaveBeenCalledWith(
+            expect.objectContaining({ to: "Alice <a@test.com>" })
+        );
+        expect(mockSend).toHaveBeenCalledWith(
+            expect.objectContaining({ to: "Bob <b@test.com>" })
+        );
         expect(context.log).toHaveBeenCalledWith(
             "Digest summary: 2 sent, 0 failed, 0 skipped out of 2 users"
         );
@@ -253,7 +259,7 @@ describe("sendDigest", () => {
 
         expect(mockRenderTemplate).toHaveBeenCalledWith("<fake-jsx/>", {
             name: "Alice",
-            releases: [{ packageName: "test-package", version: "v1.0.0", summary: "Summary for v1.0.0" }],
+            packages: [{ packageName: "test-package", releaseCount: 1, latestVersion: "v1.0.0", oldestVersion: "v1.0.0", summary: "Summary for v1.0.0" }],
         });
         expect(mockInterpolateSubject).toHaveBeenCalledWith(
             "Digest for {{name}} — {{count}} updates",
@@ -265,6 +271,41 @@ describe("sendDigest", () => {
                 subject: "Digest for Alice — 1 updates",
             })
         );
+    });
+
+    it("groups multiple releases per package into a single entry", async () => {
+        mockFindMany.mockResolvedValue([
+            {
+                Email: "a@test.com",
+                Name: "Alice",
+                Watchlists: [
+                    {
+                        Packages: {
+                            Name: "my-lib",
+                            Releases: [
+                                { Tag: "v1.3.0", MajorVersion: 1, IsPrerelease: false },
+                                { Tag: "v1.2.0", MajorVersion: 1, IsPrerelease: false },
+                                { Tag: "v1.1.0", MajorVersion: 1, IsPrerelease: false },
+                            ],
+                            ReleaseSummaries: [
+                                { Summary: "Grouped summary", MajorVersion: 1, IsPrerelease: false },
+                            ],
+                        },
+                    },
+                ],
+            },
+        ]);
+        mockSend.mockResolvedValue({ error: null });
+        const context = makeContext();
+
+        await sendDigest(makeTimer(), context);
+
+        const sentHtml = mockSend.mock.calls[0][0].html;
+        // Should show version range, not individual entries
+        expect(sentHtml).toContain("v1.1.0");
+        expect(sentHtml).toContain("v1.3.0");
+        expect(sentHtml).toContain("3 releases");
+        expect(sentHtml).toContain("Grouped summary");
     });
 
     it("falls back to hardcoded HTML when template rendering fails", async () => {
