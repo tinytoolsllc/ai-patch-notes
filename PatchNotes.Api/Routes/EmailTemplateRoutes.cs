@@ -126,7 +126,7 @@ public static class EmailTemplateRoutes
             new EmailTemplate
             {
                 Name = "digest",
-                Subject = "Your Weekly PatchNotes Digest — {{releaseCount}} updates",
+                Subject = "Your Weekly PatchNotes Digest — {{count}} updates",
                 JsxSource = DigestJsx,
             },
         };
