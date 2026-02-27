@@ -26,6 +26,21 @@ updates:
         patterns:
           - "*"
 
+  # npm dependencies for SWA API (GitHub search)
+  - package-ecosystem: "npm"
+    directory: "/patchnotes-web/api"
+    schedule:
+      interval: "weekly"
+    groups:
+      production:
+        dependency-type: "production"
+        patterns:
+          - "*"
+      dev-dependencies:
+        dependency-type: "development"
+        patterns:
+          - "*"
+
   # npm dependencies for email Azure Function
   - package-ecosystem: "npm"
     directory: "/patchnotes-email"
