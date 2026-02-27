@@ -289,8 +289,8 @@ export const handlers = [
     return HttpResponse.json({ packageId }, { status: 201 })
   }),
 
-  // GET /github/search
-  http.get(`${API_BASE}/github/search`, ({ request }) => {
+  // GET /github-search
+  http.get(`${API_BASE}/github-search`, ({ request }) => {
     const url = new URL(request.url)
     const q = url.searchParams.get('q') ?? ''
     if (q.length < 2) {

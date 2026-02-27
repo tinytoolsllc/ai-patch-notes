@@ -166,7 +166,7 @@ describe('WatchlistPage', () => {
 
     it('shows no results message when search returns empty', async () => {
       server.use(
-        http.get('/api/github/search', () => {
+        http.get('/api/github-search', () => {
           return HttpResponse.json([])
         })
       )

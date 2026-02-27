@@ -158,10 +158,7 @@ export function WatchlistPage() {
   }
 
   // Extract search results from the response
-  const searchResults: GitHubRepoSearchResultDto[] =
-    searchData && 'data' in searchData
-      ? ((searchData as { data: GitHubRepoSearchResultDto[] }).data ?? [])
-      : []
+  const searchResults: GitHubRepoSearchResultDto[] = searchData ?? []
 
   const showSearchResults = debouncedQuery.length >= 2
 

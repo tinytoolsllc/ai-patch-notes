@@ -41,7 +41,6 @@ export * from './releaseDto';
 export * from './releasePackageDto';
 export * from './releaseSummaryDto';
 export * from './searchGitHubRepositoriesParams';
-export * from './searchGitHubRepositoriesUserParams';
 export * from './setWatchlistRequest';
 export * from './subscriptionStatusDto';
 export * from './updateEmailPreferencesRequest';

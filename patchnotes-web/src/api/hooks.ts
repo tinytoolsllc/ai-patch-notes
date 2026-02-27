@@ -1,7 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useStytchUser } from '@stytch/react'
 import * as z from 'zod'
-import type { GetReleasesParams, WatchlistPackageDto } from './generated/model'
+import type {
+  GetReleasesParams,
+  GitHubRepoSearchResultDto,
+  WatchlistPackageDto,
+} from './generated/model'
 
 import {
   useGetPackages,
@@ -24,10 +28,6 @@ import {
   removeFromWatchlist,
   addToWatchlistFromGitHub,
 } from './generated/watchlist/watchlist'
-import {
-  searchGitHubRepositoriesUser,
-  getSearchGitHubRepositoriesUserQueryKey,
-} from './generated/git-hub-search/git-hub-search'
 import {
   resetPackageSummaries,
   resetPackageReleases,
@@ -324,9 +324,18 @@ export function useAddFromGithub() {
 
 export function useGithubSearch(query: string) {
   return useQuery({
-    queryKey: getSearchGitHubRepositoriesUserQueryKey({ q: query }),
-    queryFn: ({ signal }) =>
-      searchGitHubRepositoriesUser({ q: query }, { signal }),
+    queryKey: ['github-search', query],
+    queryFn: async ({ signal }) => {
+      const response = await fetch(
+        `/api/github-search?q=${encodeURIComponent(query)}`,
+        { signal }
+      )
+      if (!response.ok) {
+        throw new Error('GitHub search failed')
+      }
+
+      return (await response.json()) as GitHubRepoSearchResultDto[]
+    },
     enabled: query.length >= 2,
     staleTime: 60_000,
   })

@@ -256,11 +256,11 @@ describe('useGithubSearch', () => {
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
 
-    expect(result.current.data).toMatchObject({
-      data: expect.arrayContaining([
+    expect(result.current.data).toEqual(
+      expect.arrayContaining([
         expect.objectContaining({ owner: 'facebook', repo: 'react' }),
-      ]),
-    })
+      ])
+    )
   })
 
   it('does not fetch when query is too short', () => {

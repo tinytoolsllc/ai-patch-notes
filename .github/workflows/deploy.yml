@@ -219,7 +219,7 @@ jobs:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           action: upload
           app_location: patchnotes-web/dist
-          api_location: ""
+          api_location: patchnotes-web/api
           output_location: ""
           skip_app_build: true
 

@@ -954,41 +954,6 @@
         }
       }
     },
-    "/api/github/search": {
-      "get": {
-        "tags": [
-          "GitHubSearch"
-        ],
-        "operationId": "SearchGitHubRepositoriesUser",
-        "parameters": [
-          {
-            "name": "q",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/GitHubRepoSearchResultDto"
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad Request"
-          }
-        }
-      }
-    },
     "/api/subscription/checkout": {
       "post": {
         "tags": [
