@@ -160,15 +160,27 @@ export function AdminEmails() {
   const { user: stytchUser } = useStytchUser()
 
   const statusTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const testStatusTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null
+  )
   const clearStatusTimeout = () => {
     if (statusTimeoutRef.current) {
       clearTimeout(statusTimeoutRef.current)
       statusTimeoutRef.current = null
     }
   }
+  const clearTestStatusTimeout = () => {
+    if (testStatusTimeoutRef.current) {
+      clearTimeout(testStatusTimeoutRef.current)
+      testStatusTimeoutRef.current = null
+    }
+  }
 
   useEffect(() => {
-    return () => clearStatusTimeout()
+    return () => {
+      clearStatusTimeout()
+      clearTestStatusTimeout()
+    }
   }, [])
 
   const queryClient = useQueryClient()
@@ -270,8 +282,8 @@ export function AdminEmails() {
         type: 'success',
         message: `Test email sent to ${testEmailAddress}`,
       })
-      clearStatusTimeout()
-      statusTimeoutRef.current = setTimeout(() => {
+      clearTestStatusTimeout()
+      testStatusTimeoutRef.current = setTimeout(() => {
         setTestSendStatus(null)
         setShowTestEmailCard(false)
       }, 3000)
@@ -280,8 +292,11 @@ export function AdminEmails() {
         type: 'error',
         message: 'Failed to send test email',
       })
-      clearStatusTimeout()
-      statusTimeoutRef.current = setTimeout(() => setTestSendStatus(null), 5000)
+      clearTestStatusTimeout()
+      testStatusTimeoutRef.current = setTimeout(
+        () => setTestSendStatus(null),
+        5000
+      )
     }
   }
 

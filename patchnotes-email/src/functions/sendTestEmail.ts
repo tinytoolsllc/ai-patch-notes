@@ -17,12 +17,11 @@ interface SendTestEmailRequest {
  * Build template props from real database data when testData is not provided.
  */
 async function buildRealData(
+    db: ReturnType<typeof getPrismaClient>,
     templateName: string,
     recipientEmail: string,
     context: InvocationContext
 ): Promise<Record<string, unknown>> {
-    const db = getPrismaClient();
-
     if (templateName === "welcome") {
         // Look up the user's name by email, fall back to "there"
         const user = await db.users.findFirst({
@@ -118,7 +117,7 @@ export async function sendTestEmail(
         // Use provided testData or build from real DB data
         const useRealData = !body.testData || typeof body.testData !== "object";
         const templateData = useRealData
-            ? await buildRealData(body.templateName, body.recipientEmail, context)
+            ? await buildRealData(db, body.templateName, body.recipientEmail, context)
             : body.testData;
 
         context.log(`Using ${useRealData ? "real" : "sample"} data for test email`);
