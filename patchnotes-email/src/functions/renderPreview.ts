@@ -1,3 +1,4 @@
+import { trackEvent, trackException, flush } from "../lib/telemetry.js";
 import { app, HttpRequest, HttpResponseInit, InvocationContext } from "@azure/functions";
 import { renderTemplate } from "../lib/templateRenderer.js";
 
@@ -10,6 +11,7 @@ export async function renderPreview(
     request: HttpRequest,
     context: InvocationContext
 ): Promise<HttpResponseInit> {
+    const startedAt = Date.now();
     let body: PreviewRequest;
     try {
         body = (await request.json()) as PreviewRequest;
@@ -23,6 +25,10 @@ export async function renderPreview(
 
     try {
         const html = await renderTemplate(body.jsxSource, body.props ?? {});
+        trackEvent("PreviewRendered", {
+            durationMs: (Date.now() - startedAt).toString(),
+        });
+        await flush();
         return {
             status: 200,
             headers: { "Content-Type": "text/html; charset=utf-8" },
@@ -30,6 +36,11 @@ export async function renderPreview(
         };
     } catch (err) {
         context.error("Template render failed:", err);
+        trackException(err, { operation: "renderPreview" });
+        trackEvent("PreviewRenderFailed", {
+            durationMs: (Date.now() - startedAt).toString(),
+        });
+        await flush();
         const message = err instanceof Error ? err.message : "Unknown render error";
         return { status: 422, body: `Template render failed: ${message}` };
     }

@@ -176,6 +176,7 @@ export function AdminEmails() {
       '/api/admin/email-templates/preview',
       currentTemplate?.jsxSource,
       selectedTemplate,
+      sampleData,
     ],
     queryFn: () =>
       api.post<{ html: string }>('/admin/email-templates/preview', {

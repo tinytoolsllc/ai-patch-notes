@@ -113,9 +113,11 @@ export async function sendDigest(
                 const releases = watch.Packages.Releases;
                 if (releases.length === 0) continue;
 
-                // Releases are already ordered desc by PublishedAt from the query
-                const latestRelease = releases[0];
-                const oldestRelease = releases[releases.length - 1];
+                // Releases should be ordered desc by PublishedAt from the query (line 54),
+                // but sort by Tag as a safety net in case the query shape changes.
+                const sorted = [...releases].sort((a, b) => b.Tag.localeCompare(a.Tag, undefined, { numeric: true }));
+                const latestRelease = sorted[0];
+                const oldestRelease = sorted[sorted.length - 1];
                 const matchingSummary = watch.Packages.ReleaseSummaries.find(
                     (s) => s.MajorVersion === latestRelease.MajorVersion && s.IsPrerelease === latestRelease.IsPrerelease
                 );
@@ -163,10 +165,12 @@ export async function sendDigest(
                 subject = sanitizeSubject(`Your Weekly PatchNotes Digest — ${packages.length} packages`);
             }
 
+            // Email is guaranteed non-null here — validated by isValidEmail above
+            const email = user.Email!;
             try {
                 const toAddress = user.Name
-                    ? `${user.Name} <${user.Email!}>`
-                    : user.Email!;
+                    ? `${user.Name} <${email}>`
+                    : email;
                 const { error } = await resend.emails.send({
                     from: FROM_ADDRESS,
                     to: toAddress,
@@ -175,16 +179,16 @@ export async function sendDigest(
                 });
 
                 if (error) {
-                    context.error(`Failed to send digest to ${user.Email}:`, error);
-                    failures.push({ email: user.Email!, error });
+                    context.error(`Failed to send digest to ${email}:`, error);
+                    failures.push({ email, error });
                 } else {
                     sentCount++;
-                    context.log(`Digest sent to ${user.Email}`);
+                    context.log(`Digest sent to ${email}`);
                 }
             } catch (err) {
-                context.error(`Error sending to ${user.Email}:`, err);
-                trackException(err, { operation: "sendDigest", recipient: user.Email! });
-                failures.push({ email: user.Email!, error: err });
+                context.error(`Error sending to ${email}:`, err);
+                trackException(err, { operation: "sendDigest", recipient: email });
+                failures.push({ email, error: err });
             }
         }
 

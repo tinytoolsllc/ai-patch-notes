@@ -1,4 +1,3 @@
-using System.Net.Http.Headers;
 using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using PatchNotes.Data;
@@ -195,7 +194,8 @@ public static class EmailTemplateRoutes
             PreviewTemplateRequest request,
             IConfiguration configuration,
             IHttpClientFactory httpClientFactory,
-            ILoggerFactory loggerFactory) =>
+            ILoggerFactory loggerFactory,
+            CancellationToken cancellationToken) =>
         {
             var logger = loggerFactory.CreateLogger("EmailTemplateRoutes");
             var renderUrl = configuration["EmailFunction:PreviewUrl"];
@@ -211,14 +211,15 @@ public static class EmailTemplateRoutes
             if (!string.IsNullOrEmpty(functionKey))
                 httpRequest.Headers.Add("x-functions-key", functionKey);
 
-            var payload = JsonSerializer.Serialize(new { jsxSource = request.JsxSource, props = request.Props });
-            httpRequest.Content = new StringContent(payload);
-            httpRequest.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+            httpRequest.Content = new StringContent(
+                JsonSerializer.Serialize(new { jsxSource = request.JsxSource, props = request.Props }),
+                System.Text.Encoding.UTF8,
+                "application/json");
 
             try
             {
-                var response = await http.SendAsync(httpRequest);
-                var body = await response.Content.ReadAsStringAsync();
+                var response = await http.SendAsync(httpRequest, cancellationToken);
+                var body = await response.Content.ReadAsStringAsync(cancellationToken);
 
                 if (!response.IsSuccessStatusCode)
                 {
