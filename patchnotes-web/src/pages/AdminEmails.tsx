@@ -151,6 +151,7 @@ export function AdminEmails() {
 
   const [showTestEmailCard, setShowTestEmailCard] = useState(false)
   const [testEmailAddress, setTestEmailAddress] = useState('')
+  const [useSampleData, setUseSampleData] = useState(false)
   const [testSendStatus, setTestSendStatus] = useState<{
     type: 'sending' | 'success' | 'error'
     message: string
@@ -255,10 +256,16 @@ export function AdminEmails() {
     setTestSendStatus({ type: 'sending', message: 'Sending test email...' })
 
     try {
-      await api.post(`/admin/email-templates/${currentTemplate.name}/test`, {
+      const payload: Record<string, unknown> = {
         recipientEmail: testEmailAddress,
-        testData: sampleData,
-      })
+      }
+      if (useSampleData) {
+        payload.testData = sampleData
+      }
+      await api.post(
+        `/admin/email-templates/${currentTemplate.name}/test`,
+        payload
+      )
       setTestSendStatus({
         type: 'success',
         message: `Test email sent to ${testEmailAddress}`,
@@ -421,8 +428,10 @@ export function AdminEmails() {
                     </h3>
                     <p className="text-xs text-text-secondary">
                       Sends a real email using the{' '}
-                      <strong>{selectedTemplate}</strong> template with the
-                      sample data shown below.
+                      <strong>{selectedTemplate}</strong> template
+                      {useSampleData
+                        ? ' with the sample data shown below.'
+                        : ' with real data from the database.'}
                     </p>
                     <div>
                       <label className="text-xs font-medium text-text-secondary">
@@ -436,6 +445,15 @@ export function AdminEmails() {
                         className="w-full mt-1 px-3 py-2 text-sm text-text-primary bg-surface-secondary border border-border-default rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500"
                       />
                     </div>
+                    <label className="flex items-center gap-2 text-sm text-text-secondary cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={useSampleData}
+                        onChange={(e) => setUseSampleData(e.target.checked)}
+                        className="rounded border-border-default"
+                      />
+                      Use sample data instead of real database data
+                    </label>
                     <div className="flex items-center gap-2">
                       <Button
                         variant="primary"
