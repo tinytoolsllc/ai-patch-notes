@@ -23,6 +23,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as ReleasesReleaseIdRouteImport } from './routes/releases.$releaseId'
 import { Route as PackagesOwnerRouteImport } from './routes/packages.$owner'
 import { Route as AdminResetRouteImport } from './routes/admin_.reset'
+import { Route as AdminHealthRouteImport } from './routes/admin_.health'
 import { Route as AdminEmailsRouteImport } from './routes/admin_.emails'
 import { Route as PackagesOwnerIndexRouteImport } from './routes/packages.$owner.index'
 import { Route as PackagesOwnerRepoRouteImport } from './routes/packages.$owner.$repo'
@@ -99,6 +100,11 @@ const AdminResetRoute = AdminResetRouteImport.update({
   path: '/admin/reset',
   getParentRoute: () => rootRouteImport,
 } as any).lazy(() => import('./routes/admin_.reset.lazy').then((d) => d.Route))
+const AdminHealthRoute = AdminHealthRouteImport.update({
+  id: '/admin_/health',
+  path: '/admin/health',
+  getParentRoute: () => rootRouteImport,
+} as any).lazy(() => import('./routes/admin_.health.lazy').then((d) => d.Route))
 const AdminEmailsRoute = AdminEmailsRouteImport.update({
   id: '/admin_/emails',
   path: '/admin/emails',
@@ -130,6 +136,7 @@ export interface FileRoutesByFullPath {
   '/subscription-success': typeof SubscriptionSuccessRoute
   '/watchlist': typeof WatchlistRoute
   '/admin/emails': typeof AdminEmailsRoute
+  '/admin/health': typeof AdminHealthRoute
   '/admin/reset': typeof AdminResetRoute
   '/packages/$owner': typeof PackagesOwnerRouteWithChildren
   '/releases/$releaseId': typeof ReleasesReleaseIdRoute
@@ -149,6 +156,7 @@ export interface FileRoutesByTo {
   '/subscription-success': typeof SubscriptionSuccessRoute
   '/watchlist': typeof WatchlistRoute
   '/admin/emails': typeof AdminEmailsRoute
+  '/admin/health': typeof AdminHealthRoute
   '/admin/reset': typeof AdminResetRoute
   '/releases/$releaseId': typeof ReleasesReleaseIdRoute
   '/packages/$owner/$repo': typeof PackagesOwnerRepoRoute
@@ -168,6 +176,7 @@ export interface FileRoutesById {
   '/subscription-success': typeof SubscriptionSuccessRoute
   '/watchlist': typeof WatchlistRoute
   '/admin_/emails': typeof AdminEmailsRoute
+  '/admin_/health': typeof AdminHealthRoute
   '/admin_/reset': typeof AdminResetRoute
   '/packages/$owner': typeof PackagesOwnerRouteWithChildren
   '/releases/$releaseId': typeof ReleasesReleaseIdRoute
@@ -189,6 +198,7 @@ export interface FileRouteTypes {
     | '/subscription-success'
     | '/watchlist'
     | '/admin/emails'
+    | '/admin/health'
     | '/admin/reset'
     | '/packages/$owner'
     | '/releases/$releaseId'
@@ -208,6 +218,7 @@ export interface FileRouteTypes {
     | '/subscription-success'
     | '/watchlist'
     | '/admin/emails'
+    | '/admin/health'
     | '/admin/reset'
     | '/releases/$releaseId'
     | '/packages/$owner/$repo'
@@ -226,6 +237,7 @@ export interface FileRouteTypes {
     | '/subscription-success'
     | '/watchlist'
     | '/admin_/emails'
+    | '/admin_/health'
     | '/admin_/reset'
     | '/packages/$owner'
     | '/releases/$releaseId'
@@ -246,6 +258,7 @@ export interface RootRouteChildren {
   SubscriptionSuccessRoute: typeof SubscriptionSuccessRoute
   WatchlistRoute: typeof WatchlistRoute
   AdminEmailsRoute: typeof AdminEmailsRoute
+  AdminHealthRoute: typeof AdminHealthRoute
   AdminResetRoute: typeof AdminResetRoute
   PackagesOwnerRoute: typeof PackagesOwnerRouteWithChildren
   ReleasesReleaseIdRoute: typeof ReleasesReleaseIdRoute
@@ -351,6 +364,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminResetRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin_/health': {
+      id: '/admin_/health'
+      path: '/admin/health'
+      fullPath: '/admin/health'
+      preLoaderRoute: typeof AdminHealthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin_/emails': {
       id: '/admin_/emails'
       path: '/admin/emails'
@@ -402,6 +422,7 @@ const rootRouteChildren: RootRouteChildren = {
   SubscriptionSuccessRoute: SubscriptionSuccessRoute,
   WatchlistRoute: WatchlistRoute,
   AdminEmailsRoute: AdminEmailsRoute,
+  AdminHealthRoute: AdminHealthRoute,
   AdminResetRoute: AdminResetRoute,
   PackagesOwnerRoute: PackagesOwnerRouteWithChildren,
   ReleasesReleaseIdRoute: ReleasesReleaseIdRoute,
