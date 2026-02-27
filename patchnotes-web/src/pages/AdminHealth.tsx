@@ -68,7 +68,11 @@ function StatusBadge({ status }: { status: HealthStatus }) {
 
 // ── Failure Message Cell ──────────────────────────────────────
 
-function FailureMessageCell({ message }: { message: string | null | undefined }) {
+function FailureMessageCell({
+  message,
+}: {
+  message: string | null | undefined
+}) {
   const [expanded, setExpanded] = useState(false)
 
   if (!message) return <span className="text-text-tertiary">—</span>
@@ -77,7 +81,9 @@ function FailureMessageCell({ message }: { message: string | null | undefined })
 
   return (
     <div className="max-w-xs">
-      <p className={`text-xs text-text-secondary font-mono ${!expanded && truncated ? 'line-clamp-2' : ''}`}>
+      <p
+        className={`text-xs text-text-secondary font-mono ${!expanded && truncated ? 'line-clamp-2' : ''}`}
+      >
         {message}
       </p>
       {truncated && (
@@ -103,7 +109,13 @@ interface HealthRowProps {
   isDisabling: boolean
 }
 
-function HealthRow({ pkg, onReset, onDisable, isResetting, isDisabling }: HealthRowProps) {
+function HealthRow({
+  pkg,
+  onReset,
+  onDisable,
+  isResetting,
+  isDisabling,
+}: HealthRowProps) {
   const status = getStatus(pkg)
   const githubUrl = `https://github.com/${pkg.githubOwner}/${pkg.githubRepo}`
 
@@ -129,7 +141,9 @@ function HealthRow({ pkg, onReset, onDisable, isResetting, isDisabling }: Health
       </td>
       <td className="py-3 px-4 text-sm text-text-secondary text-right">
         {(pkg.consecutiveFailures ?? 0) > 0 ? (
-          <span className="font-medium text-[#b45309]">{pkg.consecutiveFailures}</span>
+          <span className="font-medium text-[#b45309]">
+            {pkg.consecutiveFailures}
+          </span>
         ) : (
           <span className="text-text-tertiary">0</span>
         )}
@@ -231,7 +245,9 @@ export function AdminHealth() {
   // Auto-refresh every 30 seconds
   useEffect(() => {
     const timer = setInterval(() => {
-      queryClient.invalidateQueries({ queryKey: getGetPackagesHealthQueryKey() })
+      queryClient.invalidateQueries({
+        queryKey: getGetPackagesHealthQueryKey(),
+      })
     }, 30_000)
     return () => clearInterval(timer)
   }, [queryClient])
@@ -252,7 +268,9 @@ export function AdminHealth() {
       setResettingId(id)
       try {
         await resetSync.mutateAsync({ id })
-        queryClient.invalidateQueries({ queryKey: getGetPackagesHealthQueryKey() })
+        queryClient.invalidateQueries({
+          queryKey: getGetPackagesHealthQueryKey(),
+        })
       } finally {
         setResettingId(null)
       }
@@ -265,7 +283,9 @@ export function AdminHealth() {
       setDisablingId(id)
       try {
         await disableSync.mutateAsync({ id })
-        queryClient.invalidateQueries({ queryKey: getGetPackagesHealthQueryKey() })
+        queryClient.invalidateQueries({
+          queryKey: getGetPackagesHealthQueryKey(),
+        })
       } finally {
         setDisablingId(null)
       }
@@ -285,12 +305,15 @@ export function AdminHealth() {
 
   const counts = {
     all: packages.length,
-    failing: packages.filter((p) => !p.isSyncDisabled && (p.consecutiveFailures ?? 0) > 0).length,
+    failing: packages.filter(
+      (p) => !p.isSyncDisabled && (p.consecutiveFailures ?? 0) > 0
+    ).length,
     disabled: packages.filter((p) => p.isSyncDisabled).length,
   }
 
   const filtered = packages.filter((p) => {
-    if (filter === 'failing') return !p.isSyncDisabled && (p.consecutiveFailures ?? 0) > 0
+    if (filter === 'failing')
+      return !p.isSyncDisabled && (p.consecutiveFailures ?? 0) > 0
     if (filter === 'disabled') return p.isSyncDisabled
     return true
   })
@@ -347,15 +370,21 @@ export function AdminHealth() {
             <div className="px-6 py-4 border-b border-border-default flex items-center justify-between gap-4">
               <FilterBar filter={filter} onChange={setFilter} counts={counts} />
               <p className="text-sm text-text-secondary shrink-0">
-                {isLoading ? 'Loading...' : `${sorted.length} package${sorted.length !== 1 ? 's' : ''}`}
+                {isLoading
+                  ? 'Loading...'
+                  : `${sorted.length} package${sorted.length !== 1 ? 's' : ''}`}
               </p>
             </div>
 
             {isLoading ? (
-              <div className="p-6 text-text-secondary">Loading health data...</div>
+              <div className="p-6 text-text-secondary">
+                Loading health data...
+              </div>
             ) : sorted.length === 0 ? (
               <div className="p-6 text-text-secondary">
-                {filter === 'all' ? 'No packages tracked.' : `No ${filter} packages.`}
+                {filter === 'all'
+                  ? 'No packages tracked.'
+                  : `No ${filter} packages.`}
               </div>
             ) : (
               <div className="overflow-x-auto">

@@ -338,7 +338,11 @@ export function usePackageHealth() {
   return useGetPackagesHealth()
 }
 
-export { useResetPackageSync, useDisablePackageSync, getGetPackagesHealthQueryKey }
+export {
+  useResetPackageSync,
+  useDisablePackageSync,
+  getGetPackagesHealthQueryKey,
+}
 
 // ── Re-exports (used directly by pages) ─────────────────────
 
