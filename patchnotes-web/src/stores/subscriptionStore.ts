@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { api, API_ROOT } from '../api/client'
+import { api, API_ROOT, isApiError } from '../api/client'
 
 const API_BASE_URL = `${API_ROOT}/api`
 
@@ -33,7 +33,7 @@ export const useSubscriptionStore = create<SubscriptionState>((set) => ({
       set({ isPro, status, expiresAt, isLoading: false })
     } catch (error) {
       // If unauthorized, user is not logged in - not an error state
-      if (error instanceof Error && error.message.includes('401')) {
+      if (isApiError(error) && error.status === 401) {
         set({ isPro: false, status: null, expiresAt: null, isLoading: false })
       } else {
         set({
