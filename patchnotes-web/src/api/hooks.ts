@@ -31,6 +31,10 @@ import {
 import {
   resetPackageSummaries,
   resetPackageReleases,
+  useGetPackagesHealth,
+  useResetPackageSync,
+  useDisablePackageSync,
+  getGetPackagesHealthQueryKey,
 } from './generated/admin-packages/admin-packages'
 import { useGetFeed } from './generated/feed/feed'
 import { GetFeedResponse } from './generated/feed/feed.zod'
@@ -326,6 +330,18 @@ export function useGithubSearch(query: string) {
     enabled: query.length >= 2,
     staleTime: 60_000,
   })
+}
+
+// ── Package Health Hooks ─────────────────────────────────────
+
+export function usePackageHealth() {
+  return useGetPackagesHealth()
+}
+
+export {
+  useResetPackageSync,
+  useDisablePackageSync,
+  getGetPackagesHealthQueryKey,
 }
 
 // ── Re-exports (used directly by pages) ─────────────────────

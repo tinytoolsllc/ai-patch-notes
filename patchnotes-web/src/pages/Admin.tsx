@@ -640,6 +640,11 @@ export function Admin() {
               Package Management
             </h1>
             <div className="flex items-center gap-3">
+              <Link to="/admin/health">
+                <Button variant="secondary" size="sm">
+                  Package Health
+                </Button>
+              </Link>
               <Link to="/admin/emails">
                 <Button variant="secondary" size="sm">
                   Email Templates
