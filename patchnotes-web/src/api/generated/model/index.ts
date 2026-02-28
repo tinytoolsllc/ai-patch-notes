@@ -38,6 +38,8 @@ export * from './paginatedResponseOfOwnerPackageDto';
 export * from './paginatedResponseOfPackageDto';
 export * from './paginatedResponseOfPackageReleaseDto';
 export * from './paginatedResponseOfReleaseDto';
+export * from './previewTemplateRequest';
+export * from './previewTemplateRequestProps';
 export * from './releaseDto';
 export * from './releasePackageDto';
 export * from './releaseSummaryDto';

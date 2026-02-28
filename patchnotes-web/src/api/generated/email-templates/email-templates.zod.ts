@@ -54,3 +54,10 @@ export const SendTestEmailBody = zod.object({
   "testData": zod.unknown()
 })
 
+export const PreviewEmailTemplateBody = zod.object({
+  "jsxSource": zod.string(),
+  "props": zod.looseObject({
+
+}).nullable()
+})
+

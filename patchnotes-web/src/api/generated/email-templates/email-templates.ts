@@ -25,6 +25,7 @@ import type {
 
 import type {
   EmailTemplateDto,
+  PreviewTemplateRequest,
   SendTestEmailRequest,
   UpdateEmailTemplateRequest
 } from '.././model';
@@ -428,5 +429,88 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
         TContext
       > => {
       return useMutation(getSendTestEmailMutationOptions(options), queryClient);
+    }
+    export type previewEmailTemplateResponse200 = {
+  data: void
+  status: 200
+}
+
+export type previewEmailTemplateResponse502 = {
+  data: void
+  status: 502
+}
+
+export type previewEmailTemplateResponseSuccess = (previewEmailTemplateResponse200) & {
+  headers: Headers;
+};
+export type previewEmailTemplateResponseError = (previewEmailTemplateResponse502) & {
+  headers: Headers;
+};
+
+export type previewEmailTemplateResponse = (previewEmailTemplateResponseSuccess | previewEmailTemplateResponseError)
+
+export const getPreviewEmailTemplateUrl = () => {
+
+
+  
+
+  return `/api/admin/email-templates/preview`
+}
+
+export const previewEmailTemplate = async (previewTemplateRequest: PreviewTemplateRequest, options?: RequestInit): Promise<previewEmailTemplateResponse> => {
+  
+  return customFetch<previewEmailTemplateResponse>(getPreviewEmailTemplateUrl(),
+  {      
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      previewTemplateRequest,)
+  }
+);}
+  
+
+
+
+export const getPreviewEmailTemplateMutationOptions = <TError = void,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof previewEmailTemplate>>, TError,{data: PreviewTemplateRequest}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof previewEmailTemplate>>, TError,{data: PreviewTemplateRequest}, TContext> => {
+
+const mutationKey = ['previewEmailTemplate'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof previewEmailTemplate>>, {data: PreviewTemplateRequest}> = (props) => {
+          const {data} = props ?? {};
+
+          return  previewEmailTemplate(data,requestOptions)
+        }
+
+
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PreviewEmailTemplateMutationResult = NonNullable<Awaited<ReturnType<typeof previewEmailTemplate>>>
+    export type PreviewEmailTemplateMutationBody = PreviewTemplateRequest
+    export type PreviewEmailTemplateMutationError = void
+
+    export const usePreviewEmailTemplate = <TError = void,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof previewEmailTemplate>>, TError,{data: PreviewTemplateRequest}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof previewEmailTemplate>>,
+        TError,
+        {data: PreviewTemplateRequest},
+        TContext
+      > => {
+      return useMutation(getPreviewEmailTemplateMutationOptions(options), queryClient);
     }
     

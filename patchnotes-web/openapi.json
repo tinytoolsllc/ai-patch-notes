@@ -6,7 +6,7 @@
   },
   "servers": [
     {
-      "url": "http://localhost:2101/"
+      "url": "http://localhost:5000/"
     }
   ],
   "paths": {
@@ -1312,6 +1312,32 @@
           }
         }
       }
+    },
+    "/api/admin/email-templates/preview": {
+      "post": {
+        "tags": [
+          "EmailTemplates"
+        ],
+        "operationId": "PreviewEmailTemplate",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PreviewTemplateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "502": {
+            "description": "Bad Gateway"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -2094,6 +2120,24 @@
           "offset": {
             "type": "integer",
             "format": "int32"
+          }
+        }
+      },
+      "PreviewTemplateRequest": {
+        "required": [
+          "jsxSource",
+          "props"
+        ],
+        "type": "object",
+        "properties": {
+          "jsxSource": {
+            "type": "string"
+          },
+          "props": {
+            "type": [
+              "null",
+              "object"
+            ]
           }
         }
       },
