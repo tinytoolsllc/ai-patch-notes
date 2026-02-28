@@ -10,7 +10,8 @@
     "logLevel": {
       "default": "Information",
       "Function.sendDigest": "Information",
-      "Function.sendWelcome": "Information"
+      "Function.sendWelcome": "Information",
+      "Function.sendTestEmail": "Information"
     }
   },
   "extensionBundle": {
