@@ -1,11 +1,13 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
-const { mockSend, mockFindMany, mockFindUnique, mockRenderTemplate, mockInterpolateSubject } = vi.hoisted(() => ({
+const { mockSend, mockFindMany, mockFindUnique, mockRenderTemplate, mockInterpolateSubject, mockCreate, mockUpdate } = vi.hoisted(() => ({
     mockSend: vi.fn(),
     mockFindMany: vi.fn(),
     mockFindUnique: vi.fn(),
     mockRenderTemplate: vi.fn(),
     mockInterpolateSubject: vi.fn(),
+    mockCreate: vi.fn(),
+    mockUpdate: vi.fn(),
 }));
 
 vi.mock("../lib/resend", () => ({
@@ -22,6 +24,7 @@ vi.mock("../lib/prisma", () => ({
     getPrismaClient: () => ({
         users: { findMany: mockFindMany },
         emailTemplates: { findUnique: mockFindUnique },
+        sentDigestEmails: { create: mockCreate, update: mockUpdate },
     }),
 }));
 
@@ -44,8 +47,10 @@ function makeTimer(): any {
     return { isPastDue: false };
 }
 
+let userIdCounter = 0;
 function makeUser(email: string, name: string, releases: Array<{ tag: string; major: number }>) {
     return {
+        Id: `user-${++userIdCounter}`,
         Email: email,
         Name: name,
         Watchlists: [
@@ -71,8 +76,12 @@ function makeUser(email: string, name: string, releases: Array<{ tag: string; ma
 describe("sendDigest", () => {
     beforeEach(() => {
         vi.clearAllMocks();
+        userIdCounter = 0;
         // Default: no template in DB, use fallback HTML
         mockFindUnique.mockResolvedValue(null);
+        // Default: DB operations succeed
+        mockCreate.mockResolvedValue({});
+        mockUpdate.mockResolvedValue({});
         // Fix the clock so day/hour are deterministic in tests
         vi.useFakeTimers();
         // Wednesday (3) at 14:00 UTC
@@ -123,7 +132,7 @@ describe("sendDigest", () => {
             makeUser("a@test.com", "Alice", [{ tag: "v1.0.0", major: 1 }]),
             makeUser("b@test.com", "Bob", [{ tag: "v2.0.0", major: 2 }]),
         ]);
-        mockSend.mockResolvedValue({ error: null });
+        mockSend.mockResolvedValue({ data: { id: "resend-id-123" }, error: null });
         const context = makeContext();
 
         await sendDigest(makeTimer(), context);
@@ -147,9 +156,9 @@ describe("sendDigest", () => {
             makeUser("c@test.com", "Carol", [{ tag: "v3.0.0", major: 3 }]),
         ]);
         mockSend
-            .mockResolvedValueOnce({ error: null })
+            .mockResolvedValueOnce({ data: { id: "resend-id-123" }, error: null })
             .mockResolvedValueOnce({ error: { message: "rate limited" } })
-            .mockResolvedValueOnce({ error: null });
+            .mockResolvedValueOnce({ data: { id: "resend-id-123" }, error: null });
         const context = makeContext();
 
         await expect(sendDigest(makeTimer(), context)).rejects.toThrow(
@@ -166,7 +175,7 @@ describe("sendDigest", () => {
             makeUser("b@test.com", "Bob", [{ tag: "v2.0.0", major: 2 }]),
         ]);
         mockSend
-            .mockResolvedValueOnce({ error: null })
+            .mockResolvedValueOnce({ data: { id: "resend-id-123" }, error: null })
             .mockRejectedValueOnce(new Error("network error"));
         const context = makeContext();
 
@@ -193,7 +202,7 @@ describe("sendDigest", () => {
             makeUser("valid@test.com", "Valid", [{ tag: "v1.0.0", major: 1 }]),
             makeUser("not-an-email", "Invalid", [{ tag: "v2.0.0", major: 2 }]),
         ]);
-        mockSend.mockResolvedValue({ error: null });
+        mockSend.mockResolvedValue({ data: { id: "resend-id-123" }, error: null });
         const context = makeContext();
 
         await sendDigest(makeTimer(), context);
@@ -212,7 +221,7 @@ describe("sendDigest", () => {
             makeUser("a@test.com", "Alice", [{ tag: "v1.0.0", major: 1 }]),
             makeUser("b@test.com", "Bob", []),  // no releases
         ]);
-        mockSend.mockResolvedValue({ error: null });
+        mockSend.mockResolvedValue({ data: { id: "resend-id-123" }, error: null });
         const context = makeContext();
 
         await sendDigest(makeTimer(), context);
@@ -231,8 +240,8 @@ describe("sendDigest", () => {
         ]);
         mockSend
             .mockRejectedValueOnce(new Error("fail"))
-            .mockResolvedValueOnce({ error: null })
-            .mockResolvedValueOnce({ error: null });
+            .mockResolvedValueOnce({ data: { id: "resend-id-123" }, error: null })
+            .mockResolvedValueOnce({ data: { id: "resend-id-123" }, error: null });
         const context = makeContext();
 
         await expect(sendDigest(makeTimer(), context)).rejects.toThrow();
@@ -252,7 +261,7 @@ describe("sendDigest", () => {
         mockFindMany.mockResolvedValue([
             makeUser("a@test.com", "Alice", [{ tag: "v1.0.0", major: 1 }]),
         ]);
-        mockSend.mockResolvedValue({ error: null });
+        mockSend.mockResolvedValue({ data: { id: "resend-id-123" }, error: null });
         const context = makeContext();
 
         await sendDigest(makeTimer(), context);
@@ -276,6 +285,7 @@ describe("sendDigest", () => {
     it("groups multiple releases per package into a single entry", async () => {
         mockFindMany.mockResolvedValue([
             {
+                Id: "user-inline",
                 Email: "a@test.com",
                 Name: "Alice",
                 Watchlists: [
@@ -295,7 +305,7 @@ describe("sendDigest", () => {
                 ],
             },
         ]);
-        mockSend.mockResolvedValue({ error: null });
+        mockSend.mockResolvedValue({ data: { id: "resend-id-123" }, error: null });
         const context = makeContext();
 
         await sendDigest(makeTimer(), context);
@@ -318,7 +328,7 @@ describe("sendDigest", () => {
         mockFindMany.mockResolvedValue([
             makeUser("a@test.com", "Alice", [{ tag: "v1.0.0", major: 1 }]),
         ]);
-        mockSend.mockResolvedValue({ error: null });
+        mockSend.mockResolvedValue({ data: { id: "resend-id-123" }, error: null });
         const context = makeContext();
 
         await sendDigest(makeTimer(), context);
@@ -331,5 +341,89 @@ describe("sendDigest", () => {
         // Should still send with fallback HTML
         const sentHtml = mockSend.mock.calls[0][0].html;
         expect(sentHtml).toContain("Your Weekly PatchNotes Digest");
+    });
+
+    it("inserts a pending SentDigestEmail record before sending", async () => {
+        mockFindMany.mockResolvedValue([
+            makeUser("a@test.com", "Alice", [{ tag: "v1.0.0", major: 1 }]),
+        ]);
+        mockSend.mockResolvedValue({ data: { id: "resend-id-123" }, error: null });
+        const context = makeContext();
+
+        await sendDigest(makeTimer(), context);
+
+        expect(mockCreate).toHaveBeenCalledTimes(1);
+        expect(mockCreate).toHaveBeenCalledWith({
+            data: expect.objectContaining({
+                UserId: "user-1",
+                RecipientEmail: "a@test.com",
+                Status: "pending",
+            }),
+        });
+    });
+
+    it("updates SentDigestEmail to sent with ResendEmailId on success", async () => {
+        mockFindMany.mockResolvedValue([
+            makeUser("a@test.com", "Alice", [{ tag: "v1.0.0", major: 1 }]),
+        ]);
+        mockSend.mockResolvedValue({ data: { id: "resend-abc" }, error: null });
+        const context = makeContext();
+
+        await sendDigest(makeTimer(), context);
+
+        expect(mockUpdate).toHaveBeenCalledTimes(1);
+        expect(mockUpdate).toHaveBeenCalledWith({
+            where: { Id: expect.any(String) },
+            data: { Status: "sent", ResendEmailId: "resend-abc" },
+        });
+    });
+
+    it("updates SentDigestEmail to failed with ErrorMessage on API error", async () => {
+        mockFindMany.mockResolvedValue([
+            makeUser("a@test.com", "Alice", [{ tag: "v1.0.0", major: 1 }]),
+        ]);
+        mockSend.mockResolvedValue({ error: { name: "forbidden", message: "domain not verified" } });
+        const context = makeContext();
+
+        await expect(sendDigest(makeTimer(), context)).rejects.toThrow();
+
+        expect(mockUpdate).toHaveBeenCalledWith({
+            where: { Id: expect.any(String) },
+            data: { Status: "failed", ErrorMessage: "domain not verified" },
+        });
+    });
+
+    it("updates SentDigestEmail to failed on send exception", async () => {
+        mockFindMany.mockResolvedValue([
+            makeUser("a@test.com", "Alice", [{ tag: "v1.0.0", major: 1 }]),
+        ]);
+        mockSend.mockRejectedValue(new Error("network timeout"));
+        const context = makeContext();
+
+        await expect(sendDigest(makeTimer(), context)).rejects.toThrow();
+
+        expect(mockUpdate).toHaveBeenCalledWith({
+            where: { Id: expect.any(String) },
+            data: { Status: "failed", ErrorMessage: expect.stringContaining("network timeout") },
+        });
+    });
+
+    it("continues sending even if DB insert fails", async () => {
+        mockFindMany.mockResolvedValue([
+            makeUser("a@test.com", "Alice", [{ tag: "v1.0.0", major: 1 }]),
+            makeUser("b@test.com", "Bob", [{ tag: "v2.0.0", major: 2 }]),
+        ]);
+        mockCreate.mockRejectedValue(new Error("DB write failed"));
+        mockSend.mockResolvedValue({ data: { id: "resend-id-123" }, error: null });
+        const context = makeContext();
+
+        await sendDigest(makeTimer(), context);
+
+        // Both emails should still be sent despite DB failures
+        expect(mockSend).toHaveBeenCalledTimes(2);
+        expect(context.warn).toHaveBeenCalledWith(
+            expect.stringContaining("Failed to insert SentDigestEmail"),
+            expect.any(Error)
+        );
     });
 });
