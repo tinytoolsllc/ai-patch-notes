@@ -38,7 +38,7 @@ jobs:
         run: dotnet publish PatchNotes.Api/PatchNotes.Api.csproj --configuration Release --output ./publish/api
 
       - name: Upload API artifact
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: api
           path: ./publish/api
@@ -47,7 +47,7 @@ jobs:
         run: dotnet publish PatchNotes.Functions/PatchNotes.Functions.csproj --no-build --configuration Release --output ./publish/functions
 
       - name: Upload Sync Function artifact
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: functions
           path: ./publish/functions
@@ -92,7 +92,7 @@ jobs:
           rm .npmrc pnpm-workspace.yaml
 
       - name: Upload Email Function artifact
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: email-function
           path: publish/email-function
@@ -135,7 +135,7 @@ jobs:
           VITE_STYTCH_PUBLIC_TOKEN: ${{ secrets.VITE_STYTCH_PUBLIC_TOKEN }}
 
       - name: Upload frontend artifact
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: frontend
           path: patchnotes-web/dist
@@ -177,7 +177,7 @@ jobs:
       url: https://api.myreleasenotes.ai
     steps:
       - name: Download API artifact
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           name: api
           path: ./api
@@ -207,7 +207,7 @@ jobs:
       - uses: actions/checkout@v6
 
       - name: Download frontend artifact
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           name: frontend
           path: patchnotes-web/dist
@@ -231,7 +231,7 @@ jobs:
       name: production
     steps:
       - name: Download Sync Function artifact
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           name: functions
           path: ./functions
@@ -257,7 +257,7 @@ jobs:
       name: production
     steps:
       - name: Download Email Function artifact
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           name: email-function
           path: ./email-function
