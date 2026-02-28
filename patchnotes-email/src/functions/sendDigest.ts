@@ -180,6 +180,11 @@ export async function sendDigest(
 
                 if (error) {
                     context.error(`Failed to send digest to ${email}:`, error);
+                    trackEvent("DigestEmailFailed", {
+                        recipient: email,
+                        errorName: error.name ?? "unknown",
+                        errorMessage: error.message ?? "",
+                    });
                     failures.push({ email, error });
                 } else {
                     sentCount++;
