@@ -45,7 +45,7 @@ namespace PatchNotes.Data.Migrations.Sqlite
                     b.HasIndex("Name")
                         .IsUnique();
 
-                    b.ToTable("EmailTemplates", (string)null);
+                    b.ToTable("EmailTemplates");
                 });
 
             modelBuilder.Entity("PatchNotes.Data.Package", b =>
@@ -106,9 +106,10 @@ namespace PatchNotes.Data.Migrations.Sqlite
                     b.HasKey("Id");
 
                     b.HasIndex("NpmName")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasFilter("[NpmName] IS NOT NULL");
 
-                    b.ToTable("Packages", (string)null);
+                    b.ToTable("Packages");
                 });
 
             modelBuilder.Entity("PatchNotes.Data.ProcessedWebhookEvent", b =>
@@ -122,7 +123,7 @@ namespace PatchNotes.Data.Migrations.Sqlite
 
                     b.HasKey("EventId");
 
-                    b.ToTable("ProcessedWebhookEvents", (string)null);
+                    b.ToTable("ProcessedWebhookEvents");
                 });
 
             modelBuilder.Entity("PatchNotes.Data.Release", b =>
@@ -187,7 +188,7 @@ namespace PatchNotes.Data.Migrations.Sqlite
 
                     b.HasIndex("PackageId", "MajorVersion", "IsPrerelease");
 
-                    b.ToTable("Releases", (string)null);
+                    b.ToTable("Releases");
                 });
 
             modelBuilder.Entity("PatchNotes.Data.ReleaseSummary", b =>
@@ -225,7 +226,57 @@ namespace PatchNotes.Data.Migrations.Sqlite
                     b.HasIndex("PackageId", "MajorVersion", "IsPrerelease")
                         .IsUnique();
 
-                    b.ToTable("ReleaseSummaries", (string)null);
+                    b.ToTable("ReleaseSummaries");
+                });
+
+            modelBuilder.Entity("PatchNotes.Data.SentDigestEmail", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasMaxLength(21)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ErrorMessage")
+                        .HasMaxLength(1024)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("HtmlBody")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("RecipientEmail")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ResendEmailId")
+                        .HasMaxLength(128)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("SentAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Subject")
+                        .IsRequired()
+                        .HasMaxLength(512)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasMaxLength(21)
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SentAt");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("SentDigestEmails");
                 });
 
             modelBuilder.Entity("PatchNotes.Data.User", b =>
@@ -296,7 +347,7 @@ namespace PatchNotes.Data.Migrations.Sqlite
                     b.HasIndex("StytchUserId")
                         .IsUnique();
 
-                    b.ToTable("Users", (string)null);
+                    b.ToTable("Users");
                 });
 
             modelBuilder.Entity("PatchNotes.Data.Watchlist", b =>
@@ -325,7 +376,7 @@ namespace PatchNotes.Data.Migrations.Sqlite
                     b.HasIndex("UserId", "PackageId")
                         .IsUnique();
 
-                    b.ToTable("Watchlists", (string)null);
+                    b.ToTable("Watchlists");
                 });
 
             modelBuilder.Entity("PatchNotes.Data.Release", b =>
@@ -348,6 +399,17 @@ namespace PatchNotes.Data.Migrations.Sqlite
                         .IsRequired();
 
                     b.Navigation("Package");
+                });
+
+            modelBuilder.Entity("PatchNotes.Data.SentDigestEmail", b =>
+                {
+                    b.HasOne("PatchNotes.Data.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("PatchNotes.Data.Watchlist", b =>

@@ -6,6 +6,7 @@ import { getPrismaClient } from "../lib/prisma.js";
 import { renderTemplate, interpolateSubject } from "../lib/templateRenderer.js";
 import { subDays } from "date-fns";
 import { UTCDate } from "@date-fns/utc";
+import { nanoid } from "nanoid";
 
 interface SendTestEmailRequest {
     templateName: string;
@@ -138,7 +139,33 @@ export async function sendTestEmail(
 
         const subject = sanitizeSubject("[TEST] " + interpolateSubject(template.Subject, subjectVars));
 
-        const { error } = await resend.emails.send({
+        // Look up user ID for the recipient (may not exist)
+        const recipientUser = await db.users.findFirst({
+            where: { Email: body.recipientEmail },
+            select: { Id: true },
+        });
+
+        // Insert pending record before attempting send
+        const sentEmailId = nanoid();
+        if (recipientUser) {
+            try {
+                await db.sentDigestEmails.create({
+                    data: {
+                        Id: sentEmailId,
+                        UserId: recipientUser.Id,
+                        Subject: subject,
+                        HtmlBody: html,
+                        RecipientEmail: body.recipientEmail,
+                        Status: "pending",
+                        SentAt: new Date(),
+                    },
+                });
+            } catch (dbErr) {
+                context.warn("Failed to insert SentDigestEmail record:", dbErr);
+            }
+        }
+
+        const { data, error } = await resend.emails.send({
             from: FROM_ADDRESS,
             to: body.recipientEmail,
             subject,
@@ -147,6 +174,16 @@ export async function sendTestEmail(
 
         if (error) {
             context.error("Resend error:", error);
+            if (recipientUser) {
+                try {
+                    await db.sentDigestEmails.update({
+                        where: { Id: sentEmailId },
+                        data: { Status: "failed", ErrorMessage: (error.message ?? "").slice(0, 1024) },
+                    });
+                } catch (dbErr) {
+                    context.warn("Failed to update SentDigestEmail status:", dbErr);
+                }
+            }
             trackEvent("TestEmailFailed", {
                 reason: "resend_error",
                 templateName: body.templateName,
@@ -155,6 +192,17 @@ export async function sendTestEmail(
             });
             await flush();
             return { status: 500, body: `Failed to send email: ${error.message}` };
+        }
+
+        if (recipientUser) {
+            try {
+                await db.sentDigestEmails.update({
+                    where: { Id: sentEmailId },
+                    data: { Status: "sent", ResendEmailId: data?.id ?? null },
+                });
+            } catch (dbErr) {
+                context.warn("Failed to update SentDigestEmail status:", dbErr);
+            }
         }
 
         trackEvent("TestEmailSent", {

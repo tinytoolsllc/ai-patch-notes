@@ -40,6 +40,7 @@ public class PatchNotesDbContext : DbContext
     public DbSet<ProcessedWebhookEvent> ProcessedWebhookEvents => Set<ProcessedWebhookEvent>();
     public DbSet<ReleaseSummary> ReleaseSummaries => Set<ReleaseSummary>();
     public DbSet<EmailTemplate> EmailTemplates => Set<EmailTemplate>();
+    public DbSet<SentDigestEmail> SentDigestEmails => Set<SentDigestEmail>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -113,6 +114,23 @@ public class PatchNotesDbContext : DbContext
             entity.Property(e => e.Name).HasMaxLength(128);
             entity.Property(e => e.Subject).HasMaxLength(512);
             entity.HasIndex(e => e.Name).IsUnique();
+        });
+
+        modelBuilder.Entity<SentDigestEmail>(entity =>
+        {
+            entity.Property(e => e.Id).HasMaxLength(21);
+            entity.Property(e => e.UserId).HasMaxLength(21);
+            entity.Property(e => e.Subject).HasMaxLength(512);
+            entity.Property(e => e.RecipientEmail).HasMaxLength(256);
+            entity.Property(e => e.Status).HasMaxLength(16);
+            entity.Property(e => e.ResendEmailId).HasMaxLength(128);
+            entity.Property(e => e.ErrorMessage).HasMaxLength(1024);
+            entity.HasIndex(e => e.UserId);
+            entity.HasIndex(e => e.SentAt);
+            entity.HasOne(e => e.User)
+                .WithMany()
+                .HasForeignKey(e => e.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
 
         modelBuilder.Entity<Watchlist>(entity =>

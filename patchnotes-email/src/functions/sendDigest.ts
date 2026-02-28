@@ -6,6 +6,7 @@ import { getPrismaClient } from "../lib/prisma.js";
 import { renderTemplate, interpolateSubject } from "../lib/templateRenderer.js";
 import { subDays, getDay, getHours } from "date-fns";
 import { UTCDate } from "@date-fns/utc";
+import { nanoid } from "nanoid";
 
 const DIGEST_WINDOW_DAYS = 7;
 
@@ -42,6 +43,7 @@ export async function sendDigest(
                 },
             },
             select: {
+                Id: true,
                 Email: true,
                 Name: true,
                 Watchlists: {
@@ -167,11 +169,31 @@ export async function sendDigest(
 
             // Email is guaranteed non-null here — validated by isValidEmail above
             const email = user.Email!;
+
+            // Insert pending record before attempting send
+            const sentEmailId = nanoid();
+            try {
+                await db.sentDigestEmails.create({
+                    data: {
+                        Id: sentEmailId,
+                        UserId: user.Id,
+                        Subject: subject,
+                        HtmlBody: html,
+                        RecipientEmail: email,
+                        Status: "pending",
+                        SentAt: new Date(),
+                    },
+                });
+            } catch (dbErr) {
+                context.warn(`Failed to insert SentDigestEmail record for ${email}:`, dbErr);
+                // Don't break the send loop — continue sending even if DB insert fails
+            }
+
             try {
                 const toAddress = user.Name
                     ? `${user.Name} <${email}>`
                     : email;
-                const { error } = await resend.emails.send({
+                const { data, error } = await resend.emails.send({
                     from: FROM_ADDRESS,
                     to: toAddress,
                     subject,
@@ -185,14 +207,38 @@ export async function sendDigest(
                         errorName: error.name ?? "unknown",
                         errorMessage: error.message ?? "",
                     });
+                    try {
+                        await db.sentDigestEmails.update({
+                            where: { Id: sentEmailId },
+                            data: { Status: "failed", ErrorMessage: (error.message ?? "").slice(0, 1024) },
+                        });
+                    } catch (dbErr) {
+                        context.warn(`Failed to update SentDigestEmail status for ${email}:`, dbErr);
+                    }
                     failures.push({ email, error });
                 } else {
                     sentCount++;
                     context.log(`Digest sent to ${email}`);
+                    try {
+                        await db.sentDigestEmails.update({
+                            where: { Id: sentEmailId },
+                            data: { Status: "sent", ResendEmailId: data?.id ?? null },
+                        });
+                    } catch (dbErr) {
+                        context.warn(`Failed to update SentDigestEmail status for ${email}:`, dbErr);
+                    }
                 }
             } catch (err) {
                 context.error(`Error sending to ${email}:`, err);
                 trackException(err, { operation: "sendDigest", recipient: email });
+                try {
+                    await db.sentDigestEmails.update({
+                        where: { Id: sentEmailId },
+                        data: { Status: "failed", ErrorMessage: String(err).slice(0, 1024) },
+                    });
+                } catch (dbErr) {
+                    context.warn(`Failed to update SentDigestEmail status for ${email}:`, dbErr);
+                }
                 failures.push({ email, error: err });
             }
         }
