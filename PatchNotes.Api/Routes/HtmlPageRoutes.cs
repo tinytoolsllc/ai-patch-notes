@@ -143,6 +143,38 @@ public static class HtmlPageRoutes
         .WithName("GetReleaseHtml")
         .ExcludeFromDescription();
 
+        // GET /html/emails/{id} - Sent digest email "view in browser" page
+        group.MapGet("/emails/{id}", async (string id, PatchNotesDbContext db) =>
+        {
+            var email = await db.SentDigestEmails
+                .AsNoTracking()
+                .Where(e => e.Id == id && e.Status == "sent")
+                .Select(e => new { e.Subject, e.HtmlBody })
+                .FirstOrDefaultAsync();
+
+            if (email == null)
+            {
+                return Results.NotFound(new ApiError("Email not found"));
+            }
+
+            var bodyHtml = new StringBuilder(email.HtmlBody.Length + 512);
+            bodyHtml.Append(HtmlTemplate.Header(("Email", null)));
+            bodyHtml.Append("<main><div class=\"container\">");
+            bodyHtml.Append("<div class=\"card card-padded\">");
+            bodyHtml.Append(email.HtmlBody);
+            bodyHtml.Append("</div></div></main>");
+
+            var title = $"{Encode(email.Subject)} | My Release Notes";
+            return Results.Content(
+                HtmlTemplate.Wrap(title, email.Subject, $"/html/emails/{id}", bodyHtml.ToString()),
+                "text/html");
+        })
+        .AllowAnonymous()
+        .Produces<string>(StatusCodes.Status200OK, "text/html")
+        .Produces(StatusCodes.Status404NotFound)
+        .WithName("GetEmailHtml")
+        .ExcludeFromDescription();
+
         // GET /html/packages/{owner} - Owner package listing HTML page
         group.MapGet("/packages/{owner}", async (string owner, PatchNotesDbContext db) =>
         {
