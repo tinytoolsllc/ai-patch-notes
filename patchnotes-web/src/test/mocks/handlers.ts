@@ -323,6 +323,11 @@ export const handlers = [
     return new HttpResponse(null, { status: 204 })
   }),
 
+  // POST /admin/email-templates/:name/test
+  http.post(`${API_BASE}/admin/email-templates/:name/test`, () => {
+    return new HttpResponse(null, { status: 204 })
+  }),
+
   // GET /subscription/status
   http.get(`${API_BASE}/subscription/status`, () => {
     return HttpResponse.json({ isPro: false, status: null, expiresAt: null })

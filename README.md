@@ -59,38 +59,97 @@ A GitHub release viewer for npm packages. Track release notes across your favori
 
 The project uses direnv for environment-based configuration. Create a secrets file at `~/.secrets/patchnotes/.env.local`:
 
-```bash
-# Required for API authentication
-APIKEY=your-api-key
-
-# Required for GitHub API (increases rate limit)
-GITHUB__TOKEN=your-github-token
-
-# Required for AI summaries (Ollama Cloud)
-AI__APIKEY=your-ollama-api-key
-AI__BASEURL=https://ollama.com/v1/
-AI__MODEL=gemma3:27b
+```env
+ConnectionStrings__PatchNotes=Server=localhost;Database=PatchNotes;User Id=sa;Password=...;TrustServerCertificate=True
+GitHub__Token=ghp_...
+Stytch__ProjectId=...
+Stytch__Secret=...
+Stytch__WebhookSecret=...
+Stripe__SecretKey=sk_test_...
+Stripe__WebhookSecret=whsec_...
+AI__ApiKey=...
+AI__BaseUrl=https://ollama.com/v1/
+AI__Model=gemma3:27b
+RESEND_API_KEY=re_...
+DATABASE_URL=Server=localhost;Database=PatchNotes;User id=sa;Password=...;TrustServerCertificate=true
 ```
 
-## Authentication
-
-The app uses [Stytch](https://stytch.com/) for B2C authentication.
-
-### Frontend Configuration
-
-Add these environment variables to the frontend (via `.env` or Vite config):
+Also copy the email function local settings:
 
 ```bash
-VITE_STYTCH_PROJECT_ID=your-project-id
-VITE_STYTCH_PUBLIC_TOKEN=your-public-token
+cp patchnotes-email/local.settings.json.example patchnotes-email/local.settings.json
 ```
 
-### Stytch Setup
+## Azure Deployment Configuration
 
-1. Create a Stytch account at https://stytch.com/
-2. Create a new Consumer project
-3. Configure allowed redirect URLs for your domains
-4. Copy the Project ID and Public Token to your environment
+### API -- App Service (`api-myreleasenotes-ai`)
+
+| Setting | Description |
+|---------|-------------|
+| `ConnectionStrings__PatchNotes` | SQL Server connection string |
+| `GitHub__Token` | GitHub PAT for repository search and release fetching |
+| `Stytch__ProjectId` | Stytch project ID |
+| `Stytch__Secret` | Stytch secret key |
+| `Stytch__WebhookSecret` | Stytch webhook signing secret |
+| `Stripe__SecretKey` | Stripe secret key |
+| `Stripe__WebhookSecret` | Stripe webhook signing secret |
+| `SyncFunction__Url` | URL of the sync function (e.g. `https://fn-patchnotes-sync.azurewebsites.net/api/sync-new-packages`) |
+| `SyncFunction__Key` | Function-level auth key for the sync function |
+| `EmailFunction__Url` | URL of the test email function (e.g. `https://fn-patchnotes-email.azurewebsites.net/api/sendTestEmail`) |
+| `EmailFunction__Key` | Function-level auth key for the email function |
+| `APPLICATIONINSIGHTS_CONNECTION_STRING` | Application Insights connection string |
+
+### Sync Function -- Azure Functions (`fn-patchnotes-sync`)
+
+| Setting | Description |
+|---------|-------------|
+| `AzureWebJobsStorage` | Azure Storage connection string |
+| `FUNCTIONS_WORKER_RUNTIME` | `dotnet-isolated` |
+| `ConnectionStrings__PatchNotes` | SQL Server connection string |
+| `GitHub__Token` | GitHub PAT |
+| `AI__ApiKey` | AI provider API key |
+| `AI__BaseUrl` | AI provider endpoint |
+| `AI__Model` | Model name (e.g. `llama-3.3-70b-versatile`) |
+| `APPLICATIONINSIGHTS_CONNECTION_STRING` | Application Insights connection string |
+
+### Email Function -- Azure Functions (`fn-patchnotes-email`)
+
+| Setting | Description |
+|---------|-------------|
+| `AzureWebJobsStorage` | Azure Storage connection string |
+| `FUNCTIONS_WORKER_RUNTIME` | `node` |
+| `RESEND_API_KEY` | Resend API key for email delivery |
+| `DATABASE_URL` | SQL Server connection string (ADO.NET format) |
+| `APP_BASE_URL` | Base URL for links in emails (default: `https://app.myreleasenotes.ai`) |
+| `APPLICATIONINSIGHTS_CONNECTION_STRING` | Application Insights connection string |
+
+### Frontend -- Static Web Apps
+
+Build-time variables set in CI:
+
+| Setting | Description |
+|---------|-------------|
+| `VITE_API_URL` | API base URL (e.g. `https://api.myreleasenotes.ai`) -- GitHub Actions variable |
+| `VITE_STYTCH_PUBLIC_TOKEN` | Stytch public token -- GitHub Actions secret |
+
+### GitHub Actions
+
+**Secrets:**
+
+| Secret | Description |
+|--------|-------------|
+| `AZURE_CLIENT_ID` | Service principal client ID (OIDC login) |
+| `AZURE_TENANT_ID` | Azure AD tenant ID |
+| `AZURE_SUBSCRIPTION_ID` | Azure subscription ID |
+| `DATABASE_CONNECTION_STRING` | SQL Server connection string (for migrations) |
+| `AZURE_STATIC_WEB_APPS_API_TOKEN` | SWA deployment token |
+| `VITE_STYTCH_PUBLIC_TOKEN` | Stytch public token (frontend build) |
+
+**Variables:**
+
+| Variable | Description |
+|----------|-------------|
+| `VITE_API_URL` | API base URL (e.g. `https://api.myreleasenotes.ai`) |
 
 ## Quick Start
 

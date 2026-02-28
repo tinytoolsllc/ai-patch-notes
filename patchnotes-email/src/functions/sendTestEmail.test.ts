@@ -1,8 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
-const { mockSend, mockFindUnique, mockRenderTemplate, mockInterpolateSubject, mockTrackEvent, mockFlush } = vi.hoisted(() => ({
+const { mockSend, mockFindUnique, mockFindFirst, mockFindMany, mockRenderTemplate, mockInterpolateSubject, mockTrackEvent, mockFlush } = vi.hoisted(() => ({
     mockSend: vi.fn(),
     mockFindUnique: vi.fn(),
+    mockFindFirst: vi.fn(),
+    mockFindMany: vi.fn(),
     mockRenderTemplate: vi.fn(),
     mockInterpolateSubject: vi.fn(),
     mockTrackEvent: vi.fn(),
@@ -19,6 +21,8 @@ vi.mock("../lib/resend", () => ({
 vi.mock("../lib/prisma", () => ({
     getPrismaClient: () => ({
         emailTemplates: { findUnique: mockFindUnique },
+        users: { findFirst: mockFindFirst },
+        releases: { findMany: mockFindMany },
     }),
 }));
 
@@ -49,17 +53,26 @@ function makeRequest(body: unknown): any {
     };
 }
 
-const VALID_REQUEST = {
+const VALID_REQUEST_WITH_DATA = {
     templateName: "welcome",
     recipientEmail: "admin@test.com",
     testData: { name: "Jane Doe" },
+};
+
+const VALID_REQUEST_REAL_DATA = {
+    templateName: "welcome",
+    recipientEmail: "admin@test.com",
 };
 
 describe("sendTestEmail", () => {
     beforeEach(() => {
         vi.clearAllMocks();
         mockFindUnique.mockResolvedValue(null);
+        mockFindFirst.mockResolvedValue(null);
+        mockFindMany.mockResolvedValue([]);
     });
+
+    // ── Validation ────────────────────────────────────────────
 
     it("returns 400 for invalid JSON", async () => {
         const request = { json: async () => { throw new Error("bad json"); } } as any;
@@ -70,7 +83,7 @@ describe("sendTestEmail", () => {
 
     it("returns 400 when templateName is missing", async () => {
         const result = await sendTestEmail(
-            makeRequest({ ...VALID_REQUEST, templateName: "" }),
+            makeRequest({ ...VALID_REQUEST_WITH_DATA, templateName: "" }),
             makeContext()
         );
         expect(result.status).toBe(400);
@@ -79,7 +92,7 @@ describe("sendTestEmail", () => {
 
     it("returns 400 when recipientEmail is missing", async () => {
         const result = await sendTestEmail(
-            makeRequest({ ...VALID_REQUEST, recipientEmail: "" }),
+            makeRequest({ ...VALID_REQUEST_WITH_DATA, recipientEmail: "" }),
             makeContext()
         );
         expect(result.status).toBe(400);
@@ -88,27 +101,150 @@ describe("sendTestEmail", () => {
 
     it("returns 400 for invalid email format", async () => {
         const result = await sendTestEmail(
-            makeRequest({ ...VALID_REQUEST, recipientEmail: "not-valid" }),
+            makeRequest({ ...VALID_REQUEST_WITH_DATA, recipientEmail: "not-valid" }),
             makeContext()
         );
         expect(result.status).toBe(400);
         expect(result.body).toBe("Invalid email address format");
     });
 
-    it("returns 400 when testData is missing", async () => {
-        const result = await sendTestEmail(
-            makeRequest({ templateName: "welcome", recipientEmail: "a@b.com" }),
-            makeContext()
-        );
-        expect(result.status).toBe(400);
-        expect(result.body).toBe("Missing required field: testData");
-    });
-
     it("returns 404 when template is not found", async () => {
-        const result = await sendTestEmail(makeRequest(VALID_REQUEST), makeContext());
+        const result = await sendTestEmail(makeRequest(VALID_REQUEST_REAL_DATA), makeContext());
         expect(result.status).toBe(404);
         expect(result.body).toBe("Template not found: welcome");
     });
+
+    // ── With sample data (testData provided) ──────────────────
+
+    it("sends test email with provided testData", async () => {
+        mockFindUnique.mockResolvedValue({
+            Name: "welcome",
+            Subject: "Welcome, {{name}}!",
+            JsxSource: "<jsx/>",
+        });
+        mockRenderTemplate.mockResolvedValue("<html>welcome rendered</html>");
+        mockInterpolateSubject.mockReturnValue("Welcome, Jane Doe!");
+        mockSend.mockResolvedValue({ error: null });
+
+        const result = await sendTestEmail(makeRequest(VALID_REQUEST_WITH_DATA), makeContext());
+
+        expect(result.status).toBe(200);
+        expect(mockRenderTemplate).toHaveBeenCalledWith("<jsx/>", { name: "Jane Doe" });
+        expect(mockSend.mock.calls[0][0].subject).toBe("[TEST] Welcome, Jane Doe!");
+        expect(mockTrackEvent).toHaveBeenCalledWith("TestEmailSent", expect.objectContaining({
+            dataSource: "sample",
+        }));
+    });
+
+    it("derives count from releases array in provided testData", async () => {
+        mockFindUnique.mockResolvedValue({
+            Name: "digest",
+            Subject: "Your Digest — {{count}} updates",
+            JsxSource: "<digest-jsx/>",
+        });
+        mockRenderTemplate.mockResolvedValue("<html>digest</html>");
+        mockInterpolateSubject.mockReturnValue("Your Digest — 2 updates");
+        mockSend.mockResolvedValue({ error: null });
+
+        const result = await sendTestEmail(makeRequest({
+            templateName: "digest",
+            recipientEmail: "admin@test.com",
+            testData: {
+                name: "Jane Doe",
+                releases: [
+                    { packageName: "react", version: "19.1.0", summary: "New features" },
+                    { packageName: "lodash", version: "5.0.0", summary: "ES modules" },
+                ],
+            },
+        }), makeContext());
+
+        expect(result.status).toBe(200);
+        expect(mockInterpolateSubject).toHaveBeenCalledWith(
+            "Your Digest — {{count}} updates",
+            expect.objectContaining({ count: "2" })
+        );
+    });
+
+    // ── With real data (testData omitted) ─────────────────────
+
+    it("uses real DB data for welcome when testData is omitted", async () => {
+        mockFindUnique.mockResolvedValue({
+            Name: "welcome",
+            Subject: "Welcome, {{name}}!",
+            JsxSource: "<jsx/>",
+        });
+        mockFindFirst.mockResolvedValue({ Name: "Alice Admin" });
+        mockRenderTemplate.mockResolvedValue("<html>welcome Alice</html>");
+        mockInterpolateSubject.mockReturnValue("Welcome, Alice Admin!");
+        mockSend.mockResolvedValue({ error: null });
+
+        const result = await sendTestEmail(makeRequest(VALID_REQUEST_REAL_DATA), makeContext());
+
+        expect(result.status).toBe(200);
+        expect(mockRenderTemplate).toHaveBeenCalledWith("<jsx/>", { name: "Alice Admin" });
+        expect(mockTrackEvent).toHaveBeenCalledWith("TestEmailSent", expect.objectContaining({
+            dataSource: "database",
+        }));
+    });
+
+    it("uses 'there' as fallback name when user not found in DB", async () => {
+        mockFindUnique.mockResolvedValue({
+            Name: "welcome",
+            Subject: "Welcome, {{name}}!",
+            JsxSource: "<jsx/>",
+        });
+        mockFindFirst.mockResolvedValue(null);
+        mockRenderTemplate.mockResolvedValue("<html>welcome</html>");
+        mockInterpolateSubject.mockReturnValue("Welcome, there!");
+        mockSend.mockResolvedValue({ error: null });
+
+        const result = await sendTestEmail(makeRequest(VALID_REQUEST_REAL_DATA), makeContext());
+
+        expect(result.status).toBe(200);
+        expect(mockRenderTemplate).toHaveBeenCalledWith("<jsx/>", { name: "there" });
+    });
+
+    it("uses real DB releases for digest when testData is omitted", async () => {
+        mockFindUnique.mockResolvedValue({
+            Name: "digest",
+            Subject: "Digest — {{count}} updates",
+            JsxSource: "<digest-jsx/>",
+        });
+        mockFindFirst.mockResolvedValue({ Name: "Alice" });
+        mockFindMany.mockResolvedValue([
+            {
+                Tag: "v19.1.0",
+                MajorVersion: 19,
+                IsPrerelease: false,
+                Packages: {
+                    Name: "react",
+                    ReleaseSummaries: [
+                        { Summary: "New features", MajorVersion: 19, IsPrerelease: false },
+                    ],
+                },
+            },
+        ]);
+        mockRenderTemplate.mockResolvedValue("<html>digest</html>");
+        mockInterpolateSubject.mockReturnValue("Digest — 1 updates");
+        mockSend.mockResolvedValue({ error: null });
+
+        const result = await sendTestEmail(makeRequest({
+            templateName: "digest",
+            recipientEmail: "admin@test.com",
+        }), makeContext());
+
+        expect(result.status).toBe(200);
+        expect(mockRenderTemplate).toHaveBeenCalledWith("<digest-jsx/>", {
+            name: "Alice",
+            releases: [{ packageName: "react", version: "v19.1.0", summary: "New features" }],
+        });
+        expect(mockInterpolateSubject).toHaveBeenCalledWith(
+            "Digest — {{count}} updates",
+            expect.objectContaining({ count: "1" })
+        );
+    });
+
+    // ── Error paths ───────────────────────────────────────────
 
     it("returns 500 when template rendering fails (no fallback)", async () => {
         mockFindUnique.mockResolvedValue({
@@ -118,7 +254,7 @@ describe("sendTestEmail", () => {
         });
         mockRenderTemplate.mockRejectedValue(new Error("render failed"));
 
-        const result = await sendTestEmail(makeRequest(VALID_REQUEST), makeContext());
+        const result = await sendTestEmail(makeRequest(VALID_REQUEST_WITH_DATA), makeContext());
 
         expect(result.status).toBe(500);
         expect(result.body).toBe("Internal server error");
@@ -135,74 +271,12 @@ describe("sendTestEmail", () => {
         mockInterpolateSubject.mockReturnValue("Welcome, Jane Doe!");
         mockSend.mockResolvedValue({ error: { message: "rate limited" } });
 
-        const result = await sendTestEmail(makeRequest(VALID_REQUEST), makeContext());
+        const result = await sendTestEmail(makeRequest(VALID_REQUEST_WITH_DATA), makeContext());
 
         expect(result.status).toBe(500);
         expect(result.body).toContain("Failed to send email");
         expect(mockTrackEvent).toHaveBeenCalledWith("TestEmailFailed", expect.objectContaining({
             reason: "resend_error",
         }));
-    });
-
-    it("sends test email successfully with [TEST] subject prefix", async () => {
-        mockFindUnique.mockResolvedValue({
-            Name: "welcome",
-            Subject: "Welcome, {{name}}!",
-            JsxSource: "<jsx/>",
-        });
-        mockRenderTemplate.mockResolvedValue("<html>welcome rendered</html>");
-        mockInterpolateSubject.mockReturnValue("Welcome, Jane Doe!");
-        mockSend.mockResolvedValue({ error: null });
-
-        const result = await sendTestEmail(makeRequest(VALID_REQUEST), makeContext());
-
-        expect(result.status).toBe(200);
-        expect(result.body).toBe("Test email sent");
-
-        expect(mockRenderTemplate).toHaveBeenCalledWith("<jsx/>", { name: "Jane Doe" });
-        expect(mockInterpolateSubject).toHaveBeenCalledWith(
-            "Welcome, {{name}}!",
-            expect.objectContaining({ name: "Jane Doe" })
-        );
-
-        const sendCall = mockSend.mock.calls[0][0];
-        expect(sendCall.subject).toBe("[TEST] Welcome, Jane Doe!");
-        expect(sendCall.to).toBe("admin@test.com");
-        expect(sendCall.html).toBe("<html>welcome rendered</html>");
-
-        expect(mockTrackEvent).toHaveBeenCalledWith("TestEmailSent", expect.objectContaining({
-            templateName: "welcome",
-        }));
-    });
-
-    it("derives count from releases array for digest templates", async () => {
-        const digestRequest = {
-            templateName: "digest",
-            recipientEmail: "admin@test.com",
-            testData: {
-                name: "Jane Doe",
-                releases: [
-                    { packageName: "react", version: "19.1.0", summary: "New features" },
-                    { packageName: "lodash", version: "5.0.0", summary: "ES modules" },
-                ],
-            },
-        };
-
-        mockFindUnique.mockResolvedValue({
-            Name: "digest",
-            Subject: "Your Digest — {{count}} updates",
-            JsxSource: "<digest-jsx/>",
-        });
-        mockRenderTemplate.mockResolvedValue("<html>digest</html>");
-        mockInterpolateSubject.mockReturnValue("Your Digest — 2 updates");
-        mockSend.mockResolvedValue({ error: null });
-
-        const result = await sendTestEmail(makeRequest(digestRequest), makeContext());
-
-        expect(result.status).toBe(200);
-        expect(mockInterpolateSubject).toHaveBeenCalledWith(
-            "Your Digest — {{count}} updates",
-            expect.objectContaining({ count: "2" })
-        );
     });
 });
