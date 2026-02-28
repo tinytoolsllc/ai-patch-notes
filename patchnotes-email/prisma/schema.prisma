@@ -108,16 +108,16 @@ model Watchlists {
 }
 
 model SentDigestEmails {
-  Id             String    @id(map: "PK_SentDigestEmails") @db.NVarChar(21)
-  UserId         String    @db.NVarChar(21)
-  Subject        String    @db.NVarChar(512)
-  HtmlBody       String    @db.NVarChar(Max)
-  RecipientEmail String    @db.NVarChar(256)
-  Status         String    @db.NVarChar(16)
-  ResendEmailId  String?   @db.NVarChar(128)
-  ErrorMessage   String?   @db.NVarChar(1024)
-  SentAt         DateTime  @db.DateTimeOffset
-  Users          Users     @relation(fields: [UserId], references: [Id], onDelete: Cascade, onUpdate: NoAction, map: "FK_SentDigestEmails_Users_UserId")
+  Id             String   @id(map: "PK_SentDigestEmails") @db.NVarChar(21)
+  UserId         String   @db.NVarChar(21)
+  Subject        String   @db.NVarChar(512)
+  HtmlBody       String   @db.NVarChar(Max)
+  RecipientEmail String   @db.NVarChar(256)
+  Status         String   @db.NVarChar(16)
+  ResendEmailId  String?  @db.NVarChar(128)
+  ErrorMessage   String?  @db.NVarChar(1024)
+  SentAt         DateTime @db.DateTimeOffset
+  Users          Users    @relation(fields: [UserId], references: [Id], onDelete: Cascade, onUpdate: NoAction, map: "FK_SentDigestEmails_Users_UserId")
 
   @@index([SentAt], map: "IX_SentDigestEmails_SentAt")
   @@index([UserId], map: "IX_SentDigestEmails_UserId")
