@@ -1270,6 +1270,48 @@
           }
         }
       }
+    },
+    "/api/admin/email-templates/{name}/test": {
+      "post": {
+        "tags": [
+          "EmailTemplates"
+        ],
+        "operationId": "SendTestEmail",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SendTestEmailRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "503": {
+            "description": "Service Unavailable"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -1559,6 +1601,7 @@
           }
         }
       },
+      "JsonElement": { },
       "OwnerPackageDto": {
         "required": [
           "id",
@@ -2158,6 +2201,21 @@
               "string"
             ],
             "format": "date-time"
+          }
+        }
+      },
+      "SendTestEmailRequest": {
+        "required": [
+          "recipientEmail",
+          "testData"
+        ],
+        "type": "object",
+        "properties": {
+          "recipientEmail": {
+            "type": "string"
+          },
+          "testData": {
+            "$ref": "#/components/schemas/JsonElement"
           }
         }
       },
