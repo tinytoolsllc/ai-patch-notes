@@ -189,6 +189,58 @@ public static class EmailTemplateRoutes
         .Produces(StatusCodes.Status503ServiceUnavailable)
         .WithName("SendTestEmail");
 
+        // POST /api/admin/email-templates/preview - Render a template with sample data
+        group.MapPost("/preview", async (
+            PreviewTemplateRequest request,
+            IConfiguration configuration,
+            IHttpClientFactory httpClientFactory,
+            ILoggerFactory loggerFactory,
+            CancellationToken cancellationToken) =>
+        {
+            var logger = loggerFactory.CreateLogger("EmailTemplateRoutes");
+            var renderUrl = configuration["EmailFunction:PreviewUrl"];
+            if (string.IsNullOrEmpty(renderUrl))
+            {
+                return Results.StatusCode(503);
+            }
+
+            using var http = httpClientFactory.CreateClient();
+            using var httpRequest = new HttpRequestMessage(HttpMethod.Post, renderUrl);
+
+            var functionKey = configuration["EmailFunction:Key"];
+            if (!string.IsNullOrEmpty(functionKey))
+                httpRequest.Headers.Add("x-functions-key", functionKey);
+
+            httpRequest.Content = new StringContent(
+                JsonSerializer.Serialize(new { jsxSource = request.JsxSource, props = request.Props }),
+                System.Text.Encoding.UTF8,
+                "application/json");
+
+            try
+            {
+                var response = await http.SendAsync(httpRequest, cancellationToken);
+                var body = await response.Content.ReadAsStringAsync(cancellationToken);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    logger.LogWarning("Email function render failed ({Status}): {Body}", (int)response.StatusCode, body);
+                    return Results.Problem(body, statusCode: (int)response.StatusCode);
+                }
+
+                return Results.Ok(new { html = body });
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Failed to call email render function");
+                return Results.StatusCode(502);
+            }
+        })
+        .AddEndpointFilterFactory(requireAuth)
+        .AddEndpointFilterFactory(requireAdmin)
+        .Produces(StatusCodes.Status200OK)
+        .Produces(StatusCodes.Status502BadGateway)
+        .WithName("PreviewEmailTemplate");
+
         return app;
     }
 
@@ -211,7 +263,7 @@ public static class EmailTemplateRoutes
             new EmailTemplate
             {
                 Name = "digest",
-                Subject = "Your Weekly PatchNotes Digest — {{count}} updates",
+                Subject = "Your Weekly PatchNotes Digest — {{count}} packages",
                 JsxSource = DigestJsx,
             },
         };
@@ -257,7 +309,7 @@ public static class EmailTemplateRoutes
     private const string DigestJsx = """
         import { Html, Head, Body, Container, Section, Heading, Text, Hr, Link } from "@react-email/components";
 
-        export default function DigestEmail({ name = "there", releases = [] }) {
+        export default function DigestEmail({ name = "there", packages = [] }) {
           return (
             <Html>
               <Head />
@@ -270,11 +322,13 @@ public static class EmailTemplateRoutes
                     <Text style={{ color: "#4a4a4a", fontSize: "16px", lineHeight: "26px" }}>
                       Hi {name}, here's what happened this week with the packages you're watching:
                     </Text>
-                    {releases.length > 0 ? (
+                    {packages.length > 0 ? (
                       <ul style={{ padding: "0 0 0 20px" }}>
-                        {releases.map((r, i) => (
+                        {packages.map((p, i) => (
                           <li key={i} style={{ color: "#4a4a4a", fontSize: "16px", lineHeight: "26px", marginBottom: "8px" }}>
-                            <strong>{r.packageName} {r.version}</strong>: {r.summary}
+                            <strong>{p.packageName}</strong>{" "}
+                            ({p.releaseCount} {p.releaseCount === 1 ? "release" : "releases"},{" "}
+                            {p.releaseCount === 1 ? p.latestVersion : `${p.oldestVersion} → ${p.latestVersion}`}): {p.summary}
                           </li>
                         ))}
                       </ul>
@@ -312,3 +366,5 @@ public class EmailTemplateDto
 public record UpdateEmailTemplateRequest(string? Subject, string? JsxSource);
 
 public record SendTestEmailRequest(string RecipientEmail, JsonElement TestData);
+
+public record PreviewTemplateRequest(string JsxSource, Dictionary<string, object>? Props);

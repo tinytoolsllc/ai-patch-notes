@@ -101,22 +101,37 @@ export async function sendDigest(
         let skippedCount = 0;
 
         for (const user of users) {
-            const releases: Array<{ packageName: string; version: string; summary: string }> = [];
+            const packages: Array<{
+                packageName: string;
+                releaseCount: number;
+                latestVersion: string;
+                oldestVersion: string;
+                summary: string;
+            }> = [];
 
             for (const watch of user.Watchlists) {
-                for (const release of watch.Packages.Releases) {
-                    const matchingSummary = watch.Packages.ReleaseSummaries.find(
-                        (s) => s.MajorVersion === release.MajorVersion && s.IsPrerelease === release.IsPrerelease
-                    );
-                    releases.push({
-                        packageName: watch.Packages.Name,
-                        version: release.Tag,
-                        summary: matchingSummary?.Summary ?? "",
-                    });
-                }
+                const releases = watch.Packages.Releases;
+                if (releases.length === 0) continue;
+
+                // Releases should be ordered desc by PublishedAt from the query (line 54),
+                // but sort by Tag as a safety net in case the query shape changes.
+                const sorted = [...releases].sort((a, b) => b.Tag.localeCompare(a.Tag, undefined, { numeric: true }));
+                const latestRelease = sorted[0];
+                const oldestRelease = sorted[sorted.length - 1];
+                const matchingSummary = watch.Packages.ReleaseSummaries.find(
+                    (s) => s.MajorVersion === latestRelease.MajorVersion && s.IsPrerelease === latestRelease.IsPrerelease
+                );
+
+                packages.push({
+                    packageName: watch.Packages.Name,
+                    releaseCount: releases.length,
+                    latestVersion: latestRelease.Tag,
+                    oldestVersion: oldestRelease.Tag,
+                    summary: matchingSummary?.Summary ?? "",
+                });
             }
 
-            if (releases.length === 0) {
+            if (packages.length === 0) {
                 skippedCount++;
                 continue;
             }
@@ -134,41 +149,46 @@ export async function sendDigest(
                 try {
                     html = await renderTemplate(template.JsxSource, {
                         name: user.Name ?? "there",
-                        releases,
+                        packages,
                     });
                     subject = interpolateSubject(template.Subject, {
                         name: user.Name ?? "there",
-                        count: String(releases.length),
+                        count: String(packages.length),
                     });
                 } catch (renderErr) {
                     context.warn(`Failed to render digest template for ${user.Email}, using fallback:`, renderErr);
-                    html = fallbackDigestHtml(user.Name, releases);
-                    subject = sanitizeSubject(`Your Weekly PatchNotes Digest — ${releases.length} updates`);
+                    html = fallbackDigestHtml(user.Name, packages);
+                    subject = sanitizeSubject(`Your Weekly PatchNotes Digest — ${packages.length} packages`);
                 }
             } else {
-                html = fallbackDigestHtml(user.Name, releases);
-                subject = sanitizeSubject(`Your Weekly PatchNotes Digest — ${releases.length} updates`);
+                html = fallbackDigestHtml(user.Name, packages);
+                subject = sanitizeSubject(`Your Weekly PatchNotes Digest — ${packages.length} packages`);
             }
 
+            // Email is guaranteed non-null here — validated by isValidEmail above
+            const email = user.Email!;
             try {
+                const toAddress = user.Name
+                    ? `${user.Name} <${email}>`
+                    : email;
                 const { error } = await resend.emails.send({
                     from: FROM_ADDRESS,
-                    to: user.Email!,
+                    to: toAddress,
                     subject,
                     html,
                 });
 
                 if (error) {
-                    context.error(`Failed to send digest to ${user.Email}:`, error);
-                    failures.push({ email: user.Email!, error });
+                    context.error(`Failed to send digest to ${email}:`, error);
+                    failures.push({ email, error });
                 } else {
                     sentCount++;
-                    context.log(`Digest sent to ${user.Email}`);
+                    context.log(`Digest sent to ${email}`);
                 }
             } catch (err) {
-                context.error(`Error sending to ${user.Email}:`, err);
-                trackException(err, { operation: "sendDigest", recipient: user.Email! });
-                failures.push({ email: user.Email!, error: err });
+                context.error(`Error sending to ${email}:`, err);
+                trackException(err, { operation: "sendDigest", recipient: email });
+                failures.push({ email, error: err });
             }
         }
 
@@ -206,16 +226,21 @@ export async function sendDigest(
 
 function fallbackDigestHtml(
     name: string | null,
-    releases: Array<{ packageName: string; version: string; summary: string }>
+    packages: Array<{ packageName: string; releaseCount: number; latestVersion: string; oldestVersion: string; summary: string }>
 ): string {
-    const releaseList = releases
-        .map((r) => `<li><strong>${escapeHtml(r.packageName)} ${escapeHtml(r.version)}</strong>: ${escapeHtml(r.summary)}</li>`)
+    const packageList = packages
+        .map((p) => {
+            const versionRange = p.releaseCount === 1
+                ? escapeHtml(p.latestVersion)
+                : `${escapeHtml(p.oldestVersion)} → ${escapeHtml(p.latestVersion)}`;
+            return `<li><strong>${escapeHtml(p.packageName)}</strong> (${p.releaseCount} ${p.releaseCount === 1 ? "release" : "releases"}, ${versionRange}): ${escapeHtml(p.summary)}</li>`;
+        })
         .join("\n");
 
     return `
             <h1>Your Weekly PatchNotes Digest</h1>
             <p>Hi ${escapeHtml(name ?? "there")}, here's what happened this week with the packages you're watching:</p>
-            <ul>${releaseList}</ul>
+            <ul>${packageList}</ul>
             <p><a href="${APP_BASE_URL}">View all updates on PatchNotes</a></p>
             ${emailFooter()}
         `;
