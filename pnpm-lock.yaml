@@ -106,8 +106,8 @@ importers:
   patchnotes-web:
     dependencies:
       '@stytch/react':
-        specifier: ^20.0.1
-        version: 20.0.2(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+        specifier: ^20.0.3
+        version: 20.0.3(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       '@tanstack/react-pacer':
         specifier: ^0.20.0
         version: 0.20.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
@@ -1728,8 +1728,8 @@ packages:
   '@standard-schema/spec@1.1.0':
     resolution: {integrity: sha512-l2aFy5jALhniG5HgqrD6jXLi/rUWrKvqN/qJx6yoJsgKhblVd+iqqU4RCXavm/jPityDo5TCvKMnpjKnOriy0w==}
 
-  '@stytch/react@20.0.2':
-    resolution: {integrity: sha512-d15pdCAahhOvNsI3D2znBmLQx6+SgF0Vr5JVIROSG5a4R3MwjrKBVO+lUX0PfgCnTj5Qu4uY1rRSUKLWqVeFFA==}
+  '@stytch/react@20.0.3':
+    resolution: {integrity: sha512-9tjousID37WX4N/fxm/VwEnj/DlaguQ3YVWXFMNfNyIBIHmnlqjNjpWTc3my1X+MJzhl44FWhpNW1hvUwg3F/Q==}
     peerDependencies:
       react: '>= 17.0.2'
       react-dom: '>= 17.0.2'
@@ -6290,7 +6290,7 @@ snapshots:
 
   '@standard-schema/spec@1.1.0': {}
 
-  '@stytch/react@20.0.2(react-dom@19.2.4(react@19.2.4))(react@19.2.4)':
+  '@stytch/react@20.0.3(react-dom@19.2.4(react@19.2.4))(react@19.2.4)':
     dependencies:
       react: 19.2.4
       react-dom: 19.2.4(react@19.2.4)
