@@ -21,6 +21,15 @@ gh pr list --author app/dependabot
 
 If no PRs exist, inform the user and stop.
 
+## Blocked Packages (DO NOT merge)
+
+These packages have major version bumps that are **incompatible** — skip any PRs for them:
+
+- **nanoid >=4.0.0** (patchnotes-email) — v4+/v5+ is ESM-only, incompatible with CJS build
+- **Microsoft.ApplicationInsights.WorkerService >=3.0.0** (NuGet) — v3 removes `ITelemetryInitializer`, crashes the Functions worker
+
+These are also configured as `ignore` rules in `.github/dependabot.yml`, but if a PR slips through, do not merge it.
+
 ## Step 2: Fetch and Merge Locally
 
 1. Fetch all remote branches:
@@ -69,7 +78,14 @@ After all merges, regenerate lock files to ensure consistency:
 pnpm install
 ```
 
-## Step 5: Build and Validate
+## Step 5: Regenerate API Types (if orval was updated)
+
+If `orval` was bumped, regenerate the API client types so the version comment matches:
+```bash
+cd patchnotes-web && pnpm generate:api && cd ..
+```
+
+## Step 6: Build and Validate
 
 ### Frontend (patchnotes-web)
 ```bash
@@ -84,7 +100,7 @@ dotnet test PatchNotes.slnx
 
 If any checks fail, fix the issues before proceeding.
 
-## Step 6: Commit and Push
+## Step 7: Commit and Push
 
 `main` is protected, so push to a branch and create a PR.
 
@@ -106,7 +122,7 @@ If any checks fail, fix the issues before proceeding.
    gh pr create --title "chore(deps): merge dependabot updates" --body "Merges all pending dependabot PRs and regenerates pnpm lock file."
    ```
 
-## Step 7: Monitor CI/Deploy Actions
+## Step 8: Monitor CI/Deploy Actions
 
 After pushing, monitor the GitHub Actions workflows:
 

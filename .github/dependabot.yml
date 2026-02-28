@@ -50,6 +50,10 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+    ignore:
+      # v3 removes ITelemetryInitializer, crashes the Functions worker
+      - dependency-name: "Microsoft.ApplicationInsights.WorkerService"
+        versions: [">=3.0.0"]
     groups:
       dotnet:
         patterns:
