@@ -24,7 +24,7 @@
     "@prisma/client": "^7.4.1",
     "@react-email/components": "^1.0.8",
     "@react-email/render": "^2.0.4",
-    "applicationinsights": "^3.5.1",
+    "applicationinsights": "^3.14.0",
     "date-fns": "^4.1.0",
     "esbuild": "^0.27.3",
     "nanoid": "^3.3.11",
