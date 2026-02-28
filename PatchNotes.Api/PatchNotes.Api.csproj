@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Markdig" Version="1.0.0" />
+    <PackageReference Include="Markdig" Version="1.0.1" />
     <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="3.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.3" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.3">
@@ -15,7 +15,7 @@
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.3" />
-    <PackageReference Include="Stripe.net" Version="50.3.0" />
+    <PackageReference Include="Stripe.net" Version="50.4.0" />
     <PackageReference Include="Stytch.net" Version="3.2.0" />
     <PackageReference Include="Svix" Version="1.86.0" />
   </ItemGroup>
