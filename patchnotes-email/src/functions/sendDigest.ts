@@ -1,10 +1,10 @@
 // Telemetry must be imported first to patch HTTP for dependency tracking
 import { trackEvent, trackException, flush } from "../lib/telemetry.js";
 import { app, InvocationContext, Timer } from "@azure/functions";
-import { resend, FROM_ADDRESS, APP_BASE_URL, escapeHtml, emailFooter, sanitizeSubject, isValidEmail } from "../lib/resend.js";
+import { resend, FROM_ADDRESS, isValidEmail } from "../lib/resend.js";
 import { getPrismaClient } from "../lib/prisma.js";
 import { renderTemplate, interpolateSubject } from "../lib/templateRenderer.js";
-import { subDays, getDay, getHours } from "date-fns";
+import { subDays, getDay, getHours, format } from "date-fns";
 import { UTCDate } from "@date-fns/utc";
 import { nanoid } from "nanoid";
 
@@ -92,10 +92,18 @@ export async function sendDigest(
 
         // Fetch digest template once for all users
         const template = await db.emailTemplates.findUnique({ where: { Name: "digest" } });
-        if (template) {
-            context.log("Using digest template from DB");
-        } else {
-            context.log("No digest template found in DB, using fallback for all users");
+        if (!template) {
+            context.error("No digest template found in DB — skipping all digest emails");
+            trackEvent("DigestCompleted", {
+                outcome: "no_template",
+                durationMs: (Date.now() - startedAt).toString(),
+                usersQueried: users.length.toString(),
+                emailsSent: "0",
+                emailsFailed: "0",
+                emailsSkipped: users.length.toString(),
+            });
+            await flush();
+            return;
         }
 
         const failures: Array<{ email: string; error: unknown }> = [];
@@ -144,34 +152,32 @@ export async function sendDigest(
                 continue;
             }
 
-            let html: string;
-            let subject: string;
-
-            if (template) {
-                try {
-                    html = await renderTemplate(template.JsxSource, {
-                        name: user.Name ?? "there",
-                        packages,
-                    });
-                    subject = interpolateSubject(template.Subject, {
-                        name: user.Name ?? "there",
-                        count: String(packages.length),
-                    });
-                } catch (renderErr) {
-                    context.warn(`Failed to render digest template for ${user.Email}, using fallback:`, renderErr);
-                    html = fallbackDigestHtml(user.Name, packages);
-                    subject = sanitizeSubject(`Your Weekly PatchNotes Digest — ${packages.length} packages`);
-                }
-            } else {
-                html = fallbackDigestHtml(user.Name, packages);
-                subject = sanitizeSubject(`Your Weekly PatchNotes Digest — ${packages.length} packages`);
-            }
-
             // Email is guaranteed non-null here — validated by isValidEmail above
             const email = user.Email!;
 
-            // Insert pending record before attempting send
+            // Generate ID before rendering so it can be included in the template
             const sentEmailId = nanoid();
+
+            let html: string;
+            let subject: string;
+
+            try {
+                html = await renderTemplate(template.JsxSource, {
+                    name: user.Name ?? "there",
+                    packages,
+                    emailId: sentEmailId,
+                });
+                subject = interpolateSubject(template.Subject, {
+                    name: user.Name ?? "there",
+                    count: String(packages.length),
+                    date: format(now, "MMM d"),
+                });
+            } catch (renderErr) {
+                context.error(`Failed to render digest template for ${email}:`, renderErr);
+                trackException(renderErr, { operation: "sendDigest", recipient: email });
+                failures.push({ email, error: renderErr });
+                continue;
+            }
             try {
                 await db.sentDigestEmails.create({
                     data: {
@@ -273,28 +279,6 @@ export async function sendDigest(
         await flush();
         throw err;
     }
-}
-
-function fallbackDigestHtml(
-    name: string | null,
-    packages: Array<{ packageName: string; releaseCount: number; latestVersion: string; oldestVersion: string; summary: string }>
-): string {
-    const packageList = packages
-        .map((p) => {
-            const versionRange = p.releaseCount === 1
-                ? escapeHtml(p.latestVersion)
-                : `${escapeHtml(p.oldestVersion)} → ${escapeHtml(p.latestVersion)}`;
-            return `<li><strong>${escapeHtml(p.packageName)}</strong> (${p.releaseCount} ${p.releaseCount === 1 ? "release" : "releases"}, ${versionRange}): ${escapeHtml(p.summary)}</li>`;
-        })
-        .join("\n");
-
-    return `
-            <h1>Your Weekly PatchNotes Digest</h1>
-            <p>Hi ${escapeHtml(name ?? "there")}, here's what happened this week with the packages you're watching:</p>
-            <ul>${packageList}</ul>
-            <p><a href="${APP_BASE_URL}">View all updates on PatchNotes</a></p>
-            ${emailFooter()}
-        `;
 }
 
 // Runs every hour, on the hour
