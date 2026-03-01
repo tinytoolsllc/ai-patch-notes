@@ -7,6 +7,13 @@
 import * as zod from 'zod';
 
 
+export const GetWatchlistTemplatesResponseItem = zod.object({
+  "name": zod.string(),
+  "description": zod.string(),
+  "packages": zod.array(zod.string()).optional()
+})
+export const GetWatchlistTemplatesResponse = zod.array(GetWatchlistTemplatesResponseItem)
+
 export const GetWatchlistResponseItem = zod.object({
   "id": zod.string(),
   "name": zod.string(),

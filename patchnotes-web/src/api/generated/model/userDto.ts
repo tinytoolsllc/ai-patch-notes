@@ -17,4 +17,5 @@ export interface UserDto {
   lastLoginAt?: string | null;
   isPro?: boolean;
   isAdmin?: boolean;
+  isNewUser?: boolean;
 }

@@ -18,6 +18,7 @@ import {
 import { useGetRelease, useGetReleases } from './generated/releases/releases'
 import {
   useGetWatchlist,
+  useGetWatchlistTemplates,
   getGetWatchlistQueryKey,
   setWatchlist,
   addToWatchlist,
@@ -50,7 +51,10 @@ import {
   GetReleaseResponse,
   GetReleasesResponse,
 } from './generated/releases/releases.zod'
-import { GetWatchlistResponse } from './generated/watchlist/watchlist.zod'
+import {
+  GetWatchlistResponse,
+  GetWatchlistTemplatesResponse,
+} from './generated/watchlist/watchlist.zod'
 
 // ── Helpers ─────────────────────────────────────────────────
 
@@ -253,6 +257,15 @@ export function useWatchlist() {
     query: {
       enabled: !!user,
       select: (res) => validateResponse(GetWatchlistResponse, res.data),
+    },
+  })
+}
+
+export function useWatchlistTemplates() {
+  return useGetWatchlistTemplates({
+    query: {
+      select: (res) =>
+        validateResponse(GetWatchlistTemplatesResponse, res.data),
     },
   })
 }

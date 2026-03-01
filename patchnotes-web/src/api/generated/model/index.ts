@@ -54,3 +54,4 @@ export * from './updatePackageRequest';
 export * from './updateUserRequest';
 export * from './userDto';
 export * from './watchlistPackageDto';
+export * from './watchlistTemplateDto';

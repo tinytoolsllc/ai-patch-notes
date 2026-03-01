@@ -1,6 +1,7 @@
 using System.Net.Http.Headers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using PatchNotes.Data;
 using PatchNotes.Api.Stytch;
 
@@ -16,6 +17,21 @@ public static class WatchlistRoutes
         var requireAuth = RouteUtils.CreateAuthFilter();
 
         var group = app.MapGroup("/api/watchlist").WithTags("Watchlist");
+
+        // GET /api/watchlist/templates — return available watchlist templates (public)
+        group.MapGet("/templates", (IOptions<WatchlistTemplateOptions> options) =>
+        {
+            var templates = options.Value.Templates.Select(t => new WatchlistTemplateDto
+            {
+                Name = t.Name,
+                Description = t.Description,
+                Packages = t.Packages
+            }).ToArray();
+
+            return Results.Ok(templates);
+        })
+        .Produces<WatchlistTemplateDto[]>(StatusCodes.Status200OK)
+        .WithName("GetWatchlistTemplates");
 
         // GET /api/watchlist — return list of package IDs the current user is watching
         group.MapGet("/", async (HttpContext httpContext, PatchNotesDbContext db) =>
@@ -317,6 +333,13 @@ public record WatchlistPackageDto(
 );
 
 public record SetWatchlistRequest(string[] PackageIds);
+
+public class WatchlistTemplateDto
+{
+    public required string Name { get; set; }
+    public required string Description { get; set; }
+    public string[] Packages { get; set; } = [];
+}
 
 public class AddFromGitHubResponse
 {

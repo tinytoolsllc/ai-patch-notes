@@ -26,13 +26,118 @@ import type {
 import type {
   AddFromGitHubResponse,
   SetWatchlistRequest,
-  WatchlistPackageDto
+  WatchlistPackageDto,
+  WatchlistTemplateDto
 } from '.././model';
 
 import { customFetch } from '../../custom-fetch';
 
 
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
+
+
+
+export type getWatchlistTemplatesResponse200 = {
+  data: WatchlistTemplateDto[]
+  status: 200
+}
+
+export type getWatchlistTemplatesResponseSuccess = (getWatchlistTemplatesResponse200) & {
+  headers: Headers;
+};
+;
+
+export type getWatchlistTemplatesResponse = (getWatchlistTemplatesResponseSuccess)
+
+export const getGetWatchlistTemplatesUrl = () => {
+
+
+  
+
+  return `/api/watchlist/templates`
+}
+
+export const getWatchlistTemplates = async ( options?: RequestInit): Promise<getWatchlistTemplatesResponse> => {
+  
+  return customFetch<getWatchlistTemplatesResponse>(getGetWatchlistTemplatesUrl(),
+  {      
+    ...options,
+    method: 'GET'
+    
+    
+  }
+);}
+  
+
+
+
+
+export const getGetWatchlistTemplatesQueryKey = () => {
+    return [
+    `/api/watchlist/templates`
+    ] as const;
+    }
+
+    
+export const getGetWatchlistTemplatesQueryOptions = <TData = Awaited<ReturnType<typeof getWatchlistTemplates>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getWatchlistTemplates>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetWatchlistTemplatesQueryKey();
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getWatchlistTemplates>>> = ({ signal }) => getWatchlistTemplates({ signal, ...requestOptions });
+
+      
+
+      
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getWatchlistTemplates>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetWatchlistTemplatesQueryResult = NonNullable<Awaited<ReturnType<typeof getWatchlistTemplates>>>
+export type GetWatchlistTemplatesQueryError = unknown
+
+
+export function useGetWatchlistTemplates<TData = Awaited<ReturnType<typeof getWatchlistTemplates>>, TError = unknown>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getWatchlistTemplates>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getWatchlistTemplates>>,
+          TError,
+          Awaited<ReturnType<typeof getWatchlistTemplates>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetWatchlistTemplates<TData = Awaited<ReturnType<typeof getWatchlistTemplates>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getWatchlistTemplates>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getWatchlistTemplates>>,
+          TError,
+          Awaited<ReturnType<typeof getWatchlistTemplates>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetWatchlistTemplates<TData = Awaited<ReturnType<typeof getWatchlistTemplates>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getWatchlistTemplates>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetWatchlistTemplates<TData = Awaited<ReturnType<typeof getWatchlistTemplates>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getWatchlistTemplates>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetWatchlistTemplatesQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
 
 
 

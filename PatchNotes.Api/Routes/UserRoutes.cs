@@ -113,7 +113,8 @@ public static class UserRoutes
                 CreatedAt = user.CreatedAt,
                 LastLoginAt = user.LastLoginAt,
                 IsPro = user.IsPro || isAdmin,
-                IsAdmin = isAdmin
+                IsAdmin = isAdmin,
+                IsNewUser = isNewUser
             });
         })
         .AddEndpointFilterFactory(RouteUtils.CreateAuthFilter())
@@ -281,6 +282,7 @@ public class UserDto
     public DateTimeOffset? LastLoginAt { get; set; }
     public bool IsPro { get; set; }
     public bool IsAdmin { get; set; }
+    public bool IsNewUser { get; set; }
 }
 
 public record UpdateUserRequest(string? Name);

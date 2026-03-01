@@ -45,6 +45,7 @@ if (string.IsNullOrEmpty(stripeSecretKey))
 StripeConfiguration.ApiKey = stripeSecretKey;
 
 builder.Services.Configure<DefaultWatchlistOptions>(builder.Configuration.GetSection(DefaultWatchlistOptions.SectionName));
+builder.Services.Configure<WatchlistTemplateOptions>(builder.Configuration.GetSection(WatchlistTemplateOptions.SectionName));
 
 if (builder.Environment.IsProduction() || builder.Environment.IsStaging())
 {

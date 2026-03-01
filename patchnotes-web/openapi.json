@@ -819,6 +819,29 @@
         }
       }
     },
+    "/api/watchlist/templates": {
+      "get": {
+        "tags": [
+          "Watchlist"
+        ],
+        "operationId": "GetWatchlistTemplates",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/WatchlistTemplateDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/watchlist": {
       "get": {
         "tags": [
@@ -2471,6 +2494,9 @@
           },
           "isAdmin": {
             "type": "boolean"
+          },
+          "isNewUser": {
+            "type": "boolean"
           }
         }
       },
@@ -2501,6 +2527,27 @@
               "null",
               "string"
             ]
+          }
+        }
+      },
+      "WatchlistTemplateDto": {
+        "required": [
+          "name",
+          "description"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "packages": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           }
         }
       }
