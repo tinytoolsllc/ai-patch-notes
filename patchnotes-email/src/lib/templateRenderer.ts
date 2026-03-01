@@ -35,7 +35,6 @@ export async function renderTemplate(
     });
 
     const moduleObj: { exports: Record<string, unknown> } = { exports: {} };
-    // eslint-disable-next-line no-new-func -- Intentional: evaluating admin-seeded DB templates
     const fn = new Function("module", "exports", "require", "React", code);
     fn(moduleObj, moduleObj.exports, sandboxRequire, React);
 

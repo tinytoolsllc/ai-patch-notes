@@ -77,8 +77,14 @@ describe("sendDigest", () => {
     beforeEach(() => {
         vi.clearAllMocks();
         userIdCounter = 0;
-        // Default: no template in DB, use fallback HTML
-        mockFindUnique.mockResolvedValue(null);
+        // Default: template exists in DB
+        mockFindUnique.mockResolvedValue({
+            Name: "digest",
+            Subject: "Your digest for {{date}} — {{count}} packages",
+            JsxSource: "<fake-jsx/>",
+        });
+        mockRenderTemplate.mockResolvedValue("<html>rendered</html>");
+        mockInterpolateSubject.mockImplementation((subject: string) => subject);
         // Default: DB operations succeed
         mockCreate.mockResolvedValue({});
         mockUpdate.mockResolvedValue({});
@@ -249,15 +255,7 @@ describe("sendDigest", () => {
         expect(mockSend).toHaveBeenCalledTimes(3);
     });
 
-    it("uses DB template when available", async () => {
-        const template = {
-            Name: "digest",
-            Subject: "Digest for {{name}} — {{count}} updates",
-            JsxSource: "<fake-jsx/>",
-        };
-        mockFindUnique.mockResolvedValue(template);
-        mockRenderTemplate.mockResolvedValue("<html>rendered</html>");
-        mockInterpolateSubject.mockReturnValue("Digest for Alice — 1 updates");
+    it("uses DB template with emailId and date", async () => {
         mockFindMany.mockResolvedValue([
             makeUser("a@test.com", "Alice", [{ tag: "v1.0.0", major: 1 }]),
         ]);
@@ -269,16 +267,11 @@ describe("sendDigest", () => {
         expect(mockRenderTemplate).toHaveBeenCalledWith("<fake-jsx/>", {
             name: "Alice",
             packages: [{ packageName: "test-package", releaseCount: 1, latestVersion: "v1.0.0", oldestVersion: "v1.0.0", summary: "Summary for v1.0.0" }],
+            emailId: expect.any(String),
         });
         expect(mockInterpolateSubject).toHaveBeenCalledWith(
-            "Digest for {{name}} — {{count}} updates",
-            { name: "Alice", count: "1" }
-        );
-        expect(mockSend).toHaveBeenCalledWith(
-            expect.objectContaining({
-                html: "<html>rendered</html>",
-                subject: "Digest for Alice — 1 updates",
-            })
+            "Your digest for {{date}} — {{count}} packages",
+            { name: "Alice", count: "1", date: "Jan 7" }
         );
     });
 
@@ -310,37 +303,53 @@ describe("sendDigest", () => {
 
         await sendDigest(makeTimer(), context);
 
-        const sentHtml = mockSend.mock.calls[0][0].html;
-        // Should show version range, not individual entries
-        expect(sentHtml).toContain("v1.1.0");
-        expect(sentHtml).toContain("v1.3.0");
-        expect(sentHtml).toContain("3 releases");
-        expect(sentHtml).toContain("Grouped summary");
+        expect(mockRenderTemplate).toHaveBeenCalledWith(
+            "<fake-jsx/>",
+            expect.objectContaining({
+                packages: [
+                    expect.objectContaining({
+                        packageName: "my-lib",
+                        releaseCount: 3,
+                        latestVersion: "v1.3.0",
+                        oldestVersion: "v1.1.0",
+                        summary: "Grouped summary",
+                    }),
+                ],
+            })
+        );
     });
 
-    it("falls back to hardcoded HTML when template rendering fails", async () => {
-        mockFindUnique.mockResolvedValue({
-            Name: "digest",
-            Subject: "Digest",
-            JsxSource: "bad-jsx",
-        });
-        mockRenderTemplate.mockRejectedValue(new Error("render failed"));
+    it("returns early when no template exists in DB", async () => {
+        mockFindUnique.mockResolvedValue(null);
         mockFindMany.mockResolvedValue([
             makeUser("a@test.com", "Alice", [{ tag: "v1.0.0", major: 1 }]),
         ]);
-        mockSend.mockResolvedValue({ data: { id: "resend-id-123" }, error: null });
         const context = makeContext();
 
         await sendDigest(makeTimer(), context);
 
-        expect(context.warn).toHaveBeenCalledWith(
-            expect.stringContaining("Failed to render digest template"),
+        expect(mockSend).not.toHaveBeenCalled();
+        expect(context.error).toHaveBeenCalledWith(
+            expect.stringContaining("No digest template found in DB")
+        );
+    });
+
+    it("skips user and records failure when template rendering fails", async () => {
+        mockRenderTemplate.mockRejectedValue(new Error("render failed"));
+        mockFindMany.mockResolvedValue([
+            makeUser("a@test.com", "Alice", [{ tag: "v1.0.0", major: 1 }]),
+            makeUser("b@test.com", "Bob", [{ tag: "v2.0.0", major: 2 }]),
+        ]);
+        const context = makeContext();
+
+        await expect(sendDigest(makeTimer(), context)).rejects.toThrow(
+            "Digest send partially failed"
+        );
+        expect(mockSend).not.toHaveBeenCalled();
+        expect(context.error).toHaveBeenCalledWith(
+            expect.stringContaining("Failed to render digest template for a@test.com"),
             expect.any(Error)
         );
-        expect(mockSend).toHaveBeenCalledTimes(1);
-        // Should still send with fallback HTML
-        const sentHtml = mockSend.mock.calls[0][0].html;
-        expect(sentHtml).toContain("Your Weekly PatchNotes Digest");
     });
 
     it("inserts a pending SentDigestEmail record before sending", async () => {
