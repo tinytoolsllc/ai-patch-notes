@@ -842,42 +842,6 @@
         }
       }
     },
-    "/api/watchlist/from-template": {
-      "post": {
-        "tags": [
-          "Watchlist"
-        ],
-        "operationId": "ApplyWatchlistTemplate",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ApplyWatchlistTemplateRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApplyWatchlistTemplateResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad Request"
-          },
-          "404": {
-            "description": "Not Found"
-          }
-        }
-      }
-    },
     "/api/watchlist": {
       "get": {
         "tags": [
@@ -925,6 +889,42 @@
                   "items": {
                     "type": "string"
                   }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
+    "/api/watchlist/from-template": {
+      "post": {
+        "tags": [
+          "Watchlist"
+        ],
+        "operationId": "ApplyWatchlistTemplate",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApplyWatchlistTemplateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApplyWatchlistTemplateResponse"
                 }
               }
             }
@@ -1455,6 +1455,28 @@
           }
         }
       },
+      "ApplyWatchlistTemplateRequest": {
+        "required": [
+          "templateName"
+        ],
+        "type": "object",
+        "properties": {
+          "templateName": {
+            "type": "string"
+          }
+        }
+      },
+      "ApplyWatchlistTemplateResponse": {
+        "type": "object",
+        "properties": {
+          "packageIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
       "BulkAddPackageItem": {
         "required": [
           "githubOwner",
@@ -1712,7 +1734,7 @@
           }
         }
       },
-      "JsonElement": { },
+      "JsonElement": {},
       "OwnerPackageDto": {
         "required": [
           "id",
@@ -2585,28 +2607,6 @@
               "type": "string"
             }
           },
-          "packageIds": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          }
-        }
-      },
-      "ApplyWatchlistTemplateRequest": {
-        "required": [
-          "templateName"
-        ],
-        "type": "object",
-        "properties": {
-          "templateName": {
-            "type": "string"
-          }
-        }
-      },
-      "ApplyWatchlistTemplateResponse": {
-        "type": "object",
-        "properties": {
           "packageIds": {
             "type": "array",
             "items": {
