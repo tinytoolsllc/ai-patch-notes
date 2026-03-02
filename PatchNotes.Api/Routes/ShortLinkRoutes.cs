@@ -5,6 +5,8 @@ namespace PatchNotes.Api.Routes;
 
 public static class ShortLinkRoutes
 {
+    private const string SiteBaseUrl = "https://www.myreleasenotes.ai";
+
     public static WebApplication MapShortLinkRoutes(this WebApplication app)
     {
         // GET /s/{id} — resolve a package or release ID and redirect to its SPA page
@@ -20,7 +22,7 @@ public static class ShortLinkRoutes
             if (release != null)
             {
                 httpContext.Response.Headers.CacheControl = "public, max-age=86400";
-                return Results.Redirect($"/releases/{release.Id}", permanent: true);
+                return Results.Redirect($"{SiteBaseUrl}/releases/{release.Id}", permanent: true);
             }
 
             // Then check packages
@@ -33,7 +35,7 @@ public static class ShortLinkRoutes
             if (package != null)
             {
                 httpContext.Response.Headers.CacheControl = "public, max-age=86400";
-                return Results.Redirect($"/packages/{package.GithubOwner}/{package.GithubRepo}", permanent: true);
+                return Results.Redirect($"{SiteBaseUrl}/packages/{package.GithubOwner}/{package.GithubRepo}", permanent: true);
             }
 
             return Results.NotFound();
