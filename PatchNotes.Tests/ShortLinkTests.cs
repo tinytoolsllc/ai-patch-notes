@@ -65,7 +65,7 @@ public class ShortLinkTests : IAsyncLifetime
         var response = await _client.GetAsync($"/s/{_releaseId}");
 
         response.StatusCode.Should().Be(HttpStatusCode.MovedPermanently);
-        response.Headers.Location!.ToString().Should().Be($"/releases/{_releaseId}");
+        response.Headers.Location!.ToString().Should().Be($"https://www.myreleasenotes.ai/releases/{_releaseId}");
         response.Headers.CacheControl!.Public.Should().BeTrue();
         response.Headers.CacheControl!.MaxAge.Should().Be(TimeSpan.FromSeconds(86400));
     }
@@ -76,7 +76,7 @@ public class ShortLinkTests : IAsyncLifetime
         var response = await _client.GetAsync($"/s/{_packageId}");
 
         response.StatusCode.Should().Be(HttpStatusCode.MovedPermanently);
-        response.Headers.Location!.ToString().Should().Be($"/packages/{_packageOwner}/{_packageRepo}");
+        response.Headers.Location!.ToString().Should().Be($"https://www.myreleasenotes.ai/packages/{_packageOwner}/{_packageRepo}");
         response.Headers.CacheControl!.Public.Should().BeTrue();
     }
 
