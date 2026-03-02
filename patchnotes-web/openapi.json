@@ -6,7 +6,7 @@
   },
   "servers": [
     {
-      "url": "http://localhost:5000/"
+      "url": "http://localhost:2101/"
     }
   ],
   "paths": {
@@ -30,6 +30,32 @@
         "responses": {
           "200": {
             "description": "OK"
+          }
+        }
+      }
+    },
+    "/s/{id}": {
+      "get": {
+        "tags": [
+          "ShortLinks"
+        ],
+        "operationId": "ResolveShortLink",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "301": {
+            "description": "Moved Permanently"
+          },
+          "404": {
+            "description": "Not Found"
           }
         }
       }
@@ -2483,6 +2509,9 @@
   "tags": [
     {
       "name": "PatchNotes.Api"
+    },
+    {
+      "name": "ShortLinks"
     },
     {
       "name": "Packages"
