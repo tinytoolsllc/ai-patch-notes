@@ -110,7 +110,7 @@ function HeroBodyMobile() {
           </span>
         ))}
       </div>
-      <Link to="/login" search={{}}>
+      <Link to="/login" search={{ returnUrl: undefined }}>
         <Button className="px-6 text-xs">Get Started Free</Button>
       </Link>
     </div>
@@ -135,7 +135,7 @@ function HeroBodyWeb() {
           </div>
         ))}
       </div>
-      <Link to="/login" search={{}} className="mt-3">
+      <Link to="/login" search={{ returnUrl: undefined }} className="mt-3">
         <Button className="px-6 text-xs">Get Started Free</Button>
       </Link>
     </div>
@@ -263,7 +263,7 @@ function HowItWorksBodyWeb() {
           </div>
         ))}
       </div>
-      <Link to="/login" search={{}} className="mt-3">
+      <Link to="/login" search={{ returnUrl: undefined }} className="mt-3">
         <Button variant="secondary" className="px-5 text-xs">
           Create your free account
         </Button>
