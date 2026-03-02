@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link } from '@tanstack/react-router'
+import { Link, useLocation } from '@tanstack/react-router'
 import { useStytchUser } from '@stytch/react'
 import {
   ChevronLeft,
@@ -97,6 +97,7 @@ const highlights = [
 // ---------------------------------------------------------------------------
 
 function HeroBodyMobile() {
+  const location = useLocation()
   return (
     <div className="flex flex-col items-center gap-3">
       <div className="flex flex-col gap-1.5">
@@ -110,7 +111,7 @@ function HeroBodyMobile() {
           </span>
         ))}
       </div>
-      <Link to="/login" search={{ returnUrl: undefined }}>
+      <Link to="/login" search={{ returnUrl: location.pathname }}>
         <Button className="px-6 text-xs">Get Started Free</Button>
       </Link>
     </div>
@@ -118,6 +119,7 @@ function HeroBodyMobile() {
 }
 
 function HeroBodyWeb() {
+  const location = useLocation()
   return (
     <div className="flex flex-col items-center">
       <div className="flex items-center justify-center gap-8">
@@ -135,7 +137,11 @@ function HeroBodyWeb() {
           </div>
         ))}
       </div>
-      <Link to="/login" search={{ returnUrl: undefined }} className="mt-3">
+      <Link
+        to="/login"
+        search={{ returnUrl: location.pathname }}
+        className="mt-3"
+      >
         <Button className="px-6 text-xs">Get Started Free</Button>
       </Link>
     </div>
@@ -238,6 +244,7 @@ function HowItWorksBodyMobile() {
 }
 
 function HowItWorksBodyWeb() {
+  const location = useLocation()
   return (
     <div className="flex flex-col items-center">
       <div className="flex items-center justify-center gap-8">
@@ -263,7 +270,11 @@ function HowItWorksBodyWeb() {
           </div>
         ))}
       </div>
-      <Link to="/login" search={{ returnUrl: undefined }} className="mt-3">
+      <Link
+        to="/login"
+        search={{ returnUrl: location.pathname }}
+        className="mt-3"
+      >
         <Button variant="secondary" className="px-5 text-xs">
           Create your free account
         </Button>
