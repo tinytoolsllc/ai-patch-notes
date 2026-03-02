@@ -10,6 +10,7 @@ vi.mock('@tanstack/react-router', () => ({
     </a>
   ),
   useNavigate: () => mockNavigate,
+  useLocation: () => ({ pathname: '/authenticate' }),
 }))
 
 const mockStytchUser = vi.hoisted(() => vi.fn())

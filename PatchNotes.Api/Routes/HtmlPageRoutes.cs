@@ -158,7 +158,7 @@ public static class HtmlPageRoutes
             }
 
             var bodyHtml = new StringBuilder(email.HtmlBody.Length + 512);
-            bodyHtml.Append(HtmlTemplate.Header(("Email", null)));
+            bodyHtml.Append(HtmlTemplate.Header($"/html/emails/{id}", ("Email", null)));
             bodyHtml.Append("<main><div class=\"container\">");
             bodyHtml.Append("<div class=\"card card-padded\">");
             bodyHtml.Append(email.HtmlBody);
