@@ -107,6 +107,8 @@ public static class HtmlTemplate
         .group-title { font-weight: 600; font-size: 0.875rem; }
         .group-summary { padding: 0 1.5rem 1rem; font-size: 0.875rem; color: var(--color-text-secondary); line-height: 1.5; }
         .group-meta { font-size: 0.75rem; color: var(--color-text-tertiary); }
+        .copy-link-btn { display: inline-flex; align-items: center; gap: 0.25rem; padding: 0.25rem 0.5rem; font-size: 0.75rem; color: var(--color-text-tertiary); background: none; border: 1px solid var(--color-border-default); border-radius: 0.375rem; cursor: pointer; transition: color 0.15s, border-color 0.15s; }
+        .copy-link-btn:hover { color: var(--color-text-secondary); border-color: var(--color-text-tertiary); }
 
         .release-list { border-top: 1px solid var(--color-border-default); }
         .release-item { padding: 0.75rem 1.5rem; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--color-border-default); }
