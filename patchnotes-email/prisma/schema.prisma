@@ -28,9 +28,10 @@ model Packages {
   IsSyncDisabled      Boolean            @default(dbgenerated("CONVERT([bit],(0))"), map: "DF__Packages__IsSync__787EE5A0")
   LastFailureAt       DateTime?          @db.DateTimeOffset
   LastFailureMessage  String?            @db.NVarChar(1024)
-  Releases            Releases[]
-  ReleaseSummaries    ReleaseSummaries[]
-  Watchlists          Watchlists[]
+  Releases                 Releases[]
+  ReleaseSummaries         ReleaseSummaries[]
+  Watchlists               Watchlists[]
+  WatchlistTemplatePackages WatchlistTemplatePackages[]
 }
 
 model ProcessedWebhookEvents {
@@ -129,4 +130,25 @@ model EmailTemplates {
   Subject   String   @db.NVarChar(512)
   JsxSource String   @db.NVarChar(Max)
   UpdatedAt DateTime @db.DateTimeOffset
+}
+
+model WatchlistTemplates {
+  Id               String                      @id(map: "PK_WatchlistTemplates") @default("", map: "DF__WatchlistT__Id") @db.NVarChar(21)
+  Name             String                      @unique(map: "IX_WatchlistTemplates_Name") @db.NVarChar(128)
+  Description      String                      @db.NVarChar(512)
+  SortOrder        Int
+  CreatedAt        DateTime                    @db.DateTimeOffset
+  UpdatedAt        DateTime                    @db.DateTimeOffset
+  TemplatePackages WatchlistTemplatePackages[]
+}
+
+model WatchlistTemplatePackages {
+  Id                  String             @id(map: "PK_WatchlistTemplatePackages") @default("", map: "DF__WatchlistTP__Id") @db.NVarChar(21)
+  WatchlistTemplateId String             @db.NVarChar(21)
+  PackageId           String             @db.NVarChar(21)
+  WatchlistTemplates  WatchlistTemplates @relation(fields: [WatchlistTemplateId], references: [Id], onDelete: Cascade, onUpdate: NoAction, map: "FK_WatchlistTemplatePackages_WatchlistTemplates_WatchlistTemplateId")
+  Packages            Packages           @relation(fields: [PackageId], references: [Id], onDelete: Cascade, onUpdate: NoAction, map: "FK_WatchlistTemplatePackages_Packages_PackageId")
+
+  @@unique([WatchlistTemplateId, PackageId], map: "IX_WatchlistTemplatePackages_WatchlistTemplateId_PackageId")
+  @@index([PackageId], map: "IX_WatchlistTemplatePackages_PackageId")
 }

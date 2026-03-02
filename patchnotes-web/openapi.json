@@ -1457,11 +1457,11 @@
       },
       "ApplyWatchlistTemplateRequest": {
         "required": [
-          "templateName"
+          "templateId"
         ],
         "type": "object",
         "properties": {
-          "templateName": {
+          "templateId": {
             "type": "string"
           }
         }
@@ -1734,7 +1734,7 @@
           }
         }
       },
-      "JsonElement": {},
+      "JsonElement": { },
       "OwnerPackageDto": {
         "required": [
           "id",
@@ -2590,11 +2590,15 @@
       },
       "WatchlistTemplateDto": {
         "required": [
+          "id",
           "name",
           "description"
         ],
         "type": "object",
         "properties": {
+          "id": {
+            "type": "string"
+          },
           "name": {
             "type": "string"
           },

@@ -1,7 +1,6 @@
 using System.Net.Http.Headers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using PatchNotes.Data;
 using PatchNotes.Api.Stytch;
 
@@ -19,39 +18,42 @@ public static class WatchlistRoutes
         var group = app.MapGroup("/api/watchlist").WithTags("Watchlist");
 
         // GET /api/watchlist/templates — return available watchlist templates (public)
-        group.MapGet("/templates", async (IOptions<WatchlistTemplateOptions> options, PatchNotesDbContext db) =>
+        group.MapGet("/templates", async (PatchNotesDbContext db) =>
         {
-            // Collect all unique owner/repo pairs across templates
-            var allPairs = options.Value.Templates
-                .SelectMany(t => t.Packages)
-                .Where(p => p.Contains('/'))
-                .Distinct()
-                .Select(p => { var parts = p.Split('/'); return new { Owner = parts[0], Repo = parts[1], Key = p }; })
-                .ToList();
-
-            // Single DB query to resolve all packages
-            var owners = allPairs.Select(p => p.Owner).Distinct().ToArray();
-            var repos = allPairs.Select(p => p.Repo).Distinct().ToArray();
-            var packages = await db.Packages
+            var dbTemplates = await db.WatchlistTemplates
                 .AsNoTracking()
-                .Where(p => owners.Contains(p.GithubOwner) && repos.Contains(p.GithubRepo))
-                .Select(p => new { p.Id, p.GithubOwner, p.GithubRepo })
+                .Include(t => t.TemplatePackages)
+                    .ThenInclude(tp => tp.Package)
+                .OrderBy(t => t.SortOrder)
+                .Take(8)
                 .ToListAsync();
 
-            var lookup = packages.ToDictionary(p => $"{p.GithubOwner}/{p.GithubRepo}", p => p.Id);
-
-            var templates = options.Value.Templates.Select(t => new WatchlistTemplateDto
+            var templates = dbTemplates.Select(t =>
             {
-                Name = t.Name,
-                Description = t.Description,
-                Packages = t.Packages,
-                PackageIds = t.Packages
-                    .Where(p => lookup.ContainsKey(p))
-                    .Select(p => lookup[p])
-                    .ToArray()
-            }).ToArray();
+                var sorted = t.TemplatePackages
+                    .OrderBy(tp => tp.Package.Name)
+                    .ToList();
+                return new WatchlistTemplateDto
+                {
+                    Id = t.Id,
+                    Name = t.Name,
+                    Description = t.Description,
+                    Packages = sorted.Select(tp => $"{tp.Package.GithubOwner}/{tp.Package.GithubRepo}").ToArray(),
+                    PackageIds = sorted.Select(tp => tp.PackageId).ToArray(),
+                };
+            }).ToList();
 
-            return Results.Ok(templates);
+            // Always append the hardcoded "Empty" template
+            templates.Add(new WatchlistTemplateDto
+            {
+                Id = "empty",
+                Name = "Empty",
+                Description = "Start from scratch",
+                Packages = [],
+                PackageIds = [],
+            });
+
+            return Results.Ok(templates.ToArray());
         })
         .Produces<WatchlistTemplateDto[]>(StatusCodes.Status200OK)
         .WithName("GetWatchlistTemplates");
@@ -163,7 +165,7 @@ public static class WatchlistRoutes
         .WithName("SetWatchlist");
 
         // POST /api/watchlist/from-template — apply a watchlist template in one request
-        group.MapPost("/from-template", async (ApplyWatchlistTemplateRequest request, HttpContext httpContext, PatchNotesDbContext db, IOptions<WatchlistTemplateOptions> options, IConfiguration configuration, ILoggerFactory loggerFactory, IHttpClientFactory httpClientFactory, IHostApplicationLifetime appLifetime) =>
+        group.MapPost("/from-template", async (ApplyWatchlistTemplateRequest request, HttpContext httpContext, PatchNotesDbContext db, IConfiguration configuration, ILoggerFactory loggerFactory, IHttpClientFactory httpClientFactory, IHostApplicationLifetime appLifetime) =>
         {
             var logger = loggerFactory.CreateLogger("PatchNotes.Api.Routes.WatchlistRoutes");
             var stytchUserId = httpContext.Items["StytchUserId"] as string;
@@ -178,58 +180,21 @@ public static class WatchlistRoutes
                 return Results.NotFound(new ApiError("User not found"));
             }
 
-            var template = options.Value.Templates.FirstOrDefault(t =>
-                string.Equals(t.Name, request.TemplateName, StringComparison.OrdinalIgnoreCase));
+            var template = await db.WatchlistTemplates
+                .Include(t => t.TemplatePackages)
+                .FirstOrDefaultAsync(t => t.Id == request.TemplateId);
             if (template == null)
             {
                 return Results.BadRequest(new ApiError("Template not found"));
             }
 
-            var ownerRepoPairs = template.Packages
-                .Where(p => p.Contains('/'))
-                .Select(p => { var parts = p.Split('/'); return new { Owner = parts[0], Repo = parts[1], Key = p }; })
-                .ToList();
-
-            if (ownerRepoPairs.Count == 0)
+            var allPackageIds = template.TemplatePackages.Select(tp => tp.PackageId).Distinct().ToList();
+            if (allPackageIds.Count == 0)
             {
                 return Results.Ok(new ApplyWatchlistTemplateResponse { PackageIds = [] });
             }
 
-            // Find existing packages in one query
-            var ownerList = ownerRepoPairs.Select(p => p.Owner).Distinct().ToArray();
-            var repoList = ownerRepoPairs.Select(p => p.Repo).Distinct().ToArray();
-            var existingPackages = await db.Packages
-                .Where(p => ownerList.Contains(p.GithubOwner) && repoList.Contains(p.GithubRepo))
-                .ToListAsync();
-
-            var existingLookup = existingPackages.ToDictionary(p => $"{p.GithubOwner}/{p.GithubRepo}");
-
-            // Create missing packages
-            var newPackages = new List<Package>();
-            foreach (var pair in ownerRepoPairs)
-            {
-                if (!existingLookup.ContainsKey(pair.Key))
-                {
-                    var pkg = new Package
-                    {
-                        Name = pair.Repo,
-                        Url = $"https://github.com/{pair.Owner}/{pair.Repo}",
-                        GithubOwner = pair.Owner,
-                        GithubRepo = pair.Repo,
-                    };
-                    db.Packages.Add(pkg);
-                    newPackages.Add(pkg);
-                    existingLookup[pair.Key] = pkg;
-                }
-            }
-
-            if (newPackages.Count > 0)
-            {
-                await db.SaveChangesAsync();
-            }
-
             // Add all to watchlist, skipping already-watched
-            var allPackageIds = ownerRepoPairs.Select(p => existingLookup[p.Key].Id).Distinct().ToList();
             var alreadyWatched = await db.Watchlists
                 .Where(w => w.UserId == user.Id && allPackageIds.Contains(w.PackageId))
                 .Select(w => w.PackageId)
@@ -248,11 +213,8 @@ public static class WatchlistRoutes
             if (toAdd.Count > 0)
             {
                 await db.SaveChangesAsync();
-            }
 
-            // Fire-and-forget: ping sync for new packages
-            if (newPackages.Count > 0)
-            {
+                // Fire-and-forget: ping sync for newly-watched packages
                 var syncUrl = configuration["SyncFunction:Url"];
                 var syncKey = configuration["SyncFunction:Key"];
                 if (!string.IsNullOrEmpty(syncUrl))
@@ -482,6 +444,7 @@ public record SetWatchlistRequest(string[] PackageIds);
 
 public class WatchlistTemplateDto
 {
+    public required string Id { get; set; }
     public required string Name { get; set; }
     public required string Description { get; set; }
     public string[] Packages { get; set; } = [];
@@ -495,7 +458,7 @@ public class AddFromGitHubResponse
 
 public class ApplyWatchlistTemplateRequest
 {
-    public required string TemplateName { get; set; }
+    public required string TemplateId { get; set; }
 }
 
 public class ApplyWatchlistTemplateResponse

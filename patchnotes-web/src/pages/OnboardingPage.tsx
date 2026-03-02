@@ -34,13 +34,13 @@ export function OnboardingPage() {
   }
 
   const handleSelect = async (template: {
-    name: string
+    id: string
     packages?: string[]
   }) => {
-    setApplying(template.name)
+    setApplying(template.id)
     try {
-      if ((template.packages ?? []).length > 0) {
-        await applyTemplate.mutateAsync(template.name)
+      if (template.id !== 'empty' && (template.packages ?? []).length > 0) {
+        await applyTemplate.mutateAsync(template.id)
       }
       navigate({ to: '/watchlist' })
     } catch {
@@ -69,12 +69,12 @@ export function OnboardingPage() {
             ) : (
               (templates ?? []).map((template) => {
                 const Icon = templateIcons[template.name] ?? CircleDashed
-                const isApplying = applying === template.name
+                const isApplying = applying === template.id
                 const isDisabled = applying !== null
 
                 return (
                   <button
-                    key={template.name}
+                    key={template.id}
                     onClick={() => handleSelect(template)}
                     disabled={isDisabled}
                     className="text-left"

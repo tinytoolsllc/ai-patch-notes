@@ -6,5 +6,5 @@
  */
 
 export interface ApplyWatchlistTemplateRequest {
-  templateName: string;
+  templateId: string;
 }

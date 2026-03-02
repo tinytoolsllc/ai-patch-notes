@@ -41,6 +41,8 @@ public class PatchNotesDbContext : DbContext
     public DbSet<ReleaseSummary> ReleaseSummaries => Set<ReleaseSummary>();
     public DbSet<EmailTemplate> EmailTemplates => Set<EmailTemplate>();
     public DbSet<SentDigestEmail> SentDigestEmails => Set<SentDigestEmail>();
+    public DbSet<WatchlistTemplate> WatchlistTemplates => Set<WatchlistTemplate>();
+    public DbSet<WatchlistTemplatePackage> WatchlistTemplatePackages => Set<WatchlistTemplatePackage>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -145,6 +147,30 @@ public class PatchNotesDbContext : DbContext
                 .OnDelete(DeleteBehavior.Cascade);
             entity.HasOne(e => e.Package)
                 .WithMany(p => p.Watchlists)
+                .HasForeignKey(e => e.PackageId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<WatchlistTemplate>(entity =>
+        {
+            entity.Property(e => e.Id).HasMaxLength(21);
+            entity.Property(e => e.Name).HasMaxLength(128);
+            entity.Property(e => e.Description).HasMaxLength(512);
+            entity.HasIndex(e => e.Name).IsUnique();
+        });
+
+        modelBuilder.Entity<WatchlistTemplatePackage>(entity =>
+        {
+            entity.Property(e => e.Id).HasMaxLength(21);
+            entity.Property(e => e.WatchlistTemplateId).HasMaxLength(21);
+            entity.Property(e => e.PackageId).HasMaxLength(21);
+            entity.HasIndex(e => new { e.WatchlistTemplateId, e.PackageId }).IsUnique();
+            entity.HasOne(e => e.WatchlistTemplate)
+                .WithMany(t => t.TemplatePackages)
+                .HasForeignKey(e => e.WatchlistTemplateId)
+                .OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne(e => e.Package)
+                .WithMany()
                 .HasForeignKey(e => e.PackageId)
                 .OnDelete(DeleteBehavior.Cascade);
         });

@@ -340,8 +340,7 @@ export function useApplyTemplate() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: (templateName: string) =>
-      applyWatchlistTemplate({ templateName }),
+    mutationFn: (templateId: string) => applyWatchlistTemplate({ templateId }),
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: getGetWatchlistQueryKey() })
       queryClient.invalidateQueries({ queryKey: ['/api/feed'] })

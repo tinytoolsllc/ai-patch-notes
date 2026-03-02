@@ -6,6 +6,7 @@
  */
 
 export interface WatchlistTemplateDto {
+  id: string;
   name: string;
   description: string;
   packages?: string[];
