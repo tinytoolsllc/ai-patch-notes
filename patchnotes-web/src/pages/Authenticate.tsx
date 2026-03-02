@@ -64,7 +64,16 @@ export function Authenticate() {
     }
 
     authenticate()
-  }, [stytch, token, tokenType, user, isInitialized, navigate, error])
+  }, [
+    stytch,
+    token,
+    tokenType,
+    user,
+    isInitialized,
+    navigate,
+    error,
+    returnUrl,
+  ])
 
   if (error) {
     return (
