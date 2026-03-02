@@ -15,6 +15,7 @@ interface PackageDetailByRepoProps {
 function buildSummaryGroup(
   group: PackageDetailGroupDto,
   pkg: {
+    id: string
     githubOwner: string
     githubRepo: string
     npmName?: string | null
@@ -37,6 +38,7 @@ function buildSummaryGroup(
 
   return {
     id: `${pkg.githubOwner}-${pkg.githubRepo}-${group.majorVersion}-${group.isPrerelease}`,
+    packageId: pkg.id,
     displayName,
     githubOwner: pkg.githubOwner,
     githubRepo: pkg.githubRepo,

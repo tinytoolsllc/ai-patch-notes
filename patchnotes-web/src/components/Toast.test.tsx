@@ -1,4 +1,5 @@
 import { render, screen } from '../test/utils'
+import { render as rawRender } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { ToastProvider, useToast } from './Toast'
 import { act } from 'react'
@@ -35,7 +36,7 @@ describe('Toast', () => {
       const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
 
       expect(() => {
-        render(<TestComponent />)
+        rawRender(<TestComponent />)
       }).toThrow('useToast must be used within a ToastProvider')
 
       consoleSpy.mockRestore()

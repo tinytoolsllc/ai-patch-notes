@@ -1,7 +1,9 @@
 import { memo } from 'react'
 import { Link } from '@tanstack/react-router'
+import { Share } from 'lucide-react'
 import { LazyMarkdown as Markdown } from '../LazyMarkdown'
 import { Badge, Card } from '../ui'
+import { useToast } from '../Toast'
 import { formatDate, formatRelativeTime } from '../../utils/dateFormat'
 
 // ============================================================================
@@ -10,6 +12,7 @@ import { formatDate, formatRelativeTime } from '../../utils/dateFormat'
 
 export interface SummaryGroup {
   id: string
+  packageId: string
   displayName: string
   githubOwner: string
   githubRepo: string
@@ -106,6 +109,15 @@ export const SummaryCard = memo(function SummaryCard({
   onToggle: (id: string) => void
   showViewAllLink?: boolean
 }) {
+  const { showToast } = useToast()
+
+  const handleCopyLink = () => {
+    const url = `${window.location.origin}/s/${group.packageId}`
+    navigator.clipboard.writeText(url).then(() => {
+      showToast('Link copied!', 'success')
+    })
+  }
+
   return (
     <Card
       padding="none"
@@ -197,6 +209,14 @@ export const SummaryCard = memo(function SummaryCard({
               </svg>
               {group.releaseCount} release{group.releaseCount !== 1 && 's'}
             </span>
+            <button
+              onClick={handleCopyLink}
+              className="flex items-center gap-1.5 hover:text-text-secondary transition-colors"
+              title="Copy share link"
+            >
+              <Share className="w-3.5 h-3.5" />
+              Share
+            </button>
           </div>
           <button
             onClick={() => onToggle(group.id)}
