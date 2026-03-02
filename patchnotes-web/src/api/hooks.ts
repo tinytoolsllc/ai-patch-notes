@@ -24,6 +24,7 @@ import {
   addToWatchlist,
   removeFromWatchlist,
   addToWatchlistFromGitHub,
+  applyWatchlistTemplate,
 } from './generated/watchlist/watchlist'
 import {
   searchGitHubRepositoriesUser,
@@ -331,6 +332,19 @@ export function useAddFromGithub() {
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: getGetWatchlistQueryKey() })
       queryClient.invalidateQueries({ queryKey: getGetPackagesQueryKey() })
+    },
+  })
+}
+
+export function useApplyTemplate() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (templateName: string) =>
+      applyWatchlistTemplate({ templateName }),
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: getGetWatchlistQueryKey() })
+      queryClient.invalidateQueries({ queryKey: ['/api/feed'] })
     },
   })
 }

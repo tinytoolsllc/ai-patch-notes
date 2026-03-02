@@ -3,8 +3,7 @@ import { useNavigate } from '@tanstack/react-router'
 import { useStytchUser } from '@stytch/react'
 import { Loader2, Code2, Server, TrendingUp, CircleDashed } from 'lucide-react'
 import { Container, Card } from '../components/ui'
-import { useWatchlistTemplates } from '../api/hooks'
-import { api } from '../api/client'
+import { useWatchlistTemplates, useApplyTemplate } from '../api/hooks'
 
 const templateIcons: Record<string, typeof Code2> = {
   Frontend: Code2,
@@ -17,6 +16,7 @@ export function OnboardingPage() {
   const { user, isInitialized } = useStytchUser()
   const navigate = useNavigate()
   const { data: templates, isLoading } = useWatchlistTemplates()
+  const applyTemplate = useApplyTemplate()
   const [applying, setApplying] = useState<string | null>(null)
 
   useEffect(() => {
@@ -37,24 +37,10 @@ export function OnboardingPage() {
     name: string
     packages?: string[]
   }) => {
-    const packages = template.packages ?? []
     setApplying(template.name)
     try {
-      if (packages.length > 0) {
-        // Resolve owner/repo pairs to package IDs by adding them via github endpoint
-        const packageIds: string[] = []
-        for (const pkg of packages) {
-          const [owner, repo] = pkg.split('/')
-          if (!owner || !repo) continue
-          try {
-            const res = await api.post<{ packageId: string }>(
-              `/watchlist/github/${owner}/${repo}`
-            )
-            if (res?.packageId) packageIds.push(res.packageId)
-          } catch {
-            // Package may already be watched or not exist, skip
-          }
-        }
+      if ((template.packages ?? []).length > 0) {
+        await applyTemplate.mutateAsync(template.name)
       }
       navigate({ to: '/watchlist' })
     } catch {

@@ -226,19 +226,40 @@ export const handlers = [
         name: 'Frontend',
         description: 'React, Vue, Vite, and more',
         packages: ['facebook/react', 'vuejs/core'],
+        packageIds: ['pkg-react-test-id'],
       },
       {
         name: 'Backend',
         description: '.NET, Node.js, and databases',
         packages: ['dotnet/runtime'],
+        packageIds: [],
       },
       {
         name: 'Popular',
         description: 'Most-watched repos on PatchNotes',
         packages: ['microsoft/typescript', 'facebook/react'],
+        packageIds: ['pkg-react-test-id'],
       },
-      { name: 'Empty', description: 'Start from scratch', packages: [] },
+      {
+        name: 'Empty',
+        description: 'Start from scratch',
+        packages: [],
+        packageIds: [],
+      },
     ])
+  }),
+
+  // POST /watchlist/from-template
+  http.post(`${API_BASE}/watchlist/from-template`, async ({ request }) => {
+    const body = (await request.json()) as { templateName: string }
+    const templates: Record<string, string[]> = {
+      Frontend: ['pkg-react-test-id', 'pkg-vuejs-core-id'],
+      Backend: ['pkg-dotnet-runtime-id'],
+      Popular: ['pkg-typescript-id', 'pkg-react-test-id'],
+      Empty: [],
+    }
+    const packageIds = templates[body.templateName] ?? []
+    return HttpResponse.json({ packageIds })
   }),
 
   // GET /watchlist
