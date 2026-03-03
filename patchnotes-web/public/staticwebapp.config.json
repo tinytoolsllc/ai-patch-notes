@@ -1,6 +1,13 @@
 {
   "navigationFallback": {
     "rewrite": "/index.html",
-    "exclude": ["/assets/*", "/sw.js", "/workbox-*.js", "/manifest.webmanifest", "/offline.html", "/pwa-*.png"]
+    "exclude": [
+      "/assets/*",
+      "/sw.js",
+      "/workbox-*.js",
+      "/manifest.webmanifest",
+      "/offline.html",
+      "/pwa-*.png"
+    ]
   }
 }
