@@ -96,24 +96,28 @@ public static class DbSeeder
             return [];
         }
 
-        return seedPackages.Select(sp => new Package
+        return seedPackages.Select(sp =>
         {
-            Name = sp.Name,
-            Url = sp.Url,
-            NpmName = sp.NpmName,
-            GithubOwner = sp.GithubOwner,
-            GithubRepo = sp.GithubRepo,
-            CreatedAt = now,
-            LastFetchedAt = now,
-            Releases = sp.Releases.Select(sr => new Release
+            var package = new Package
             {
-                PackageId = "", // set by EF Core when parent package is saved
+                Name = sp.Name,
+                Url = sp.Url,
+                NpmName = sp.NpmName,
+                GithubOwner = sp.GithubOwner,
+                GithubRepo = sp.GithubRepo,
+                CreatedAt = now,
+                LastFetchedAt = now,
+            };
+            package.Releases = sp.Releases.Select(sr => new Release
+            {
+                PackageId = package.Id,
                 Tag = sr.Tag,
                 Title = sr.Title,
                 Body = sr.Body,
                 PublishedAt = sr.PublishedAt,
                 FetchedAt = now
-            }).ToList()
+            }).ToList();
+            return package;
         }).ToList();
     }
 }
