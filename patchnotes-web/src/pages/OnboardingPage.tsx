@@ -21,7 +21,7 @@ export function OnboardingPage() {
 
   useEffect(() => {
     if (isInitialized && !user) {
-      navigate({ to: '/login' })
+      navigate({ to: '/login', search: { returnUrl: '/onboarding' } })
     }
   }, [isInitialized, user, navigate])
 
