@@ -290,6 +290,27 @@ public class PackagesApiTests : IAsyncLifetime
     #region GET /api/packages/{owner}
 
     [Fact]
+    public async Task GetPackagesByOwner_ReturnsBadRequest_WhenOwnerTooLong()
+    {
+        var longOwner = new string('a', 129);
+        var response = await _client.GetAsync($"/api/packages/{longOwner}");
+
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        var error = await response.Content.ReadFromJsonAsync<JsonElement>();
+        error.GetProperty("error").GetString().Should().Be("Invalid owner name");
+    }
+
+    [Fact]
+    public async Task GetPackagesByOwner_ReturnsBadRequest_WhenOwnerHasInvalidChars()
+    {
+        var response = await _client.GetAsync("/api/packages/owner@invalid");
+
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        var error = await response.Content.ReadFromJsonAsync<JsonElement>();
+        error.GetProperty("error").GetString().Should().Be("Invalid owner name");
+    }
+
+    [Fact]
     public async Task GetPackagesByOwner_ReturnsEmptyList_WhenNoPackagesForOwner()
     {
         var response = await _client.GetAsync("/api/packages/nonexistent-owner");
@@ -423,6 +444,28 @@ public class PackagesApiTests : IAsyncLifetime
     #endregion
 
     #region GET /api/packages/{owner}/{repo}
+
+    [Fact]
+    public async Task GetPackageByOwnerRepo_ReturnsBadRequest_WhenOwnerTooLong()
+    {
+        var longOwner = new string('a', 129);
+        var response = await _client.GetAsync($"/api/packages/{longOwner}/repo");
+
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        var error = await response.Content.ReadFromJsonAsync<JsonElement>();
+        error.GetProperty("error").GetString().Should().Be("Invalid owner or repo name");
+    }
+
+    [Fact]
+    public async Task GetPackageByOwnerRepo_ReturnsBadRequest_WhenRepoTooLong()
+    {
+        var longRepo = new string('a', 129);
+        var response = await _client.GetAsync($"/api/packages/owner/{longRepo}");
+
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        var error = await response.Content.ReadFromJsonAsync<JsonElement>();
+        error.GetProperty("error").GetString().Should().Be("Invalid owner or repo name");
+    }
 
     [Fact]
     public async Task GetPackageByOwnerRepo_ReturnsNotFound_WhenPackageDoesNotExist()

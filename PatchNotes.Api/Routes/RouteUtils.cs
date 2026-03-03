@@ -117,6 +117,16 @@ public static class RouteUtils
 
         return (ids, true);
     }
+
+    /// <summary>
+    /// Returns true if the string is a valid GitHub owner or repo name segment:
+    /// non-empty, at most 128 characters, and contains only alphanumeric characters,
+    /// hyphens, underscores, or dots.
+    /// </summary>
+    public static bool IsValidGitHubSegment(string value) =>
+        value.Length > 0 &&
+        value.Length <= 128 &&
+        value.All(c => char.IsAsciiLetterOrDigit(c) || c is '-' or '_' or '.');
 }
 
 public record ApiError(string Error, string? Details = null);

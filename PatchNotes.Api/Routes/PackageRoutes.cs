@@ -142,6 +142,9 @@ public static class PackageRoutes
         // GET /api/packages/{owner} - List packages by GitHub owner (paginated)
         group.MapGet("/{owner}", async (string owner, int? limit, int? offset, PatchNotesDbContext db) =>
         {
+            if (!RouteUtils.IsValidGitHubSegment(owner))
+                return Results.BadRequest(new ApiError("Invalid owner name"));
+
             var take = Math.Clamp(limit ?? 20, 1, 100);
             var skip = Math.Max(offset ?? 0, 0);
 
@@ -182,6 +185,9 @@ public static class PackageRoutes
         // GET /api/packages/{owner}/{repo} - Package detail with all version groups and releases
         group.MapGet("/{owner}/{repo}", async (string owner, string repo, PatchNotesDbContext db) =>
         {
+            if (!RouteUtils.IsValidGitHubSegment(owner) || !RouteUtils.IsValidGitHubSegment(repo))
+                return Results.BadRequest(new ApiError("Invalid owner or repo name"));
+
             var package = await db.Packages
                 .AsNoTracking()
                 .Where(p => p.GithubOwner == owner && p.GithubRepo == repo)

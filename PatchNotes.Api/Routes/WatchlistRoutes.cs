@@ -306,6 +306,9 @@ public static class WatchlistRoutes
         // POST /api/watchlist/github/{owner}/{repo} — add a GitHub repo to watchlist, creating package if needed
         group.MapPost("/github/{owner}/{repo}", async (string owner, string repo, HttpContext httpContext, PatchNotesDbContext db, IConfiguration configuration, ILoggerFactory loggerFactory, IHttpClientFactory httpClientFactory, IHostApplicationLifetime appLifetime) =>
         {
+            if (!RouteUtils.IsValidGitHubSegment(owner) || !RouteUtils.IsValidGitHubSegment(repo))
+                return Results.BadRequest(new ApiError("Invalid owner or repo name"));
+
             var logger = loggerFactory.CreateLogger("PatchNotes.Api.Routes.WatchlistRoutes");
             var stytchUserId = httpContext.Items["StytchUserId"] as string;
             if (stytchUserId == null)
