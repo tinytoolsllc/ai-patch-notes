@@ -68,13 +68,13 @@ export function Authenticate() {
       <Container>
         <div className="flex min-h-screen flex-col items-center justify-center">
           <div className="text-center">
-            <h1 className="text-2xl font-bold text-red-600">
+            <h1 className="text-2xl font-bold text-major">
               Authentication Error
             </h1>
-            <p className="mt-2 text-gray-600">{error}</p>
+            <p className="mt-2 text-text-secondary">{error}</p>
             <button
               onClick={() => navigate({ to: '/login' })}
-              className="mt-4 rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
+              className="mt-4 rounded-md bg-brand-600 px-4 py-2 text-white hover:bg-brand-700"
             >
               Back to Login
             </button>
@@ -88,10 +88,10 @@ export function Authenticate() {
     <Container>
       <div className="flex min-h-screen flex-col items-center justify-center">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900">
+          <h1 className="text-2xl font-bold text-text-primary">
             Authenticating...
           </h1>
-          <p className="mt-2 text-gray-600">
+          <p className="mt-2 text-text-secondary">
             Please wait while we verify your credentials.
           </p>
         </div>
