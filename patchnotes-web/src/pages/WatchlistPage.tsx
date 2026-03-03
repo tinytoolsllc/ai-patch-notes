@@ -12,14 +12,7 @@ import {
 } from '../api/hooks'
 import type { WatchlistPackageDto } from '../api/generated/model'
 import type { GitHubRepoSearchResultDto } from '../api/generated/model'
-
-// ── Helpers ──────────────────────────────────────────────────
-
-function formatStars(count: number | undefined): string {
-  if (count == null) return ''
-  if (count >= 1000) return `${(count / 1000).toFixed(1)}k`
-  return String(count)
-}
+import { formatStars } from '../utils/formatStars'
 
 // ── Search Result Item ───────────────────────────────────────
 

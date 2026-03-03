@@ -22,6 +22,7 @@ import type {
   GitHubRepoSearchResultDto,
 } from '../api/generated/model'
 import { useIsAdmin } from '../utils/auth'
+import { formatStars } from '../utils/formatStars'
 
 function formatDate(dateString: string | null | undefined): string {
   if (!dateString) return 'Never'
@@ -230,12 +231,6 @@ function GitHubSearchDropdown({
     setQuery(`${result.owner}/${result.repo}`)
     setDismissed(true)
     onSelect(result)
-  }
-
-  function formatStars(count: number | undefined): string {
-    if (count == null) return ''
-    if (count >= 1000) return `${(count / 1000).toFixed(1)}k`
-    return String(count)
   }
 
   return (
