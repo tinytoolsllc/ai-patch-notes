@@ -86,9 +86,11 @@ export function ReleaseDetail({ releaseId }: ReleaseDetailProps) {
                 <VersionBadge version={release.tag} />
                 <div>
                   <CardTitle>{displayTitle}</CardTitle>
-                  <p className="text-sm text-text-tertiary mt-0.5">
-                    {release.package.npmName}
-                  </p>
+                  {release.package.npmName && (
+                    <p className="text-sm text-text-tertiary mt-0.5">
+                      {release.package.npmName}
+                    </p>
+                  )}
                 </div>
               </div>
               <time
