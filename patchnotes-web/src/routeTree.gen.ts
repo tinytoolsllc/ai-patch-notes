@@ -17,7 +17,6 @@ import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as AuthenticateRouteImport } from './routes/authenticate'
-import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ReleasesReleaseIdRouteImport } from './routes/releases.$releaseId'
@@ -68,11 +67,6 @@ const AuthenticateRoute = AuthenticateRouteImport.update({
   path: '/authenticate',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AdminRoute = AdminRouteImport.update({
-  id: '/admin',
-  path: '/admin',
-  getParentRoute: () => rootRouteImport,
-} as any).lazy(() => import('./routes/admin.lazy').then((d) => d.Route))
 const AboutRoute = AboutRouteImport.update({
   id: '/about',
   path: '/about',

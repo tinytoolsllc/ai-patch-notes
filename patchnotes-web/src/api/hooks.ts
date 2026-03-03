@@ -13,7 +13,6 @@ import {
   createPackage,
   deletePackage,
   updatePackage,
-  bulkCreatePackages,
 } from './generated/packages/packages'
 import { useGetRelease, useGetReleases } from './generated/releases/releases'
 import {
@@ -204,25 +203,6 @@ export function useUpdatePackage() {
   })
 }
 
-export function useBulkAddPackages() {
-  const queryClient = useQueryClient()
-
-  return useMutation({
-    mutationFn: (
-      items: {
-        githubOwner: string
-        githubRepo: string
-        name?: string
-        npmName?: string
-        tagPrefix?: string
-      }[]
-    ) => bulkCreatePackages(items),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: getGetPackagesQueryKey() })
-    },
-  })
-}
-
 export function useResetSummaries() {
   const queryClient = useQueryClient()
 
@@ -349,7 +329,6 @@ export {
 export { useGetPackages } from './generated/packages/packages'
 export { getGetPackageByOwnerRepoQueryOptions } from './generated/packages/packages'
 export { getGetReleaseQueryOptions } from './generated/releases/releases'
-export { useSearchGitHubRepositories } from './generated/admin-git-hub/admin-git-hub'
 export {
   useUpdateEmailTemplate,
   getGetEmailTemplatesQueryKey,

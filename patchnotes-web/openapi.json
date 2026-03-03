@@ -377,42 +377,6 @@
         }
       }
     },
-    "/api/packages/bulk": {
-      "post": {
-        "tags": [
-          "Packages"
-        ],
-        "operationId": "BulkCreatePackages",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "array",
-                "items": {
-                  "$ref": "#/components/schemas/BulkAddPackageItem"
-                }
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/BulkAddPackageResult"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad Request"
-          }
-        }
-      }
-    },
     "/api/admin/packages/health": {
       "get": {
         "tags": [
@@ -544,41 +508,6 @@
           },
           "404": {
             "description": "Not Found"
-          }
-        }
-      }
-    },
-    "/api/admin/github/search": {
-      "get": {
-        "tags": [
-          "AdminGitHub"
-        ],
-        "operationId": "SearchGitHubRepositories",
-        "parameters": [
-          {
-            "name": "q",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/GitHubRepoSearchResultDto"
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad Request"
           }
         }
       }
@@ -1389,89 +1318,6 @@
             "type": "string"
           },
           "tagPrefix": {
-            "type": [
-              "null",
-              "string"
-            ]
-          }
-        }
-      },
-      "BulkAddPackageItem": {
-        "required": [
-          "githubOwner",
-          "githubRepo"
-        ],
-        "type": "object",
-        "properties": {
-          "githubOwner": {
-            "type": "string"
-          },
-          "githubRepo": {
-            "type": "string"
-          },
-          "name": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "npmName": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "tagPrefix": {
-            "type": [
-              "null",
-              "string"
-            ]
-          }
-        }
-      },
-      "BulkAddPackageResult": {
-        "required": [
-          "results"
-        ],
-        "type": "object",
-        "properties": {
-          "results": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/BulkAddPackageResultItem"
-            }
-          }
-        }
-      },
-      "BulkAddPackageResultItem": {
-        "type": "object",
-        "properties": {
-          "success": {
-            "type": "boolean"
-          },
-          "package": {
-            "oneOf": [
-              {
-                "type": "null"
-              },
-              {
-                "$ref": "#/components/schemas/PackageDto"
-              }
-            ]
-          },
-          "error": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "githubOwner": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "githubRepo": {
             "type": [
               "null",
               "string"

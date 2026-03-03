@@ -25,8 +25,6 @@ import type {
 
 import type {
   AddPackageRequest,
-  BulkAddPackageItem,
-  BulkAddPackageResult,
   GetPackageReleasesParams,
   GetPackagesByOwnerParams,
   GetPackagesParams,
@@ -891,87 +889,3 @@ export function useGetPackageByOwnerRepo<TData = Awaited<ReturnType<typeof getPa
 
 
 
-export type bulkCreatePackagesResponse200 = {
-  data: BulkAddPackageResult
-  status: 200
-}
-
-export type bulkCreatePackagesResponse400 = {
-  data: void
-  status: 400
-}
-
-export type bulkCreatePackagesResponseSuccess = (bulkCreatePackagesResponse200) & {
-  headers: Headers;
-};
-export type bulkCreatePackagesResponseError = (bulkCreatePackagesResponse400) & {
-  headers: Headers;
-};
-
-export type bulkCreatePackagesResponse = (bulkCreatePackagesResponseSuccess | bulkCreatePackagesResponseError)
-
-export const getBulkCreatePackagesUrl = () => {
-
-
-  
-
-  return `/api/packages/bulk`
-}
-
-export const bulkCreatePackages = async (bulkAddPackageItem: BulkAddPackageItem[], options?: RequestInit): Promise<bulkCreatePackagesResponse> => {
-  
-  return customFetch<bulkCreatePackagesResponse>(getBulkCreatePackagesUrl(),
-  {      
-    ...options,
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(
-      bulkAddPackageItem,)
-  }
-);}
-  
-
-
-
-export const getBulkCreatePackagesMutationOptions = <TError = void,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof bulkCreatePackages>>, TError,{data: BulkAddPackageItem[]}, TContext>, request?: SecondParameter<typeof customFetch>}
-): UseMutationOptions<Awaited<ReturnType<typeof bulkCreatePackages>>, TError,{data: BulkAddPackageItem[]}, TContext> => {
-
-const mutationKey = ['bulkCreatePackages'];
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-      
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof bulkCreatePackages>>, {data: BulkAddPackageItem[]}> = (props) => {
-          const {data} = props ?? {};
-
-          return  bulkCreatePackages(data,requestOptions)
-        }
-
-
-
-        
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type BulkCreatePackagesMutationResult = NonNullable<Awaited<ReturnType<typeof bulkCreatePackages>>>
-    export type BulkCreatePackagesMutationBody = BulkAddPackageItem[]
-    export type BulkCreatePackagesMutationError = void
-
-    export const useBulkCreatePackages = <TError = void,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof bulkCreatePackages>>, TError,{data: BulkAddPackageItem[]}, TContext>, request?: SecondParameter<typeof customFetch>}
- , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof bulkCreatePackages>>,
-        TError,
-        {data: BulkAddPackageItem[]},
-        TContext
-      > => {
-      return useMutation(getBulkCreatePackagesMutationOptions(options), queryClient);
-    }
-    
