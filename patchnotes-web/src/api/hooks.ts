@@ -18,11 +18,13 @@ import {
 import { useGetRelease, useGetReleases } from './generated/releases/releases'
 import {
   useGetWatchlist,
+  useGetWatchlistTemplates,
   getGetWatchlistQueryKey,
   setWatchlist,
   addToWatchlist,
   removeFromWatchlist,
   addToWatchlistFromGitHub,
+  applyWatchlistTemplate,
 } from './generated/watchlist/watchlist'
 import {
   searchGitHubRepositoriesUser,
@@ -50,7 +52,10 @@ import {
   GetReleaseResponse,
   GetReleasesResponse,
 } from './generated/releases/releases.zod'
-import { GetWatchlistResponse } from './generated/watchlist/watchlist.zod'
+import {
+  GetWatchlistResponse,
+  GetWatchlistTemplatesResponse,
+} from './generated/watchlist/watchlist.zod'
 
 // ── Helpers ─────────────────────────────────────────────────
 
@@ -257,6 +262,15 @@ export function useWatchlist() {
   })
 }
 
+export function useWatchlistTemplates() {
+  return useGetWatchlistTemplates({
+    query: {
+      select: (res) =>
+        validateResponse(GetWatchlistTemplatesResponse, res.data),
+    },
+  })
+}
+
 export function useSetWatchlist() {
   const queryClient = useQueryClient()
 
@@ -318,6 +332,18 @@ export function useAddFromGithub() {
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: getGetWatchlistQueryKey() })
       queryClient.invalidateQueries({ queryKey: getGetPackagesQueryKey() })
+    },
+  })
+}
+
+export function useApplyTemplate() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (templateId: string) => applyWatchlistTemplate({ templateId }),
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: getGetWatchlistQueryKey() })
+      queryClient.invalidateQueries({ queryKey: ['/api/feed'] })
     },
   })
 }

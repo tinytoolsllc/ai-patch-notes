@@ -50,8 +50,10 @@ export function Authenticate() {
         }
 
         // Sync user to backend database
-        await api.post('/users/login')
-        navigate({ to: '/' })
+        const loginResponse = await api.post<{ isNewUser?: boolean }>(
+          '/users/login'
+        )
+        navigate({ to: loginResponse?.isNewUser ? '/onboarding' : '/' })
       } catch (err) {
         console.error('Authentication failed:', err)
         setError('Authentication failed. Please try again.')

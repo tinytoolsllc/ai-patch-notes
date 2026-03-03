@@ -379,6 +379,65 @@ namespace PatchNotes.Data.Migrations.Sqlite
                     b.ToTable("Watchlists");
                 });
 
+            modelBuilder.Entity("PatchNotes.Data.WatchlistTemplate", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasMaxLength(21)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(512)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
+
+                    b.ToTable("WatchlistTemplates");
+                });
+
+            modelBuilder.Entity("PatchNotes.Data.WatchlistTemplatePackage", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasMaxLength(21)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("PackageId")
+                        .IsRequired()
+                        .HasMaxLength(21)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("WatchlistTemplateId")
+                        .IsRequired()
+                        .HasMaxLength(21)
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PackageId");
+
+                    b.HasIndex("WatchlistTemplateId", "PackageId")
+                        .IsUnique();
+
+                    b.ToTable("WatchlistTemplatePackages");
+                });
+
             modelBuilder.Entity("PatchNotes.Data.Release", b =>
                 {
                     b.HasOne("PatchNotes.Data.Package", "Package")
@@ -431,6 +490,25 @@ namespace PatchNotes.Data.Migrations.Sqlite
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("PatchNotes.Data.WatchlistTemplatePackage", b =>
+                {
+                    b.HasOne("PatchNotes.Data.Package", "Package")
+                        .WithMany()
+                        .HasForeignKey("PackageId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("PatchNotes.Data.WatchlistTemplate", "WatchlistTemplate")
+                        .WithMany("TemplatePackages")
+                        .HasForeignKey("WatchlistTemplateId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Package");
+
+                    b.Navigation("WatchlistTemplate");
+                });
+
             modelBuilder.Entity("PatchNotes.Data.Package", b =>
                 {
                     b.Navigation("ReleaseSummaries");
@@ -443,6 +521,11 @@ namespace PatchNotes.Data.Migrations.Sqlite
             modelBuilder.Entity("PatchNotes.Data.User", b =>
                 {
                     b.Navigation("Watchlists");
+                });
+
+            modelBuilder.Entity("PatchNotes.Data.WatchlistTemplate", b =>
+                {
+                    b.Navigation("TemplatePackages");
                 });
 #pragma warning restore 612, 618
         }

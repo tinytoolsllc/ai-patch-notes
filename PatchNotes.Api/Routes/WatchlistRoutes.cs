@@ -17,6 +17,47 @@ public static class WatchlistRoutes
 
         var group = app.MapGroup("/api/watchlist").WithTags("Watchlist");
 
+        // GET /api/watchlist/templates — return available watchlist templates (public)
+        group.MapGet("/templates", async (PatchNotesDbContext db) =>
+        {
+            var dbTemplates = await db.WatchlistTemplates
+                .AsNoTracking()
+                .Include(t => t.TemplatePackages)
+                    .ThenInclude(tp => tp.Package)
+                .OrderBy(t => t.SortOrder)
+                .Take(8)
+                .ToListAsync();
+
+            var templates = dbTemplates.Select(t =>
+            {
+                var sorted = t.TemplatePackages
+                    .OrderBy(tp => tp.Package.Name)
+                    .ToList();
+                return new WatchlistTemplateDto
+                {
+                    Id = t.Id,
+                    Name = t.Name,
+                    Description = t.Description,
+                    Packages = sorted.Select(tp => $"{tp.Package.GithubOwner}/{tp.Package.GithubRepo}").ToArray(),
+                    PackageIds = sorted.Select(tp => tp.PackageId).ToArray(),
+                };
+            }).ToList();
+
+            // Always append the hardcoded "Empty" template
+            templates.Add(new WatchlistTemplateDto
+            {
+                Id = "empty",
+                Name = "Empty",
+                Description = "Start from scratch",
+                Packages = [],
+                PackageIds = [],
+            });
+
+            return Results.Ok(templates.ToArray());
+        })
+        .Produces<WatchlistTemplateDto[]>(StatusCodes.Status200OK)
+        .WithName("GetWatchlistTemplates");
+
         // GET /api/watchlist — return list of package IDs the current user is watching
         group.MapGet("/", async (HttpContext httpContext, PatchNotesDbContext db) =>
         {
@@ -122,6 +163,89 @@ public static class WatchlistRoutes
         .Produces(StatusCodes.Status400BadRequest)
         .Produces(StatusCodes.Status404NotFound)
         .WithName("SetWatchlist");
+
+        // POST /api/watchlist/from-template — apply a watchlist template in one request
+        group.MapPost("/from-template", async (ApplyWatchlistTemplateRequest request, HttpContext httpContext, PatchNotesDbContext db, IConfiguration configuration, ILoggerFactory loggerFactory, IHttpClientFactory httpClientFactory, IHostApplicationLifetime appLifetime) =>
+        {
+            var logger = loggerFactory.CreateLogger("PatchNotes.Api.Routes.WatchlistRoutes");
+            var stytchUserId = httpContext.Items["StytchUserId"] as string;
+            if (stytchUserId == null)
+            {
+                return Results.Unauthorized();
+            }
+
+            var user = await db.Users.FirstOrDefaultAsync(u => u.StytchUserId == stytchUserId);
+            if (user == null)
+            {
+                return Results.NotFound(new ApiError("User not found"));
+            }
+
+            var template = await db.WatchlistTemplates
+                .Include(t => t.TemplatePackages)
+                .FirstOrDefaultAsync(t => t.Id == request.TemplateId);
+            if (template == null)
+            {
+                return Results.BadRequest(new ApiError("Template not found"));
+            }
+
+            var allPackageIds = template.TemplatePackages.Select(tp => tp.PackageId).Distinct().ToList();
+            if (allPackageIds.Count == 0)
+            {
+                return Results.Ok(new ApplyWatchlistTemplateResponse { PackageIds = [] });
+            }
+
+            // Add all to watchlist, skipping already-watched
+            var alreadyWatched = await db.Watchlists
+                .Where(w => w.UserId == user.Id && allPackageIds.Contains(w.PackageId))
+                .Select(w => w.PackageId)
+                .ToListAsync();
+
+            var toAdd = allPackageIds.Except(alreadyWatched).ToList();
+            foreach (var packageId in toAdd)
+            {
+                db.Watchlists.Add(new Watchlist
+                {
+                    UserId = user.Id,
+                    PackageId = packageId,
+                });
+            }
+
+            if (toAdd.Count > 0)
+            {
+                await db.SaveChangesAsync();
+
+                // Fire-and-forget: ping sync for newly-watched packages
+                var syncUrl = configuration["SyncFunction:Url"];
+                var syncKey = configuration["SyncFunction:Key"];
+                if (!string.IsNullOrEmpty(syncUrl))
+                {
+                    _ = Task.Run(async () =>
+                    {
+                        try
+                        {
+                            using var http = httpClientFactory.CreateClient();
+                            using var syncRequest = new HttpRequestMessage(HttpMethod.Post, syncUrl);
+                            if (!string.IsNullOrEmpty(syncKey))
+                                syncRequest.Headers.Add("x-functions-key", syncKey);
+                            syncRequest.Content = new StringContent("");
+                            syncRequest.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+                            await http.SendAsync(syncRequest, appLifetime.ApplicationStopping);
+                        }
+                        catch (Exception ex)
+                        {
+                            logger.LogWarning(ex, "Failed to ping SyncNewPackages function");
+                        }
+                    }, appLifetime.ApplicationStopping);
+                }
+            }
+
+            return Results.Ok(new ApplyWatchlistTemplateResponse { PackageIds = [.. allPackageIds] });
+        })
+        .AddEndpointFilterFactory(requireAuth)
+        .Produces<ApplyWatchlistTemplateResponse>(StatusCodes.Status200OK)
+        .Produces(StatusCodes.Status400BadRequest)
+        .Produces(StatusCodes.Status404NotFound)
+        .WithName("ApplyWatchlistTemplate");
 
         // POST /api/watchlist/{packageId} — add a single package to watchlist
         group.MapPost("/{packageId}", async (string packageId, HttpContext httpContext, PatchNotesDbContext db) =>
@@ -318,7 +442,26 @@ public record WatchlistPackageDto(
 
 public record SetWatchlistRequest(string[] PackageIds);
 
+public class WatchlistTemplateDto
+{
+    public required string Id { get; set; }
+    public required string Name { get; set; }
+    public required string Description { get; set; }
+    public string[] Packages { get; set; } = [];
+    public string[] PackageIds { get; set; } = [];
+}
+
 public class AddFromGitHubResponse
 {
     public required string PackageId { get; set; }
+}
+
+public class ApplyWatchlistTemplateRequest
+{
+    public required string TemplateId { get; set; }
+}
+
+public class ApplyWatchlistTemplateResponse
+{
+    public string[] PackageIds { get; set; } = [];
 }

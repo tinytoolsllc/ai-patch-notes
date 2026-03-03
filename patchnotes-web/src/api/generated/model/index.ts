@@ -7,6 +7,8 @@
 
 export * from './addFromGitHubResponse';
 export * from './addPackageRequest';
+export * from './applyWatchlistTemplateRequest';
+export * from './applyWatchlistTemplateResponse';
 export * from './bulkAddPackageItem';
 export * from './bulkAddPackageResult';
 export * from './bulkAddPackageResultItem';
@@ -54,3 +56,4 @@ export * from './updatePackageRequest';
 export * from './updateUserRequest';
 export * from './userDto';
 export * from './watchlistPackageDto';
+export * from './watchlistTemplateDto';

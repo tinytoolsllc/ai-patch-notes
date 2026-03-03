@@ -15,6 +15,7 @@ public class WatchlistApiTests : IAsyncLifetime
     private HttpClient _authClient = null!;
     private string _reactPackageId = null!;
     private string _vuePackageId = null!;
+    private string _templateId = null!;
 
     public async Task InitializeAsync()
     {
@@ -34,9 +35,21 @@ public class WatchlistApiTests : IAsyncLifetime
         var react = new Package { Name = "react", Url = "https://github.com/facebook/react", NpmName = "react", GithubOwner = "facebook", GithubRepo = "react" };
         var vue = new Package { Name = "vue", Url = "https://github.com/vuejs/core", NpmName = "vue", GithubOwner = "vuejs", GithubRepo = "core" };
         db.Packages.AddRange(react, vue);
+
+        // Seed a watchlist template with both packages
+        var template = new WatchlistTemplate { Name = "Frontend", Description = "React and Vue" };
+        db.WatchlistTemplates.Add(template);
         await db.SaveChangesAsync();
+
+        db.WatchlistTemplatePackages.AddRange(
+            new WatchlistTemplatePackage { WatchlistTemplateId = template.Id, PackageId = react.Id },
+            new WatchlistTemplatePackage { WatchlistTemplateId = template.Id, PackageId = vue.Id }
+        );
+        await db.SaveChangesAsync();
+
         _reactPackageId = react.Id;
         _vuePackageId = vue.Id;
+        _templateId = template.Id;
     }
 
     public async Task DisposeAsync()

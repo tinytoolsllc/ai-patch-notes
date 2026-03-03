@@ -7,6 +7,15 @@
 import * as zod from 'zod';
 
 
+export const GetWatchlistTemplatesResponseItem = zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "description": zod.string(),
+  "packages": zod.array(zod.string()).optional(),
+  "packageIds": zod.array(zod.string()).optional()
+})
+export const GetWatchlistTemplatesResponse = zod.array(GetWatchlistTemplatesResponseItem)
+
 export const GetWatchlistResponseItem = zod.object({
   "id": zod.string(),
   "name": zod.string(),
@@ -22,6 +31,14 @@ export const SetWatchlistBody = zod.object({
 
 export const SetWatchlistResponseItem = zod.string()
 export const SetWatchlistResponse = zod.array(SetWatchlistResponseItem)
+
+export const ApplyWatchlistTemplateBody = zod.object({
+  "templateId": zod.string()
+})
+
+export const ApplyWatchlistTemplateResponse = zod.object({
+  "packageIds": zod.array(zod.string()).optional()
+})
 
 export const AddToWatchlistParams = zod.object({
   "packageId": zod.string()

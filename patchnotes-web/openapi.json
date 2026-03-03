@@ -819,6 +819,29 @@
         }
       }
     },
+    "/api/watchlist/templates": {
+      "get": {
+        "tags": [
+          "Watchlist"
+        ],
+        "operationId": "GetWatchlistTemplates",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/WatchlistTemplateDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/watchlist": {
       "get": {
         "tags": [
@@ -866,6 +889,42 @@
                   "items": {
                     "type": "string"
                   }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
+    "/api/watchlist/from-template": {
+      "post": {
+        "tags": [
+          "Watchlist"
+        ],
+        "operationId": "ApplyWatchlistTemplate",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApplyWatchlistTemplateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApplyWatchlistTemplateResponse"
                 }
               }
             }
@@ -1393,6 +1452,28 @@
               "null",
               "string"
             ]
+          }
+        }
+      },
+      "ApplyWatchlistTemplateRequest": {
+        "required": [
+          "templateId"
+        ],
+        "type": "object",
+        "properties": {
+          "templateId": {
+            "type": "string"
+          }
+        }
+      },
+      "ApplyWatchlistTemplateResponse": {
+        "type": "object",
+        "properties": {
+          "packageIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           }
         }
       },
@@ -2471,6 +2552,9 @@
           },
           "isAdmin": {
             "type": "boolean"
+          },
+          "isNewUser": {
+            "type": "boolean"
           }
         }
       },
@@ -2501,6 +2585,37 @@
               "null",
               "string"
             ]
+          }
+        }
+      },
+      "WatchlistTemplateDto": {
+        "required": [
+          "id",
+          "name",
+          "description"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "packages": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "packageIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           }
         }
       }
