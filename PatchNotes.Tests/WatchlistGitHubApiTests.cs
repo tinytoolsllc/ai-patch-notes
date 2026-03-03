@@ -125,4 +125,26 @@ public class WatchlistGitHubApiTests : IAsyncLifetime
         var response = await _unauthClient.PostAsync("/api/watchlist/github/facebook/react", null);
         response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
     }
+
+    [Fact]
+    public async Task AddFromGitHub_ReturnsBadRequest_WhenOwnerTooLong()
+    {
+        var longOwner = new string('a', 129);
+        var response = await _authClient.PostAsync($"/api/watchlist/github/{longOwner}/repo", null);
+
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        var error = await response.Content.ReadFromJsonAsync<JsonElement>();
+        error.GetProperty("error").GetString().Should().Be("Invalid owner or repo name");
+    }
+
+    [Fact]
+    public async Task AddFromGitHub_ReturnsBadRequest_WhenRepoTooLong()
+    {
+        var longRepo = new string('a', 129);
+        var response = await _authClient.PostAsync($"/api/watchlist/github/owner/{longRepo}", null);
+
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        var error = await response.Content.ReadFromJsonAsync<JsonElement>();
+        error.GetProperty("error").GetString().Should().Be("Invalid owner or repo name");
+    }
 }
