@@ -1,5 +1,5 @@
 import { useStytchUser } from '@stytch/react'
-import { Link } from '@tanstack/react-router'
+import { Link, useNavigate } from '@tanstack/react-router'
 import { Check, Sparkles } from 'lucide-react'
 import {
   AppHeader,
@@ -30,11 +30,11 @@ export function Pricing() {
   const { isPro, isLoading, startCheckout, openPortal } = useSubscriptionStore()
   const { isAllowed: isGeofencingAllowed, isLoading: isGeofencingLoading } =
     useGeofencing()
+  const navigate = useNavigate()
 
   const handleUpgrade = () => {
     if (!user) {
-      // Redirect to login
-      window.location.href = '/login'
+      navigate({ to: '/login' })
       return
     }
     startCheckout()
