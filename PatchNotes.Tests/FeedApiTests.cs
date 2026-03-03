@@ -326,6 +326,51 @@ public class FeedApiTests : IAsyncLifetime
     }
 
     [Fact]
+    public async Task GetFeed_WhenDefaultFeedCached_SkipsAuthentication()
+    {
+        // Arrange: create a package with a release so the feed is non-empty
+        using var scope = _fixture.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<PatchNotesDbContext>();
+
+        var package = new Package
+        {
+            Name = "cache-test-pkg",
+            Url = "https://github.com/owner/cache-test-pkg",
+            GithubOwner = "owner",
+            GithubRepo = "cache-test-pkg"
+        };
+        db.Packages.Add(package);
+        await db.SaveChangesAsync();
+
+        db.Releases.Add(new Release
+        {
+            PackageId = package.Id,
+            Tag = "v1.0.0",
+            Title = "First release",
+            PublishedAt = DateTimeOffset.UtcNow,
+            FetchedAt = DateTimeOffset.UtcNow,
+            MajorVersion = 1,
+            MinorVersion = 0,
+            PatchVersion = 0
+        });
+        await db.SaveChangesAsync();
+
+        // Warm the cache with an anonymous request
+        var warmResponse = await _client.GetAsync("/api/feed");
+        warmResponse.StatusCode.Should().Be(HttpStatusCode.OK);
+        _fixture.MockStytch.AuthenticateCallCount.Should().Be(0, "anonymous request should not call Stytch");
+
+        // Act: authenticated request with no watchlist — cache should be hit before auth
+        using var authClient = _fixture.CreateNonAdminClient();
+        var authResponse = await authClient.GetAsync("/api/feed");
+
+        // Assert: cache was served, Stytch was never called
+        authResponse.StatusCode.Should().Be(HttpStatusCode.OK);
+        _fixture.MockStytch.AuthenticateCallCount.Should().Be(0,
+            "cache hit should prevent Stytch authentication for empty-watchlist user");
+    }
+
+    [Fact]
     public async Task GetFeed_FallsBackToLatestRelease_WhenWindowEmpty()
     {
         // Arrange: create releases where all are very old and >7 days apart

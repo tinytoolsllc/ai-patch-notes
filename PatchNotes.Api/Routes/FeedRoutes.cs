@@ -20,20 +20,17 @@ public static class FeedRoutes
             IStytchClient stytchClient,
             IMemoryCache cache) =>
         {
+            // Check cache first; authenticate only if needed
+            var cacheKey = $"feed:default:{excludePrerelease ?? false}";
+            if (cache.TryGetValue(cacheKey, out FeedResponseDto? cached))
+                return Results.Ok(cached);
+
             // Resolve which packages to show: user's watchlist or top 5 most recent
             var userWatchlistIds = await RouteUtils.GetAuthenticatedUserWatchlistIds(
                 httpContext, db, stytchClient);
 
             var isDefaultFeed = userWatchlistIds is not { Count: > 0 };
             List<string> watchlistIds;
-
-            // Return cached response for the default feed to avoid recomputing on every request
-            if (isDefaultFeed)
-            {
-                var cacheKey = $"feed:default:{excludePrerelease ?? false}";
-                if (cache.TryGetValue(cacheKey, out FeedResponseDto? cached))
-                    return Results.Ok(cached);
-            }
 
             if (!isDefaultFeed)
             {
@@ -182,7 +179,6 @@ public static class FeedRoutes
 
             if (isDefaultFeed)
             {
-                var cacheKey = $"feed:default:{excludePrerelease ?? false}";
                 cache.Set(cacheKey, response, TimeSpan.FromSeconds(60));
             }
 
