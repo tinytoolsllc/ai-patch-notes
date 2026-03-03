@@ -313,7 +313,7 @@ public static class PackageRoutes
             }
 
             var npmJson = await npmResponse.Content.ReadAsStringAsync();
-            var npmData = JsonDocument.Parse(npmJson);
+            using var npmData = JsonDocument.Parse(npmJson);
 
             string? repoUrl = null;
             if (npmData.RootElement.TryGetProperty("repository", out var repo))
