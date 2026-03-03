@@ -10,11 +10,14 @@ export function Authenticate() {
   const navigate = useNavigate()
   const hasAuthenticated = useRef(false)
 
-  const { token, tokenType } = useMemo(() => {
+  const { token, tokenType, returnUrl } = useMemo(() => {
     const params = new URLSearchParams(window.location.search)
+    const raw = params.get('returnUrl')
     return {
       token: params.get('token'),
       tokenType: params.get('stytch_token_type'),
+      // Only allow relative paths to prevent open redirects
+      returnUrl: raw?.startsWith('/') ? raw : '/',
     }
   }, [])
 
@@ -26,7 +29,7 @@ export function Authenticate() {
     if (!isInitialized || error) return
 
     if (user) {
-      navigate({ to: '/' })
+      navigate({ to: returnUrl })
       return
     }
 
@@ -53,7 +56,7 @@ export function Authenticate() {
         const loginResponse = await api.post<{ isNewUser?: boolean }>(
           '/users/login'
         )
-        navigate({ to: loginResponse?.isNewUser ? '/onboarding' : '/' })
+        navigate({ to: loginResponse?.isNewUser ? '/onboarding' : returnUrl })
       } catch (err) {
         console.error('Authentication failed:', err)
         setError('Authentication failed. Please try again.')
@@ -61,7 +64,16 @@ export function Authenticate() {
     }
 
     authenticate()
-  }, [stytch, token, tokenType, user, isInitialized, navigate, error])
+  }, [
+    stytch,
+    token,
+    tokenType,
+    user,
+    isInitialized,
+    navigate,
+    error,
+    returnUrl,
+  ])
 
   if (error) {
     return (
@@ -73,7 +85,9 @@ export function Authenticate() {
             </h1>
             <p className="mt-2 text-text-secondary">{error}</p>
             <button
-              onClick={() => navigate({ to: '/login' })}
+              onClick={() =>
+                navigate({ to: '/login', search: { returnUrl: undefined } })
+              }
               className="mt-4 rounded-md bg-brand-600 px-4 py-2 text-white hover:bg-brand-700"
             >
               Back to Login

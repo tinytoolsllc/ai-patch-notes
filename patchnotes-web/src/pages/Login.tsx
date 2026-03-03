@@ -1,9 +1,9 @@
 import { StytchLogin } from '@stytch/react'
 import { useStytchUser } from '@stytch/react'
-import { Link, useNavigate } from '@tanstack/react-router'
+import { Link, useNavigate, useSearch } from '@tanstack/react-router'
 import { useEffect, useMemo } from 'react'
 import { ArrowLeft } from 'lucide-react'
-import { stytchLoginConfig, getStytchPresentation } from '../auth/stytch'
+import { getStytchLoginConfig, getStytchPresentation } from '../auth/stytch'
 import { useTheme } from '../components/theme'
 import { ThemeToggle } from '../components/theme'
 
@@ -11,17 +11,29 @@ export function Login() {
   const { user, isInitialized } = useStytchUser()
   const navigate = useNavigate()
   const { resolvedTheme } = useTheme()
+  const { returnUrl } = useSearch({ from: '/login' })
+
+  // Only accept relative paths to prevent open redirects
+  const validReturnUrl = returnUrl?.startsWith('/') ? returnUrl : undefined
 
   const stytchPresentation = useMemo(
     () => getStytchPresentation(resolvedTheme === 'dark'),
     [resolvedTheme]
   )
 
+  const stytchLoginConfig = useMemo(
+    () => getStytchLoginConfig(validReturnUrl),
+    [validReturnUrl]
+  )
+
+  // Destination for already-authenticated users and Back link
+  const destination = validReturnUrl ?? '/'
+
   useEffect(() => {
     if (isInitialized && user) {
-      navigate({ to: '/' })
+      navigate({ to: destination })
     }
-  }, [user, isInitialized, navigate])
+  }, [user, isInitialized, navigate, destination])
 
   if (!isInitialized) {
     return (
@@ -51,7 +63,7 @@ export function Login() {
       {/* Header */}
       <header className="sticky top-0 z-10 flex items-center justify-between px-6 py-4">
         <Link
-          to="/"
+          to={destination}
           className="flex items-center gap-2 text-text-secondary hover:text-text-primary transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />

@@ -130,7 +130,7 @@ export function WatchlistPage() {
   // Redirect if not authenticated
   useEffect(() => {
     if (isInitialized && !user) {
-      navigate({ to: '/login' })
+      navigate({ to: '/login', search: { returnUrl: '/watchlist' } })
     }
   }, [isInitialized, user, navigate])
 

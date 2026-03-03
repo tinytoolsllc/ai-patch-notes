@@ -34,7 +34,7 @@ export function Pricing() {
 
   const handleUpgrade = () => {
     if (!user) {
-      navigate({ to: '/login' })
+      navigate({ to: '/login', search: { returnUrl: '/pricing' } })
       return
     }
     startCheckout()
@@ -95,7 +95,11 @@ export function Pricing() {
                     Loading...
                   </Button>
                 ) : !user ? (
-                  <Link to="/login" className="block">
+                  <Link
+                    to="/login"
+                    search={{ returnUrl: '/pricing' }}
+                    className="block"
+                  >
                     <Button variant="secondary" size="lg" className="w-full">
                       Get Started
                     </Button>

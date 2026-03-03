@@ -158,7 +158,7 @@ public static class HtmlPageRoutes
             }
 
             var bodyHtml = new StringBuilder(email.HtmlBody.Length + 512);
-            bodyHtml.Append(HtmlTemplate.Header(("Email", null)));
+            bodyHtml.Append(HtmlTemplate.Header($"/html/emails/{id}", ("Email", null)));
             bodyHtml.Append("<main><div class=\"container\">");
             bodyHtml.Append("<div class=\"card card-padded\">");
             bodyHtml.Append(email.HtmlBody);
@@ -219,12 +219,13 @@ public static class HtmlPageRoutes
         string owner, string repo, string? npmName, string packageId, List<PackageDetailGroupDto> groups)
     {
         var sb = new StringBuilder(4096);
-        sb.Append(HtmlTemplate.Header(
+        var path = $"/packages/{owner}/{repo}";
+        sb.Append(HtmlTemplate.Header(path,
             (owner, $"/html/packages/{owner}"),
             (repo, null)));
 
         sb.Append("<main><div class=\"container\">");
-        sb.Append(HtmlTemplate.HeroCard());
+        sb.Append(HtmlTemplate.HeroCard(path));
 
         if (groups.Count > 0)
         {
@@ -283,7 +284,7 @@ public static class HtmlPageRoutes
         var owner = release.Package.GithubOwner;
         var repo = release.Package.GithubRepo;
 
-        sb.Append(HtmlTemplate.Header(
+        sb.Append(HtmlTemplate.Header($"/releases/{release.Id}",
             (owner, $"/html/packages/{owner}"),
             (repo, $"/html/packages/{owner}/{repo}"),
             (release.Tag, null)));
@@ -328,7 +329,7 @@ public static class HtmlPageRoutes
     private static string BuildOwnerListHtml(string owner, List<OwnerPackageDto> packages)
     {
         var sb = new StringBuilder(2048);
-        sb.Append(HtmlTemplate.Header((owner, null)));
+        sb.Append(HtmlTemplate.Header($"/packages/{owner}", (owner, null)));
 
         sb.Append("<main><div class=\"container\">");
         sb.Append($"<h1 class=\"text-xl font-semibold mb-4\">{Encode(owner)} Packages</h1>");
