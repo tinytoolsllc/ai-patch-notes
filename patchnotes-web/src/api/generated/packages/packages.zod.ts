@@ -185,32 +185,3 @@ export const GetPackageByOwnerRepoResponse = zod.object({
 }))
 })
 
-export const BulkCreatePackagesBodyItem = zod.object({
-  "githubOwner": zod.string(),
-  "githubRepo": zod.string(),
-  "name": zod.string().nullish(),
-  "npmName": zod.string().nullish(),
-  "tagPrefix": zod.string().nullish()
-})
-export const BulkCreatePackagesBody = zod.array(BulkCreatePackagesBodyItem)
-
-export const BulkCreatePackagesResponse = zod.object({
-  "results": zod.array(zod.object({
-  "success": zod.boolean().optional(),
-  "package": zod.union([zod.null(),zod.object({
-  "id": zod.string(),
-  "name": zod.string(),
-  "url": zod.string().nullish(),
-  "npmName": zod.string().nullish(),
-  "githubOwner": zod.string(),
-  "githubRepo": zod.string(),
-  "tagPrefix": zod.string().nullish(),
-  "lastFetchedAt": zod.iso.datetime({"offset":true}).nullish(),
-  "createdAt": zod.iso.datetime({"offset":true}).optional()
-})]).optional(),
-  "error": zod.string().nullish(),
-  "githubOwner": zod.string().nullish(),
-  "githubRepo": zod.string().nullish()
-}))
-})
-
