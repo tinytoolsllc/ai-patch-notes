@@ -1,4 +1,5 @@
 import { Hammer, Anvil } from 'lucide-react'
+import { Link } from '@tanstack/react-router'
 import { Container } from './Container'
 
 export function Footer() {
@@ -28,27 +29,27 @@ export function Footer() {
 
             {/* Right: Nav links */}
             <nav className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-text-secondary">
-              <a href="/" className="hover:text-text-primary transition-colors">
+              <Link to="/" className="hover:text-text-primary transition-colors">
                 Home
-              </a>
-              <a
-                href="/pricing"
+              </Link>
+              <Link
+                to="/pricing"
                 className="hover:text-text-primary transition-colors"
               >
                 Pricing
-              </a>
-              <a
-                href="/about"
+              </Link>
+              <Link
+                to="/about"
                 className="hover:text-text-primary transition-colors"
               >
                 About
-              </a>
-              <a
-                href="/privacy"
+              </Link>
+              <Link
+                to="/privacy"
                 className="hover:text-text-primary transition-colors"
               >
                 Privacy
-              </a>
+              </Link>
             </nav>
           </div>
 
