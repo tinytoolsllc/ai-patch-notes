@@ -35,6 +35,8 @@ public class SyncPipeline
 
         var result = new PipelineResult();
 
+        // The producer and consumer write to disjoint sets of PipelineResult fields —
+        // see PipelineResult remarks for the ownership breakdown. No synchronization is needed.
         var producerTask = ProduceAsync(channel.Writer, result, ct);
         var consumerTask = ConsumeAsync(channel.Reader, result, ct);
 
