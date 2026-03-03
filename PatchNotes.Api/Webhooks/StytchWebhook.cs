@@ -62,6 +62,13 @@ public static class StytchWebhook
                 return Results.Unauthorized();
             }
 
+            // Idempotency: skip already-processed events (svix-id is stable across retries)
+            if (await db.ProcessedWebhookEvents.AnyAsync(e => e.EventId == svixId))
+            {
+                logger.LogInformation("Skipping already-processed Stytch event {SvixId}", svixId);
+                return Results.Ok(new { received = true, duplicate = true });
+            }
+
             // Step 1: Deserialize the webhook payload
             StytchWebhookEvent? stytchEvent;
             try
@@ -180,6 +187,14 @@ public static class StytchWebhook
                     logger.LogInformation("Unhandled Stytch webhook: object_type={ObjectType}, action={Action}", stytchEvent.object_type, stytchEvent.action);
                     break;
             }
+
+            // Record event as processed for idempotency
+            db.ProcessedWebhookEvents.Add(new ProcessedWebhookEvent
+            {
+                EventId = svixId,
+                ProcessedAt = DateTimeOffset.UtcNow
+            });
+            await db.SaveChangesAsync();
 
             return Results.Ok(new { received = true });
         });
