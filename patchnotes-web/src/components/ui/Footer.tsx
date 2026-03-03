@@ -29,7 +29,10 @@ export function Footer() {
 
             {/* Right: Nav links */}
             <nav className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-text-secondary">
-              <Link to="/" className="hover:text-text-primary transition-colors">
+              <Link
+                to="/"
+                className="hover:text-text-primary transition-colors"
+              >
                 Home
               </Link>
               <Link
