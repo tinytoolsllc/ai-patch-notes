@@ -126,7 +126,6 @@ const PackagesOwnerRepoRoute = PackagesOwnerRepoRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
-  '/admin': typeof AdminRoute
   '/authenticate': typeof AuthenticateRoute
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
@@ -147,7 +146,6 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
-  '/admin': typeof AdminRoute
   '/authenticate': typeof AuthenticateRoute
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
@@ -168,7 +166,6 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
-  '/admin': typeof AdminRoute
   '/authenticate': typeof AuthenticateRoute
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
@@ -191,7 +188,6 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/about'
-    | '/admin'
     | '/authenticate'
     | '/login'
     | '/onboarding'
@@ -212,7 +208,6 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/about'
-    | '/admin'
     | '/authenticate'
     | '/login'
     | '/onboarding'
@@ -232,7 +227,6 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/about'
-    | '/admin'
     | '/authenticate'
     | '/login'
     | '/onboarding'
@@ -254,7 +248,6 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
-  AdminRoute: typeof AdminRoute
   AuthenticateRoute: typeof AuthenticateRoute
   LoginRoute: typeof LoginRoute
   OnboardingRoute: typeof OnboardingRoute
@@ -334,13 +327,6 @@ declare module '@tanstack/react-router' {
       path: '/authenticate'
       fullPath: '/authenticate'
       preLoaderRoute: typeof AuthenticateRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin': {
-      id: '/admin'
-      path: '/admin'
-      fullPath: '/admin'
-      preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/about': {
@@ -426,7 +412,6 @@ const PackagesOwnerRouteWithChildren = PackagesOwnerRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
-  AdminRoute: AdminRoute,
   AuthenticateRoute: AuthenticateRoute,
   LoginRoute: LoginRoute,
   OnboardingRoute: OnboardingRoute,
