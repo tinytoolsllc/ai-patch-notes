@@ -64,7 +64,7 @@ public static class SummaryRoutes
             int? limit,
             PatchNotesDbContext db) =>
         {
-            var take = limit ?? 20;
+            var take = Math.Clamp(limit ?? 20, 1, 100);
 
             IQueryable<ReleaseSummary> query = db.ReleaseSummaries
                 .AsNoTracking();
