@@ -25,6 +25,8 @@ public class PatchNotesApiFixture : WebApplicationFactory<Program>, IAsyncLifeti
     private Action<IWebHostBuilder>? _additionalConfig;
     private Action<IServiceCollection>? _additionalServices;
 
+    public MockStytchClient MockStytch { get; private set; } = null!;
+
     public MockNpmHandler NpmHandler => _npmHandler;
 
     /// <summary>
@@ -74,9 +76,9 @@ public class PatchNotesApiFixture : WebApplicationFactory<Program>, IAsyncLifeti
 
             // Remove existing Stytch client and add mock
             services.RemoveAll<IStytchClient>();
-            var mockStytch = new MockStytchClient(TestSessionToken, TestUserId);
-            mockStytch.RegisterSession(NonAdminSessionToken, NonAdminUserId, "nonadmin@example.com", []);
-            services.AddSingleton<IStytchClient>(mockStytch);
+            MockStytch = new MockStytchClient(TestSessionToken, TestUserId);
+            MockStytch.RegisterSession(NonAdminSessionToken, NonAdminUserId, "nonadmin@example.com", []);
+            services.AddSingleton<IStytchClient>(MockStytch);
 
             _additionalServices?.Invoke(services);
         });
@@ -249,6 +251,8 @@ public class MockStytchClient : IStytchClient
     private readonly Dictionary<string, StytchSessionResult> _sessions = new();
     private readonly Dictionary<string, StytchUser> _users = new();
 
+    public int AuthenticateCallCount { get; private set; }
+
     public MockStytchClient(string validSessionToken, string userId)
     {
         _sessions[validSessionToken] = new StytchSessionResult
@@ -287,6 +291,7 @@ public class MockStytchClient : IStytchClient
 
     public Task<StytchSessionResult?> AuthenticateSessionAsync(string sessionToken, CancellationToken cancellationToken = default)
     {
+        AuthenticateCallCount++;
         _sessions.TryGetValue(sessionToken, out var session);
         return Task.FromResult(session);
     }
