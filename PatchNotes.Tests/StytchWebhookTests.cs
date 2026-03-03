@@ -202,4 +202,26 @@ public class StytchWebhookTests : IAsyncLifetime
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
     }
+
+    [Fact]
+    public async Task HandleWebhook_GivenDuplicateSvixId_ReturnsOkWithDuplicateFlag()
+    {
+        // Arrange: send the same webhook twice with the same svix-id
+        var stytchUserId = PatchNotesApiFixture.TestUserId;
+        var body = $$$"""{"action":"CREATE","id":"{{{stytchUserId}}}","object_type":"user"}""";
+        var (id, ts, sig) = SignPayload(body);
+
+        var firstRequest = CreateWebhookRequest(body, svixId: id, svixTimestamp: ts, svixSignature: sig);
+        var firstResponse = await _client.SendAsync(firstRequest);
+        firstResponse.StatusCode.Should().Be(HttpStatusCode.OK);
+
+        // Act: send same svix-id again (simulating Svix retry)
+        var secondRequest = CreateWebhookRequest(body, svixId: id, svixTimestamp: ts, svixSignature: sig);
+        var secondResponse = await _client.SendAsync(secondRequest);
+
+        // Assert: second delivery is acknowledged but flagged as duplicate
+        secondResponse.StatusCode.Should().Be(HttpStatusCode.OK);
+        var content = await secondResponse.Content.ReadAsStringAsync();
+        content.Should().Contain("duplicate");
+    }
 }
