@@ -16,9 +16,11 @@ public class SqliteContext : PatchNotesDbContext
     {
         base.OnModelCreating(modelBuilder);
 
-        // SQLite doesn't have a native DateTimeOffset type, so convert to/from DateTime (UTC).
+        // SQLite doesn't have a native DateTimeOffset type, so convert to/from UTC DateTime.
+        // Only UTC offsets are supported — non-UTC values throw InvalidOperationException
+        // on write rather than silently losing offset information.
         var dtoConverter = new ValueConverter<DateTimeOffset, DateTime>(
-            v => v.UtcDateTime,
+            v => ToUtcDateTime(v),
             v => new DateTimeOffset(v, TimeSpan.Zero));
 
         foreach (var entityType in modelBuilder.Model.GetEntityTypes())
@@ -31,6 +33,15 @@ public class SqliteContext : PatchNotesDbContext
                 }
             }
         }
+    }
+
+    private static DateTime ToUtcDateTime(DateTimeOffset v)
+    {
+        if (v.Offset != TimeSpan.Zero)
+            throw new InvalidOperationException(
+                $"Non-UTC DateTimeOffset values are not supported in SQLite context " +
+                $"(offset: {v.Offset}). Ensure all DateTimeOffset values use UTC before persisting.");
+        return v.UtcDateTime;
     }
 }
 
@@ -79,4 +90,3 @@ public class SqlServerContextFactory : IDesignTimeDbContextFactory<SqlServerCont
         return new SqlServerContext(optionsBuilder.Options);
     }
 }
-
