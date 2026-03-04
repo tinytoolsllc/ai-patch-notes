@@ -17,9 +17,14 @@ public class SqliteContext : PatchNotesDbContext
         base.OnModelCreating(modelBuilder);
 
         // SQLite doesn't have a native DateTimeOffset type, so convert to/from DateTime (UTC).
+        // NOTE: This normalizes all offsets to UTC on write — the original offset is not preserved.
+        // All DateTimeOffset values in this application use UTC (DateTimeOffset.UtcNow), so this
+        // is safe. Non-UTC offsets would be silently converted to UTC and lost on read-back.
+        // DateTime.SpecifyKind ensures the stored value is unambiguously treated as UTC on read,
+        // preventing an InvalidOperationException if EF Core returns Kind=Unspecified or Kind=Local.
         var dtoConverter = new ValueConverter<DateTimeOffset, DateTime>(
             v => v.UtcDateTime,
-            v => new DateTimeOffset(v, TimeSpan.Zero));
+            v => new DateTimeOffset(DateTime.SpecifyKind(v, DateTimeKind.Utc), TimeSpan.Zero));
 
         foreach (var entityType in modelBuilder.Model.GetEntityTypes())
         {
