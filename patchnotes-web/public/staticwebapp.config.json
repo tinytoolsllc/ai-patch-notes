@@ -6,7 +6,6 @@
       "/sw.js",
       "/workbox-*.js",
       "/manifest.webmanifest",
-      "/offline.html",
       "/pwa-*.png"
     ]
   }
