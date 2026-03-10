@@ -404,7 +404,11 @@ export function AdminEmails() {
                     </h3>
                     <p className="text-xs text-text-secondary">
                       Sends a real email using the{' '}
-                      <strong>{currentTemplate?.name}</strong> template
+                      <strong>
+                        {currentTemplate?.name ||
+                          `Template #${currentTemplate?.id}`}
+                      </strong>{' '}
+                      template
                       {useSampleData
                         ? ' with the sample data shown below.'
                         : ' with real data from the database.'}
@@ -475,7 +479,9 @@ export function AdminEmails() {
                 <Card padding="none">
                   <div className="px-6 py-4 border-b border-border-default">
                     <h2 className="text-sm font-semibold text-text-primary">
-                      JSX Source — {currentTemplate.name}
+                      JSX Source —{' '}
+                      {currentTemplate.name ||
+                        `Template #${currentTemplate.id}`}
                     </h2>
                     <p className="text-xs text-text-tertiary mt-1">
                       Last updated:{' '}
@@ -501,7 +507,9 @@ export function AdminEmails() {
                 <Card padding="none">
                   <div className="px-6 py-4 border-b border-border-default">
                     <h2 className="text-sm font-semibold text-text-primary">
-                      Email Preview — {currentTemplate.name}
+                      Email Preview —{' '}
+                      {currentTemplate.name ||
+                        `Template #${currentTemplate.id}`}
                     </h2>
                     <p className="text-xs text-text-tertiary mt-1">
                       Rendered with sample data
@@ -523,7 +531,7 @@ export function AdminEmails() {
                     ) : (
                       <iframe
                         srcDoc={previewHtml}
-                        title={`Preview of ${currentTemplate.name} template`}
+                        title={`Preview of ${currentTemplate.name || `Template #${currentTemplate.id}`} template`}
                         className="w-full border-0 rounded bg-white"
                         style={{ minHeight: '400px' }}
                         sandbox=""
