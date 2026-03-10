@@ -122,11 +122,8 @@ public static class EmailTemplateRoutes
                 return Results.BadRequest(new ApiError("Recipient email is required"));
             }
 
-            var template = await db.EmailTemplates
-                .Where(t => t.Id == id)
-                .Select(t => t.Name)
-                .FirstOrDefaultAsync(cancellationToken);
-            if (template == null)
+            var templateExists = await db.EmailTemplates.AnyAsync(t => t.Id == id, cancellationToken);
+            if (!templateExists)
             {
                 return Results.NotFound(new ApiError("Template not found"));
             }
@@ -158,7 +155,7 @@ public static class EmailTemplateRoutes
 
                 var payload = new
                 {
-                    templateName = template,
+                    templateId = id,
                     recipientEmail = request.RecipientEmail,
                     testData = request.TestData
                 };

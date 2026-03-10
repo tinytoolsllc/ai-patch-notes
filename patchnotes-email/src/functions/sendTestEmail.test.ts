@@ -54,13 +54,13 @@ function makeRequest(body: unknown): any {
 }
 
 const VALID_REQUEST_WITH_DATA = {
-    templateName: "welcome",
+    templateId: "tmpl-welcome",
     recipientEmail: "admin@test.com",
     testData: { name: "Jane Doe" },
 };
 
 const VALID_REQUEST_REAL_DATA = {
-    templateName: "welcome",
+    templateId: "tmpl-welcome",
     recipientEmail: "admin@test.com",
 };
 
@@ -81,13 +81,13 @@ describe("sendTestEmail", () => {
         expect(result.body).toBe("Invalid JSON body");
     });
 
-    it("returns 400 when templateName is missing", async () => {
+    it("returns 400 when templateId is missing", async () => {
         const result = await sendTestEmail(
-            makeRequest({ ...VALID_REQUEST_WITH_DATA, templateName: "" }),
+            makeRequest({ ...VALID_REQUEST_WITH_DATA, templateId: "" }),
             makeContext()
         );
         expect(result.status).toBe(400);
-        expect(result.body).toBe("Missing required field: templateName");
+        expect(result.body).toBe("Missing required field: templateId");
     });
 
     it("returns 400 when recipientEmail is missing", async () => {
@@ -111,7 +111,7 @@ describe("sendTestEmail", () => {
     it("returns 404 when template is not found", async () => {
         const result = await sendTestEmail(makeRequest(VALID_REQUEST_REAL_DATA), makeContext());
         expect(result.status).toBe(404);
-        expect(result.body).toBe("Template not found: welcome");
+        expect(result.body).toBe("Template not found: tmpl-welcome");
     });
 
     // ── With sample data (testData provided) ──────────────────
@@ -147,7 +147,7 @@ describe("sendTestEmail", () => {
         mockSend.mockResolvedValue({ error: null });
 
         const result = await sendTestEmail(makeRequest({
-            templateName: "digest",
+            templateId: "tmpl-digest",
             recipientEmail: "admin@test.com",
             testData: {
                 name: "Jane Doe",
@@ -229,7 +229,7 @@ describe("sendTestEmail", () => {
         mockSend.mockResolvedValue({ error: null });
 
         const result = await sendTestEmail(makeRequest({
-            templateName: "digest",
+            templateId: "tmpl-digest",
             recipientEmail: "admin@test.com",
         }), makeContext());
 
