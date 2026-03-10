@@ -28,6 +28,8 @@ interface EmailTemplateDto {
 
 // ── Sample Data ──────────────────────────────────────────────
 
+const EMPTY_SAMPLE_DATA: Record<string, unknown> = {}
+
 const SAMPLE_DATA: Record<string, Record<string, unknown>> = {
   welcome: { name: 'Jane Doe' },
   digest: {
@@ -166,7 +168,8 @@ export function AdminEmails() {
 
   const activeTemplateId = selectedTemplateId ?? templates?.[0]?.id ?? ''
   const currentTemplate = templates?.find((t) => t.id === activeTemplateId)
-  const sampleData = SAMPLE_DATA[currentTemplate?.name ?? ''] ?? {}
+  const sampleData =
+    SAMPLE_DATA[currentTemplate?.name ?? ''] ?? EMPTY_SAMPLE_DATA
 
   const {
     data: previewData,
