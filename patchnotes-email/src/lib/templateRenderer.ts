@@ -1,4 +1,4 @@
-import { transform } from "esbuild";
+import { transform } from "esbuild-wasm";
 import { render } from "@react-email/render";
 import * as React from "react";
 import * as ReactEmailComponents from "@react-email/components";
