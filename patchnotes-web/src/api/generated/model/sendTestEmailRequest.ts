@@ -8,5 +8,5 @@ import type { JsonElement } from './jsonElement';
 
 export interface SendTestEmailRequest {
   recipientEmail: string;
-  testData: JsonElement;
+  testData: null | JsonElement;
 }

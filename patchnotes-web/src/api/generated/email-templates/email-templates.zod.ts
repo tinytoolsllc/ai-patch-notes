@@ -51,7 +51,7 @@ export const SendTestEmailParams = zod.object({
 
 export const SendTestEmailBody = zod.object({
   "recipientEmail": zod.string(),
-  "testData": zod.unknown()
+  "testData": zod.union([zod.null(),zod.unknown()])
 })
 
 export const PreviewEmailTemplateBody = zod.object({
