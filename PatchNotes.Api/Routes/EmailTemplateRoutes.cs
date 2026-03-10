@@ -41,11 +41,11 @@ public static class EmailTemplateRoutes
         .Produces<List<EmailTemplateDto>>(StatusCodes.Status200OK)
         .WithName("GetEmailTemplates");
 
-        // GET /api/admin/email-templates/{name} - Get single template by name
-        group.MapGet("/{name}", async (string name, PatchNotesDbContext db) =>
+        // GET /api/admin/email-templates/{id} - Get single template by id
+        group.MapGet("/{id}", async (string id, PatchNotesDbContext db) =>
         {
             var template = await db.EmailTemplates
-                .Where(t => t.Name == name)
+                .Where(t => t.Id == id)
                 .Select(t => new EmailTemplateDto
                 {
                     Id = t.Id,
@@ -69,10 +69,10 @@ public static class EmailTemplateRoutes
         .Produces(StatusCodes.Status404NotFound)
         .WithName("GetEmailTemplate");
 
-        // PUT /api/admin/email-templates/{name} - Update template
-        group.MapPut("/{name}", async (string name, UpdateEmailTemplateRequest request, PatchNotesDbContext db) =>
+        // PUT /api/admin/email-templates/{id} - Update template
+        group.MapPut("/{id}", async (string id, UpdateEmailTemplateRequest request, PatchNotesDbContext db) =>
         {
-            var template = await db.EmailTemplates.FirstOrDefaultAsync(t => t.Name == name);
+            var template = await db.EmailTemplates.FirstOrDefaultAsync(t => t.Id == id);
             if (template == null)
             {
                 return Results.NotFound(new ApiError("Template not found"));
@@ -105,9 +105,9 @@ public static class EmailTemplateRoutes
         .Produces(StatusCodes.Status404NotFound)
         .WithName("UpdateEmailTemplate");
 
-        // POST /api/admin/email-templates/{name}/test - Send a test email
-        group.MapPost("/{name}/test", async (
-            string name,
+        // POST /api/admin/email-templates/{id}/test - Send a test email
+        group.MapPost("/{id}/test", async (
+            string id,
             SendTestEmailRequest request,
             PatchNotesDbContext db,
             IConfiguration configuration,
@@ -122,8 +122,11 @@ public static class EmailTemplateRoutes
                 return Results.BadRequest(new ApiError("Recipient email is required"));
             }
 
-            var templateExists = await db.EmailTemplates.AnyAsync(t => t.Name == name, cancellationToken);
-            if (!templateExists)
+            var template = await db.EmailTemplates
+                .Where(t => t.Id == id)
+                .Select(t => t.Name)
+                .FirstOrDefaultAsync(cancellationToken);
+            if (template == null)
             {
                 return Results.NotFound(new ApiError("Template not found"));
             }
@@ -155,7 +158,7 @@ public static class EmailTemplateRoutes
 
                 var payload = new
                 {
-                    templateName = name,
+                    templateName = template,
                     recipientEmail = request.RecipientEmail,
                     testData = request.TestData
                 };

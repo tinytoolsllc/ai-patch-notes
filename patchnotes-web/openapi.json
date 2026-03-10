@@ -1211,7 +1211,7 @@
         }
       }
     },
-    "/api/admin/email-templates/{name}": {
+    "/api/admin/email-templates/{id}": {
       "get": {
         "tags": [
           "EmailTemplates"
@@ -1219,7 +1219,7 @@
         "operationId": "GetEmailTemplate",
         "parameters": [
           {
-            "name": "name",
+            "name": "id",
             "in": "path",
             "required": true,
             "schema": {
@@ -1250,7 +1250,7 @@
         "operationId": "UpdateEmailTemplate",
         "parameters": [
           {
-            "name": "name",
+            "name": "id",
             "in": "path",
             "required": true,
             "schema": {
@@ -1285,7 +1285,7 @@
         }
       }
     },
-    "/api/admin/email-templates/{name}/test": {
+    "/api/admin/email-templates/{id}/test": {
       "post": {
         "tags": [
           "EmailTemplates"
@@ -1293,7 +1293,7 @@
         "operationId": "SendTestEmail",
         "parameters": [
           {
-            "name": "name",
+            "name": "id",
             "in": "path",
             "required": true,
             "schema": {

@@ -15,6 +15,7 @@ public class SendTestEmailApiTests : IAsyncLifetime
     private HttpClient _authClient = null!;
     private HttpClient _unauthClient = null!;
     private HttpClient _nonAdminClient = null!;
+    private string _welcomeTemplateId = null!;
 
     public async Task InitializeAsync()
     {
@@ -29,8 +30,10 @@ public class SendTestEmailApiTests : IAsyncLifetime
         _unauthClient = _fixture.CreateClient();
         _nonAdminClient = _fixture.CreateNonAdminClient();
 
-        // Seed email templates via the list endpoint
-        await _authClient.GetAsync("/api/admin/email-templates");
+        // Seed email templates via the list endpoint and grab the welcome template ID
+        var templates = await _authClient.GetFromJsonAsync<List<EmailTemplateDto>>(
+            "/api/admin/email-templates");
+        _welcomeTemplateId = templates!.First(t => t.Name == "welcome").Id;
     }
 
     public Task DisposeAsync()
@@ -47,7 +50,7 @@ public class SendTestEmailApiTests : IAsyncLifetime
     {
         // CSRF middleware rejects requests without Origin header before auth runs
         var response = await _unauthClient.PostAsJsonAsync(
-            "/api/admin/email-templates/welcome/test",
+            $"/api/admin/email-templates/{_welcomeTemplateId}/test",
             new { recipientEmail = "a@b.com", testData = new { name = "Test" } });
         response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
     }
@@ -56,7 +59,7 @@ public class SendTestEmailApiTests : IAsyncLifetime
     public async Task SendTestEmail_Returns403_WhenNonAdmin()
     {
         var response = await _nonAdminClient.PostAsJsonAsync(
-            "/api/admin/email-templates/welcome/test",
+            $"/api/admin/email-templates/{_welcomeTemplateId}/test",
             new { recipientEmail = "a@b.com", testData = new { name = "Test" } });
         response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
     }
@@ -67,7 +70,7 @@ public class SendTestEmailApiTests : IAsyncLifetime
         _fixture.NpmHandler.SetupResponse(EmailFunctionUrl, HttpStatusCode.OK, """{"success":true}""");
 
         var response = await _authClient.PostAsJsonAsync(
-            "/api/admin/email-templates/nonexistent/test",
+            "/api/admin/email-templates/nonexistent-id/test",
             new { recipientEmail = "a@b.com", testData = new { name = "Test" } });
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
@@ -78,7 +81,7 @@ public class SendTestEmailApiTests : IAsyncLifetime
         _fixture.NpmHandler.SetupResponse(EmailFunctionUrl, HttpStatusCode.OK, """{"success":true}""");
 
         var response = await _authClient.PostAsJsonAsync(
-            "/api/admin/email-templates/welcome/test",
+            $"/api/admin/email-templates/{_welcomeTemplateId}/test",
             new { recipientEmail = "admin@test.com", testData = new { name = "Jane" } });
         response.StatusCode.Should().Be(HttpStatusCode.NoContent);
     }
@@ -89,7 +92,7 @@ public class SendTestEmailApiTests : IAsyncLifetime
         _fixture.NpmHandler.SetupResponse(EmailFunctionUrl, HttpStatusCode.InternalServerError, "render failed");
 
         var response = await _authClient.PostAsJsonAsync(
-            "/api/admin/email-templates/welcome/test",
+            $"/api/admin/email-templates/{_welcomeTemplateId}/test",
             new { recipientEmail = "admin@test.com", testData = new { name = "Jane" } });
         response.StatusCode.Should().Be(HttpStatusCode.InternalServerError);
 
@@ -105,11 +108,13 @@ public class SendTestEmailApiTests : IAsyncLifetime
         await fixture.InitializeAsync();
         using var client = fixture.CreateAuthenticatedClient();
 
-        // Seed templates
-        await client.GetAsync("/api/admin/email-templates");
+        // Seed templates and get ID
+        var templates = await client.GetFromJsonAsync<List<EmailTemplateDto>>(
+            "/api/admin/email-templates");
+        var templateId = templates!.First(t => t.Name == "welcome").Id;
 
         var response = await client.PostAsJsonAsync(
-            "/api/admin/email-templates/welcome/test",
+            $"/api/admin/email-templates/{templateId}/test",
             new { recipientEmail = "a@b.com", testData = new { name = "Test" } });
         response.StatusCode.Should().Be(HttpStatusCode.ServiceUnavailable);
     }
@@ -118,7 +123,7 @@ public class SendTestEmailApiTests : IAsyncLifetime
     public async Task SendTestEmail_Returns400_WhenRecipientEmailMissing()
     {
         var response = await _authClient.PostAsJsonAsync(
-            "/api/admin/email-templates/welcome/test",
+            $"/api/admin/email-templates/{_welcomeTemplateId}/test",
             new { recipientEmail = "", testData = new { name = "Test" } });
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
@@ -135,11 +140,13 @@ public class SendTestEmailApiTests : IAsyncLifetime
         await fixture.InitializeAsync();
         using var client = fixture.CreateAuthenticatedClient();
 
-        // Seed templates
-        await client.GetAsync("/api/admin/email-templates");
+        // Seed templates and get ID
+        var templates = await client.GetFromJsonAsync<List<EmailTemplateDto>>(
+            "/api/admin/email-templates");
+        var templateId = templates!.First(t => t.Name == "welcome").Id;
 
         var response = await client.PostAsJsonAsync(
-            "/api/admin/email-templates/welcome/test",
+            $"/api/admin/email-templates/{templateId}/test",
             new { recipientEmail = "a@b.com", testData = new { name = "Test" } });
         response.StatusCode.Should().Be(HttpStatusCode.ServiceUnavailable);
     }

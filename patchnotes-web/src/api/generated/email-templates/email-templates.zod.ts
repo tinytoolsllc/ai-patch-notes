@@ -17,7 +17,7 @@ export const GetEmailTemplatesResponseItem = zod.object({
 export const GetEmailTemplatesResponse = zod.array(GetEmailTemplatesResponseItem)
 
 export const GetEmailTemplateParams = zod.object({
-  "name": zod.string()
+  "id": zod.string()
 })
 
 export const GetEmailTemplateResponse = zod.object({
@@ -29,7 +29,7 @@ export const GetEmailTemplateResponse = zod.object({
 })
 
 export const UpdateEmailTemplateParams = zod.object({
-  "name": zod.string()
+  "id": zod.string()
 })
 
 export const UpdateEmailTemplateBody = zod.object({
@@ -46,7 +46,7 @@ export const UpdateEmailTemplateResponse = zod.object({
 })
 
 export const SendTestEmailParams = zod.object({
-  "name": zod.string()
+  "id": zod.string()
 })
 
 export const SendTestEmailBody = zod.object({

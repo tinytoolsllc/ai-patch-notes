@@ -123,7 +123,7 @@ describe('AdminEmails - Send Test Email', () => {
 
   it('shows error on send failure', async () => {
     server.use(
-      http.post(`${API_BASE}/admin/email-templates/:name/test`, () => {
+      http.post(`${API_BASE}/admin/email-templates/:id/test`, () => {
         return HttpResponse.json(
           { error: 'Email function error' },
           { status: 500 }
