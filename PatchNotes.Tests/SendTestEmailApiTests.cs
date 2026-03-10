@@ -122,4 +122,25 @@ public class SendTestEmailApiTests : IAsyncLifetime
             new { recipientEmail = "", testData = new { name = "Test" } });
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
+
+    [Fact]
+    public async Task SendTestEmail_Returns503_WhenEmailFunctionKeyNotConfigured()
+    {
+        // Create a fixture with URL but no Key
+        using var fixture = new PatchNotesApiFixture();
+        fixture.ConfigureSettings(builder =>
+        {
+            builder.UseSetting("EmailFunction:Url", EmailFunctionUrl);
+        });
+        await fixture.InitializeAsync();
+        using var client = fixture.CreateAuthenticatedClient();
+
+        // Seed templates
+        await client.GetAsync("/api/admin/email-templates");
+
+        var response = await client.PostAsJsonAsync(
+            "/api/admin/email-templates/welcome/test",
+            new { recipientEmail = "a@b.com", testData = new { name = "Test" } });
+        response.StatusCode.Should().Be(HttpStatusCode.ServiceUnavailable);
+    }
 }

@@ -138,13 +138,20 @@ public static class EmailTemplateRoutes
                     statusCode: StatusCodes.Status503ServiceUnavailable);
             }
 
+            if (string.IsNullOrEmpty(emailFunctionKey))
+            {
+                logger.LogError("EmailFunction:Key is not configured");
+                return Results.Json(
+                    new ApiError("Email function key not configured"),
+                    statusCode: StatusCodes.Status503ServiceUnavailable);
+            }
+
             try
             {
                 using var http = httpClientFactory.CreateClient();
                 using var httpRequest = new HttpRequestMessage(HttpMethod.Post, emailFunctionUrl);
 
-                if (!string.IsNullOrEmpty(emailFunctionKey))
-                    httpRequest.Headers.Add("x-functions-key", emailFunctionKey);
+                httpRequest.Headers.Add("x-functions-key", emailFunctionKey);
 
                 var payload = new
                 {
@@ -204,12 +211,19 @@ public static class EmailTemplateRoutes
                 return Results.StatusCode(503);
             }
 
+            var functionKey = configuration["EmailFunction:Key"];
+            if (string.IsNullOrEmpty(functionKey))
+            {
+                logger.LogError("EmailFunction:Key is not configured");
+                return Results.Json(
+                    new ApiError("Email function key not configured"),
+                    statusCode: StatusCodes.Status503ServiceUnavailable);
+            }
+
             using var http = httpClientFactory.CreateClient();
             using var httpRequest = new HttpRequestMessage(HttpMethod.Post, renderUrl);
 
-            var functionKey = configuration["EmailFunction:Key"];
-            if (!string.IsNullOrEmpty(functionKey))
-                httpRequest.Headers.Add("x-functions-key", functionKey);
+            httpRequest.Headers.Add("x-functions-key", functionKey);
 
             httpRequest.Content = new StringContent(
                 JsonSerializer.Serialize(new { jsxSource = request.JsxSource, props = request.Props }),
