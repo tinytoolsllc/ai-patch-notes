@@ -66,35 +66,57 @@ public static class UserRoutes
                     LastLoginAt = DateTimeOffset.UtcNow
                 };
                 db.Users.Add(user);
-                await db.SaveChangesAsync();
 
-                // Auto-populate watchlist with default packages (single batch query)
-                var defaults = watchlistOptions.Value.Packages;
-                if (defaults.Length > 0)
+                try
                 {
-                    var isPro = user.IsPro || isAdmin;
-                    var limit = isPro ? defaults.Length : Math.Min(defaults.Length, WatchlistRoutes.FreeWatchlistLimit);
-
-                    var ownerRepoPairs = defaults
-                        .Select(p => p.Split('/', 2))
-                        .Where(parts => parts.Length == 2)
-                        .Select(parts => parts[0] + "/" + parts[1])
-                        .ToList();
-
-                    var matchingPackages = await db.Packages
-                        .Where(p => ownerRepoPairs.Contains(p.GithubOwner + "/" + p.GithubRepo))
-                        .ToListAsync();
-
-                    foreach (var package in matchingPackages.Take(limit))
-                    {
-                        db.Watchlists.Add(new Watchlist
-                        {
-                            UserId = user.Id,
-                            PackageId = package.Id,
-                        });
-                    }
-
                     await db.SaveChangesAsync();
+                }
+                catch (DbUpdateException)
+                {
+                    // Unique constraint violation — another request created this user concurrently.
+                    // Detach the failed entity and fall through to the update path.
+                    db.Entry(user).State = EntityState.Detached;
+                    user = await db.Users.FirstOrDefaultAsync(u => u.StytchUserId == stytchUserId);
+                    isNewUser = false;
+
+                    if (user == null)
+                        return Results.Json(new ApiError("User creation conflict"), statusCode: 409);
+
+                    user.Email = email ?? user.Email;
+                    user.LastLoginAt = DateTimeOffset.UtcNow;
+                    await db.SaveChangesAsync();
+                }
+
+                if (isNewUser)
+                {
+                    // Auto-populate watchlist with default packages (single batch query)
+                    var defaults = watchlistOptions.Value.Packages;
+                    if (defaults.Length > 0)
+                    {
+                        var isPro = user.IsPro || isAdmin;
+                        var limit = isPro ? defaults.Length : Math.Min(defaults.Length, WatchlistRoutes.FreeWatchlistLimit);
+
+                        var ownerRepoPairs = defaults
+                            .Select(p => p.Split('/', 2))
+                            .Where(parts => parts.Length == 2)
+                            .Select(parts => parts[0] + "/" + parts[1])
+                            .ToList();
+
+                        var matchingPackages = await db.Packages
+                            .Where(p => ownerRepoPairs.Contains(p.GithubOwner + "/" + p.GithubRepo))
+                            .ToListAsync();
+
+                        foreach (var package in matchingPackages.Take(limit))
+                        {
+                            db.Watchlists.Add(new Watchlist
+                            {
+                                UserId = user.Id,
+                                PackageId = package.Id,
+                            });
+                        }
+
+                        await db.SaveChangesAsync();
+                    }
                 }
             }
             else

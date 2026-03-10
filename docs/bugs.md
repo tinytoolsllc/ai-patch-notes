@@ -68,7 +68,7 @@ Replaced `esbuild` with `esbuild-wasm` — a pure WASM implementation with the s
 
 ## Duplicate users created for the same Stytch account (race condition)
 
-**Status:** Open
+**Status:** Fixed
 
 ### Symptoms
 
@@ -98,8 +98,8 @@ When a user signs up, Stytch sends the webhook and the frontend calls the login 
 - `PatchNotes.Api/Routes/UserRoutes.cs` — lines 57-68 (login user creation)
 - `PatchNotes.Data/` — User entity has no unique index on `StytchUserId`
 
-### Suggested fix
+### Fix applied
 
-1. **Add a unique index** on `Users.StytchUserId` in the database — this turns the race into a constraint violation instead of a duplicate
-2. **Catch the unique violation** in the second writer and fall back to an update instead of insert
-3. **Consider removing one creation path** — if the login endpoint always creates users, the webhook `user.CREATE` handler could skip user creation and only handle updates
+1. **Added unique index** on `Users.StytchUserId` via migration — the migration also merges any existing duplicate users (keeps the one with the most watchlist entries, reassigns related data)
+2. **Login endpoint** (`UserRoutes.cs`) catches `DbUpdateException` on insert, detaches the failed entity, re-queries the existing user, and falls through to the update path
+3. **Stytch webhook** (`StytchWebhook.cs`) same pattern — catches `DbUpdateException` on create, falls back to update
