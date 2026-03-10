@@ -154,10 +154,20 @@ public static class EmailTemplateRoutes
                     testData = request.TestData
                 };
 
-                httpRequest.Content = new StringContent(
-                    JsonSerializer.Serialize(payload),
-                    System.Text.Encoding.UTF8,
-                    "application/json");
+                string jsonPayload;
+                try
+                {
+                    jsonPayload = JsonSerializer.Serialize(payload);
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError(ex, "Failed to serialize test email payload");
+                    return Results.Json(
+                        new ApiError("Failed to serialize test email payload", ex.Message),
+                        statusCode: StatusCodes.Status500InternalServerError);
+                }
+
+                httpRequest.Content = new StringContent(jsonPayload, System.Text.Encoding.UTF8, "application/json");
 
                 var response = await http.SendAsync(httpRequest, cancellationToken);
                 var responseBody = await response.Content.ReadAsStringAsync(cancellationToken);
@@ -178,7 +188,7 @@ public static class EmailTemplateRoutes
             {
                 logger.LogError(ex, "Failed to call email function for test email");
                 return Results.Json(
-                    new ApiError("Failed to send test email"),
+                    new ApiError("Failed to call email function", ex.Message),
                     statusCode: StatusCodes.Status502BadGateway);
             }
         })
@@ -240,7 +250,9 @@ public static class EmailTemplateRoutes
             catch (Exception ex)
             {
                 logger.LogError(ex, "Failed to call email render function");
-                return Results.StatusCode(502);
+                return Results.Json(
+                    new ApiError("Failed to call email render function", ex.Message),
+                    statusCode: StatusCodes.Status502BadGateway);
             }
         })
         .AddEndpointFilterFactory(requireAuth)
@@ -265,6 +277,6 @@ public class EmailTemplateDto
 
 public record UpdateEmailTemplateRequest(string? Subject, string? JsxSource);
 
-public record SendTestEmailRequest(string RecipientEmail, JsonElement TestData);
+public record SendTestEmailRequest(string RecipientEmail, JsonElement? TestData);
 
 public record PreviewTemplateRequest(string JsxSource, Dictionary<string, object>? Props);
