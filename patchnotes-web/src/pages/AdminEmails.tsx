@@ -52,6 +52,31 @@ const SAMPLE_DATA: Record<string, Record<string, unknown>> = {
   },
 }
 
+// ── Template Tab ─────────────────────────────────────────────
+
+function TemplateTab({
+  label,
+  active,
+  onClick,
+}: {
+  label: string
+  active: boolean
+  onClick: () => void
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+        active
+          ? 'bg-brand-500 text-white'
+          : 'bg-surface-primary text-text-secondary hover:text-text-primary hover:bg-surface-secondary'
+      }`}
+    >
+      {label}
+    </button>
+  )
+}
+
 // ── Main Page ────────────────────────────────────────────────
 
 export function AdminEmails() {
@@ -252,23 +277,18 @@ export function AdminEmails() {
           {/* Template Selector */}
           <div className="flex gap-2 mb-6">
             {(templates ?? []).map((t) => {
-              const label = t.name || `Template #${t.id}`
+              const name = t.name || `Template #${t.id}`
               return (
-                <button
+                <TemplateTab
                   key={t.id}
+                  label={name.charAt(0).toUpperCase() + name.slice(1)}
+                  active={activeTemplateId === t.id}
                   onClick={() => {
                     setSelectedTemplateId(t.id)
                     setIsEditing(false)
                     setSaveStatus(null)
                   }}
-                  className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
-                    activeTemplateId === t.id
-                      ? 'bg-brand-500 text-white'
-                      : 'bg-surface-primary text-text-secondary hover:text-text-primary hover:bg-surface-secondary'
-                  }`}
-                >
-                  {label.charAt(0).toUpperCase() + label.slice(1)}
-                </button>
+                />
               )
             })}
             {isLoading && (
