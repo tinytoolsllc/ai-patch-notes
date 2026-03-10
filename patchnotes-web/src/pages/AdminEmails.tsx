@@ -141,10 +141,7 @@ export function AdminEmails() {
 
   const activeTemplateId = selectedTemplateId ?? templates?.[0]?.id ?? ''
   const currentTemplate = templates?.find((t) => t.id === activeTemplateId)
-  const sampleData = useMemo(
-    () => SAMPLE_DATA[currentTemplate?.name ?? ''] ?? {},
-    [currentTemplate?.name]
-  )
+  const sampleData = SAMPLE_DATA[currentTemplate?.name ?? ''] ?? {}
 
   const {
     data: previewData,
