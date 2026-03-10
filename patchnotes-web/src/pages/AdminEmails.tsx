@@ -253,27 +253,31 @@ export function AdminEmails() {
       <main className="py-8">
         <Container>
           {/* Template Selector */}
-          <div className="mb-6">
-            {isLoading ? (
-              <span className="text-text-secondary text-sm">
+          <div className="flex gap-2 mb-6">
+            {(templates ?? []).map((t) => {
+              const label = t.name || `Template #${t.id}`
+              return (
+                <button
+                  key={t.id}
+                  onClick={() => {
+                    setSelectedTemplateId(t.id)
+                    setIsEditing(false)
+                    setSaveStatus(null)
+                  }}
+                  className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+                    activeTemplateId === t.id
+                      ? 'bg-brand-500 text-white'
+                      : 'bg-surface-primary text-text-secondary hover:text-text-primary hover:bg-surface-secondary'
+                  }`}
+                >
+                  {label.charAt(0).toUpperCase() + label.slice(1)}
+                </button>
+              )
+            })}
+            {isLoading && (
+              <span className="text-text-secondary text-sm py-2">
                 Loading templates...
               </span>
-            ) : (
-              <select
-                value={activeTemplateId}
-                onChange={(e) => {
-                  setSelectedTemplateId(e.target.value)
-                  setIsEditing(false)
-                  setSaveStatus(null)
-                }}
-                className="px-3 py-2 text-sm font-medium text-text-primary bg-surface-primary border border-border-default rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500"
-              >
-                {(templates ?? []).map((t) => (
-                  <option key={t.id} value={t.id}>
-                    {t.name.charAt(0).toUpperCase() + t.name.slice(1)}
-                  </option>
-                ))}
-              </select>
             )}
           </div>
 
