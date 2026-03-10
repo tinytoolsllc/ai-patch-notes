@@ -366,8 +366,8 @@ export const handlers = [
     return new HttpResponse(null, { status: 204 })
   }),
 
-  // POST /admin/email-templates/:name/test
-  http.post(`${API_BASE}/admin/email-templates/:name/test`, () => {
+  // POST /admin/email-templates/:id/test
+  http.post(`${API_BASE}/admin/email-templates/:id/test`, () => {
     return new HttpResponse(null, { status: 204 })
   }),
 

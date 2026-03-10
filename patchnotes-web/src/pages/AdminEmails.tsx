@@ -211,7 +211,7 @@ export function AdminEmails() {
   function handleSave() {
     if (!currentTemplate) return
     updateMutation.mutate({
-      name: currentTemplate.name,
+      id: currentTemplate.id,
       data: {
         subject: editSubject,
         jsxSource: editJsxSource,
@@ -232,7 +232,7 @@ export function AdminEmails() {
         payload.testData = sampleData
       }
       await api.post(
-        `/admin/email-templates/${currentTemplate.name}/test`,
+        `/admin/email-templates/${currentTemplate.id}/test`,
         payload
       )
       setTestSendStatus({
