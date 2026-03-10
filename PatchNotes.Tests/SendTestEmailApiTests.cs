@@ -3,7 +3,8 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using FluentAssertions;
 using Microsoft.AspNetCore.Hosting;
-using PatchNotes.Api.Routes;
+using Microsoft.Extensions.DependencyInjection;
+using PatchNotes.Data;
 
 namespace PatchNotes.Tests;
 
@@ -30,10 +31,18 @@ public class SendTestEmailApiTests : IAsyncLifetime
         _unauthClient = _fixture.CreateClient();
         _nonAdminClient = _fixture.CreateNonAdminClient();
 
-        // Seed email templates via the list endpoint and grab the welcome template ID
-        var templates = await _authClient.GetFromJsonAsync<List<EmailTemplateDto>>(
-            "/api/admin/email-templates");
-        _welcomeTemplateId = templates!.First(t => t.Name == "welcome").Id;
+        // Seed a test template directly in the database
+        using var scope = _fixture.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<PatchNotesDbContext>();
+        var template = new EmailTemplate
+        {
+            Name = "welcome",
+            Subject = "Welcome, {{name}}!",
+            JsxSource = "<div>Welcome</div>",
+        };
+        db.EmailTemplates.Add(template);
+        await db.SaveChangesAsync();
+        _welcomeTemplateId = template.Id;
     }
 
     public Task DisposeAsync()
@@ -108,10 +117,7 @@ public class SendTestEmailApiTests : IAsyncLifetime
         await fixture.InitializeAsync();
         using var client = fixture.CreateAuthenticatedClient();
 
-        // Seed templates and get ID
-        var templates = await client.GetFromJsonAsync<List<EmailTemplateDto>>(
-            "/api/admin/email-templates");
-        var templateId = templates!.First(t => t.Name == "welcome").Id;
+        var templateId = await SeedTemplateAsync(fixture);
 
         var response = await client.PostAsJsonAsync(
             $"/api/admin/email-templates/{templateId}/test",
@@ -140,14 +146,26 @@ public class SendTestEmailApiTests : IAsyncLifetime
         await fixture.InitializeAsync();
         using var client = fixture.CreateAuthenticatedClient();
 
-        // Seed templates and get ID
-        var templates = await client.GetFromJsonAsync<List<EmailTemplateDto>>(
-            "/api/admin/email-templates");
-        var templateId = templates!.First(t => t.Name == "welcome").Id;
+        var templateId = await SeedTemplateAsync(fixture);
 
         var response = await client.PostAsJsonAsync(
             $"/api/admin/email-templates/{templateId}/test",
             new { recipientEmail = "a@b.com", testData = new { name = "Test" } });
         response.StatusCode.Should().Be(HttpStatusCode.ServiceUnavailable);
+    }
+
+    private static async Task<string> SeedTemplateAsync(PatchNotesApiFixture fixture)
+    {
+        using var scope = fixture.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<PatchNotesDbContext>();
+        var template = new EmailTemplate
+        {
+            Name = "welcome",
+            Subject = "Welcome, {{name}}!",
+            JsxSource = "<div>Welcome</div>",
+        };
+        db.EmailTemplates.Add(template);
+        await db.SaveChangesAsync();
+        return template.Id;
     }
 }

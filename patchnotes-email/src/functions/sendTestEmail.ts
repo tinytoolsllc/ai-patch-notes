@@ -9,7 +9,7 @@ import { UTCDate } from "@date-fns/utc";
 import { nanoid } from "nanoid";
 
 interface SendTestEmailRequest {
-    templateName: string;
+    templateId: string;
     recipientEmail: string;
     testData?: Record<string, unknown>;
 }
@@ -95,8 +95,8 @@ export async function sendTestEmail(
         return { status: 400, body: "Invalid JSON body" };
     }
 
-    if (!body.templateName) {
-        return { status: 400, body: "Missing required field: templateName" };
+    if (!body.templateId) {
+        return { status: 400, body: "Missing required field: templateId" };
     }
 
     if (!body.recipientEmail) {
@@ -109,16 +109,16 @@ export async function sendTestEmail(
 
     try {
         const db = getPrismaClient();
-        const template = await db.emailTemplates.findUnique({ where: { Name: body.templateName } });
+        const template = await db.emailTemplates.findUnique({ where: { Id: body.templateId } });
 
         if (!template) {
-            return { status: 404, body: `Template not found: ${body.templateName}` };
+            return { status: 404, body: `Template not found: ${body.templateId}` };
         }
 
         // Use provided testData or build from real DB data
         const useRealData = !body.testData || typeof body.testData !== "object";
         const templateData = useRealData
-            ? await buildRealData(db, body.templateName, body.recipientEmail, context)
+            ? await buildRealData(db, template.Name, body.recipientEmail, context)
             : body.testData;
 
         context.log(`Using ${useRealData ? "real" : "sample"} data for test email`);
@@ -186,7 +186,7 @@ export async function sendTestEmail(
             }
             trackEvent("TestEmailFailed", {
                 reason: "resend_error",
-                templateName: body.templateName,
+                templateId: body.templateId,
                 errorMessage: error.message,
                 durationMs: (Date.now() - startedAt).toString(),
             });
@@ -206,7 +206,7 @@ export async function sendTestEmail(
         }
 
         trackEvent("TestEmailSent", {
-            templateName: body.templateName,
+            templateId: body.templateId,
             dataSource: useRealData ? "database" : "sample",
             durationMs: (Date.now() - startedAt).toString(),
         });
@@ -217,7 +217,7 @@ export async function sendTestEmail(
         trackException(err, { operation: "sendTestEmail", recipient: body.recipientEmail });
         trackEvent("TestEmailFailed", {
             reason: "exception",
-            templateName: body.templateName,
+            templateId: body.templateId,
             durationMs: (Date.now() - startedAt).toString(),
         });
         await flush();

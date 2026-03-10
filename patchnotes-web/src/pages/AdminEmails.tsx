@@ -54,14 +54,15 @@ const SAMPLE_DATA: Record<string, Record<string, unknown>> = {
 
 // ── Template Tab ─────────────────────────────────────────────
 
-interface TemplateTabProps {
-  name: string
+function TemplateTab({
+  label,
+  active,
+  onClick,
+}: {
+  label: string
   active: boolean
   onClick: () => void
-}
-
-function TemplateTab({ name, active, onClick }: TemplateTabProps) {
-  const label = name.charAt(0).toUpperCase() + name.slice(1)
+}) {
   return (
     <button
       onClick={onClick}
@@ -81,7 +82,9 @@ function TemplateTab({ name, active, onClick }: TemplateTabProps) {
 export function AdminEmails() {
   const { isAdmin, isLoading: authLoading } = useIsAdmin()
   const navigate = useNavigate()
-  const [selectedTemplate, setSelectedTemplate] = useState<string>('welcome')
+  const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(
+    null
+  )
   const [showSource, setShowSource] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
   const [editSubject, setEditSubject] = useState('')
@@ -161,11 +164,9 @@ export function AdminEmails() {
     }
   }, [authLoading, isAdmin, navigate])
 
-  const currentTemplate = templates?.find((t) => t.name === selectedTemplate)
-  const sampleData = useMemo(
-    () => SAMPLE_DATA[selectedTemplate] ?? {},
-    [selectedTemplate]
-  )
+  const activeTemplateId = selectedTemplateId ?? templates?.[0]?.id ?? ''
+  const currentTemplate = templates?.find((t) => t.id === activeTemplateId)
+  const sampleData = SAMPLE_DATA[currentTemplate?.name ?? ''] ?? {}
 
   const {
     data: previewData,
@@ -175,7 +176,7 @@ export function AdminEmails() {
     queryKey: [
       '/api/admin/email-templates/preview',
       currentTemplate?.jsxSource,
-      selectedTemplate,
+      activeTemplateId,
       sampleData,
     ],
     queryFn: () =>
@@ -275,18 +276,21 @@ export function AdminEmails() {
         <Container>
           {/* Template Selector */}
           <div className="flex gap-2 mb-6">
-            {(templates ?? []).map((t) => (
-              <TemplateTab
-                key={t.name}
-                name={t.name}
-                active={selectedTemplate === t.name}
-                onClick={() => {
-                  setSelectedTemplate(t.name)
-                  setIsEditing(false)
-                  setSaveStatus(null)
-                }}
-              />
-            ))}
+            {(templates ?? []).map((t) => {
+              const name = t.name || `Template #${t.id}`
+              return (
+                <TemplateTab
+                  key={t.id}
+                  label={name.charAt(0).toUpperCase() + name.slice(1)}
+                  active={activeTemplateId === t.id}
+                  onClick={() => {
+                    setSelectedTemplateId(t.id)
+                    setIsEditing(false)
+                    setSaveStatus(null)
+                  }}
+                />
+              )
+            })}
             {isLoading && (
               <span className="text-text-secondary text-sm py-2">
                 Loading templates...
@@ -400,7 +404,11 @@ export function AdminEmails() {
                     </h3>
                     <p className="text-xs text-text-secondary">
                       Sends a real email using the{' '}
-                      <strong>{selectedTemplate}</strong> template
+                      <strong>
+                        {currentTemplate?.name ||
+                          `Template #${currentTemplate?.id}`}
+                      </strong>{' '}
+                      template
                       {useSampleData
                         ? ' with the sample data shown below.'
                         : ' with real data from the database.'}
@@ -471,7 +479,9 @@ export function AdminEmails() {
                 <Card padding="none">
                   <div className="px-6 py-4 border-b border-border-default">
                     <h2 className="text-sm font-semibold text-text-primary">
-                      JSX Source — {currentTemplate.name}
+                      JSX Source —{' '}
+                      {currentTemplate.name ||
+                        `Template #${currentTemplate.id}`}
                     </h2>
                     <p className="text-xs text-text-tertiary mt-1">
                       Last updated:{' '}
@@ -497,7 +507,9 @@ export function AdminEmails() {
                 <Card padding="none">
                   <div className="px-6 py-4 border-b border-border-default">
                     <h2 className="text-sm font-semibold text-text-primary">
-                      Email Preview — {currentTemplate.name}
+                      Email Preview —{' '}
+                      {currentTemplate.name ||
+                        `Template #${currentTemplate.id}`}
                     </h2>
                     <p className="text-xs text-text-tertiary mt-1">
                       Rendered with sample data
@@ -519,7 +531,7 @@ export function AdminEmails() {
                     ) : (
                       <iframe
                         srcDoc={previewHtml}
-                        title={`Preview of ${currentTemplate.name} template`}
+                        title={`Preview of ${currentTemplate.name || `Template #${currentTemplate.id}`} template`}
                         className="w-full border-0 rounded bg-white"
                         style={{ minHeight: '400px' }}
                         sandbox=""
