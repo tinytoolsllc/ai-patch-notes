@@ -136,24 +136,48 @@ public static class StytchWebhook
                                 Name = stytchUser.Name,
                             };
                             db.Users.Add(user);
+
+                            try
+                            {
+                                await db.SaveChangesAsync();
+                                logger.LogDebug("DB save succeeded for StytchUserId={UserId}", stytchEvent.id);
+                            }
+                            catch (DbUpdateException)
+                            {
+                                // Unique constraint violation — login endpoint created this user concurrently.
+                                // Detach and fall through to update.
+                                logger.LogDebug("Unique constraint conflict for StytchUserId={UserId}, falling back to update", stytchEvent.id);
+                                db.Entry(user).State = EntityState.Detached;
+                                user = await db.Users.FirstOrDefaultAsync(u => u.StytchUserId == stytchEvent.id);
+                                if (user != null)
+                                {
+                                    user.Email = stytchUser.Email ?? user.Email;
+                                    user.Name = stytchUser.Name ?? user.Name;
+                                    await db.SaveChangesAsync();
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                logger.LogDebug("DB save failed for StytchUserId={UserId}: {Message} | Inner: {InnerMessage}", stytchEvent.id, ex.Message, ex.InnerException?.Message);
+                                return Results.Json(new { error = "Internal server error" }, statusCode: 500);
+                            }
                         }
                         else
                         {
                             logger.LogDebug("Updating existing user {UserId} for StytchUserId={StytchUserId}", user.Id, stytchEvent.id);
                             user.Email = stytchUser.Email ?? user.Email;
                             user.Name = stytchUser.Name ?? user.Name;
-                        }
 
-                        // Step 4: Save to DB
-                        try
-                        {
-                            await db.SaveChangesAsync();
-                            logger.LogDebug("DB save succeeded for StytchUserId={UserId}", stytchEvent.id);
-                        }
-                        catch (Exception ex)
-                        {
-                            logger.LogDebug("DB save failed for StytchUserId={UserId}: {Message} | Inner: {InnerMessage}", stytchEvent.id, ex.Message, ex.InnerException?.Message);
-                            return Results.Json(new { error = "Internal server error" }, statusCode: 500);
+                            try
+                            {
+                                await db.SaveChangesAsync();
+                                logger.LogDebug("DB save succeeded for StytchUserId={UserId}", stytchEvent.id);
+                            }
+                            catch (Exception ex)
+                            {
+                                logger.LogDebug("DB save failed for StytchUserId={UserId}: {Message} | Inner: {InnerMessage}", stytchEvent.id, ex.Message, ex.InnerException?.Message);
+                                return Results.Json(new { error = "Internal server error" }, statusCode: 500);
+                            }
                         }
 
                         break;

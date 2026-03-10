@@ -77,7 +77,7 @@ model ReleaseSummaries {
 }
 
 model Users {
-  StytchUserId          String             @db.NVarChar(128)
+  StytchUserId          String             @unique(map: "IX_Users_StytchUserId") @db.NVarChar(128)
   Email                 String?            @db.NVarChar(256)
   Name                  String?            @db.NVarChar(256)
   CreatedAt             DateTime           @db.DateTimeOffset
