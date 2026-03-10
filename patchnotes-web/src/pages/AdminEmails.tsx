@@ -52,36 +52,14 @@ const SAMPLE_DATA: Record<string, Record<string, unknown>> = {
   },
 }
 
-// ── Template Tab ─────────────────────────────────────────────
-
-interface TemplateTabProps {
-  name: string
-  active: boolean
-  onClick: () => void
-}
-
-function TemplateTab({ name, active, onClick }: TemplateTabProps) {
-  const label = name.charAt(0).toUpperCase() + name.slice(1)
-  return (
-    <button
-      onClick={onClick}
-      className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
-        active
-          ? 'bg-brand-500 text-white'
-          : 'bg-surface-primary text-text-secondary hover:text-text-primary hover:bg-surface-secondary'
-      }`}
-    >
-      {label}
-    </button>
-  )
-}
-
 // ── Main Page ────────────────────────────────────────────────
 
 export function AdminEmails() {
   const { isAdmin, isLoading: authLoading } = useIsAdmin()
   const navigate = useNavigate()
-  const [selectedTemplate, setSelectedTemplate] = useState<string>('welcome')
+  const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(
+    null
+  )
   const [showSource, setShowSource] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
   const [editSubject, setEditSubject] = useState('')
@@ -161,10 +139,11 @@ export function AdminEmails() {
     }
   }, [authLoading, isAdmin, navigate])
 
-  const currentTemplate = templates?.find((t) => t.name === selectedTemplate)
+  const activeTemplateId = selectedTemplateId ?? templates?.[0]?.id ?? ''
+  const currentTemplate = templates?.find((t) => t.id === activeTemplateId)
   const sampleData = useMemo(
-    () => SAMPLE_DATA[selectedTemplate] ?? {},
-    [selectedTemplate]
+    () => SAMPLE_DATA[currentTemplate?.name ?? ''] ?? {},
+    [currentTemplate?.name]
   )
 
   const {
@@ -175,7 +154,7 @@ export function AdminEmails() {
     queryKey: [
       '/api/admin/email-templates/preview',
       currentTemplate?.jsxSource,
-      selectedTemplate,
+      activeTemplateId,
       sampleData,
     ],
     queryFn: () =>
@@ -274,23 +253,27 @@ export function AdminEmails() {
       <main className="py-8">
         <Container>
           {/* Template Selector */}
-          <div className="flex gap-2 mb-6">
-            {(templates ?? []).map((t) => (
-              <TemplateTab
-                key={t.name}
-                name={t.name}
-                active={selectedTemplate === t.name}
-                onClick={() => {
-                  setSelectedTemplate(t.name)
+          <div className="mb-6">
+            {isLoading ? (
+              <span className="text-text-secondary text-sm">
+                Loading templates...
+              </span>
+            ) : (
+              <select
+                value={activeTemplateId}
+                onChange={(e) => {
+                  setSelectedTemplateId(e.target.value)
                   setIsEditing(false)
                   setSaveStatus(null)
                 }}
-              />
-            ))}
-            {isLoading && (
-              <span className="text-text-secondary text-sm py-2">
-                Loading templates...
-              </span>
+                className="px-3 py-2 text-sm font-medium text-text-primary bg-surface-primary border border-border-default rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500"
+              >
+                {(templates ?? []).map((t) => (
+                  <option key={t.id} value={t.id}>
+                    {t.name.charAt(0).toUpperCase() + t.name.slice(1)}
+                  </option>
+                ))}
+              </select>
             )}
           </div>
 
@@ -400,7 +383,7 @@ export function AdminEmails() {
                     </h3>
                     <p className="text-xs text-text-secondary">
                       Sends a real email using the{' '}
-                      <strong>{selectedTemplate}</strong> template
+                      <strong>{currentTemplate?.name}</strong> template
                       {useSampleData
                         ? ' with the sample data shown below.'
                         : ' with real data from the database.'}
