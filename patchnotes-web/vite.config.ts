@@ -20,6 +20,7 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: 'autoUpdate',
+      selfDestroying: true,
       manifest: {
         name: 'My Release Notes',
         short_name: 'Release Notes',
@@ -50,31 +51,6 @@ export default defineConfig({
             sizes: '512x512',
             type: 'image/png',
             purpose: 'maskable',
-          },
-        ],
-      },
-      workbox: {
-        navigateFallback: '/index.html',
-        navigateFallbackDenylist: [/^\/api\//],
-        runtimeCaching: [
-          {
-            urlPattern: /^https:\/\/.*\/api\//,
-            handler: 'NetworkFirst',
-            options: {
-              cacheName: 'api-cache',
-              networkTimeoutSeconds: 10,
-            },
-          },
-          {
-            urlPattern: /\.(js|css|woff2?|ttf|otf)$/,
-            handler: 'CacheFirst',
-            options: {
-              cacheName: 'static-assets',
-              expiration: {
-                maxEntries: 60,
-                maxAgeSeconds: 30 * 24 * 60 * 60, // 30 days
-              },
-            },
           },
         ],
       },
