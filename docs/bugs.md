@@ -2,7 +2,7 @@
 
 ## AI summary generation fails permanently for packages with large release notes
 
-**Status:** Open
+**Status:** Fixed
 **Affected package:** tauri-apps/tauri (ID: `VOGsDSjkGvz23dlDCPFwA`)
 **First observed:** At least 2026-03-09 (likely earlier)
 
@@ -18,17 +18,10 @@ Tauri has very long release notes. `SummaryGenerationService.GenerateGroupSummar
 
 The package has 2 version groups with stale releases (2 errors per run). When the AI call fails, the catch block in `SummaryGenerationService.cs:127-134` logs the error and records it in `SummaryGenerationError`, but the releases remain marked `SummaryStale = true`. This means the next sync run picks them up again, creating an **infinite retry loop** that will never succeed.
 
-### Relevant code
+### Fix applied
 
-- `PatchNotes.Sync.Core/SummaryGenerationService.cs` — lines 82-134 (stale check + catch block)
-- `PatchNotes.Sync.Core/AI/AiClient.cs` — line 70 (`response.EnsureSuccessStatusCode()` throws on 400)
-- `PatchNotes.Data/SummaryConstants.cs` — 7-day summary window
-
-### Suggested fix
-
-1. **Truncate input:** Cap the release body length (e.g., first 4000 chars per release) in `GenerateGroupSummaryAsync` before sending to the AI API
-2. **Break the retry loop:** On non-retryable errors (400), mark releases as `SummaryStale = false` and store a placeholder summary so the package isn't retried every run
-3. Ideally both — truncate to prevent the 400, and add a circuit breaker for any persistent failures
+1. **Truncate input:** Release bodies are capped at 4000 chars before sending to the AI API, with a `[truncated]` marker appended
+2. **Circuit breaker:** On 400 (Bad Request) errors, releases are marked `SummaryStale = false` to break the retry loop. Transient errors (5xx) still allow retry on the next run.
 
 ---
 

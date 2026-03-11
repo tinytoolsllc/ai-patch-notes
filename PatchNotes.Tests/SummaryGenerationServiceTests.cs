@@ -212,6 +212,74 @@ public class SummaryGenerationServiceTests : IDisposable
     }
 
     [Fact]
+    public async Task GenerateGroupSummariesAsync_GivenBadRequest_MarksReleasesNotStaleToBreakRetryLoop()
+    {
+        var package = await CreatePackage();
+        await AddRelease(package.Id, "v1.0.0", "Release 1", "Features");
+
+        _mockAiClient
+            .Setup(x => x.SummarizeReleaseNotesAsync(
+                It.IsAny<string>(), It.IsAny<IReadOnlyList<ReleaseInput>>(), It.IsAny<CancellationToken>()))
+            .ThrowsAsync(new HttpRequestException("Bad Request", null, System.Net.HttpStatusCode.BadRequest));
+
+        var result = await _service.GenerateGroupSummariesAsync(package.Id);
+
+        result.SummariesGenerated.Should().Be(0);
+        result.Errors.Should().HaveCount(1);
+
+        // Releases should be marked not stale — no infinite retry
+        var releases = await _db.Releases
+            .Where(r => r.PackageId == package.Id)
+            .ToListAsync();
+        releases.Should().AllSatisfy(r => r.SummaryStale.Should().BeFalse());
+    }
+
+    [Fact]
+    public async Task GenerateGroupSummariesAsync_GivenTransientError_LeavesReleasesStaleForRetry()
+    {
+        var package = await CreatePackage();
+        await AddRelease(package.Id, "v1.0.0", "Release 1", "Features");
+
+        _mockAiClient
+            .Setup(x => x.SummarizeReleaseNotesAsync(
+                It.IsAny<string>(), It.IsAny<IReadOnlyList<ReleaseInput>>(), It.IsAny<CancellationToken>()))
+            .ThrowsAsync(new HttpRequestException("Service Unavailable", null, System.Net.HttpStatusCode.ServiceUnavailable));
+
+        var result = await _service.GenerateGroupSummariesAsync(package.Id);
+
+        result.SummariesGenerated.Should().Be(0);
+        result.Errors.Should().HaveCount(1);
+
+        // Releases should remain stale — will be retried next run
+        var releases = await _db.Releases
+            .Where(r => r.PackageId == package.Id)
+            .ToListAsync();
+        releases.Should().AllSatisfy(r => r.SummaryStale.Should().BeTrue());
+    }
+
+    [Fact]
+    public async Task GenerateGroupSummariesAsync_TruncatesLongReleaseBodies()
+    {
+        var package = await CreatePackage();
+        var longBody = new string('x', 10000);
+        await AddRelease(package.Id, "v1.0.0", "Release 1", longBody);
+
+        IReadOnlyList<ReleaseInput>? capturedReleases = null;
+        _mockAiClient
+            .Setup(x => x.SummarizeReleaseNotesAsync(
+                It.IsAny<string>(), It.IsAny<IReadOnlyList<ReleaseInput>>(), It.IsAny<CancellationToken>()))
+            .Callback<string, IReadOnlyList<ReleaseInput>, CancellationToken>((_, releases, _) =>
+                capturedReleases = releases)
+            .ReturnsAsync("Summary");
+
+        await _service.GenerateGroupSummariesAsync(package.Id);
+
+        capturedReleases.Should().NotBeNull();
+        capturedReleases![0].Body!.Length.Should().BeLessThan(5000);
+        capturedReleases[0].Body.Should().EndWith("[truncated]");
+    }
+
+    [Fact]
     public async Task GenerateGroupSummariesAsync_GivenMultipleReleases_PassesAggregatedContentToAiClient()
     {
         var package = await CreatePackage();
