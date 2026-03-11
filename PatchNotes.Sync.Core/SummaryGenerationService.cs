@@ -13,6 +13,12 @@ public class SummaryGenerationService
 {
     private static readonly TimeSpan SummaryWindow = SummaryConstants.SummaryWindow;
 
+    /// <summary>
+    /// Maximum characters per release body sent to the AI API.
+    /// Prevents token limit errors for packages with very long release notes.
+    /// </summary>
+    private const int MaxBodyCharsPerRelease = 4000;
+
     private readonly PatchNotesDbContext _db;
     private readonly IAiClient _aiClient;
     private readonly VersionGroupingService _groupingService;
@@ -124,6 +130,23 @@ public class SummaryGenerationService
 
                 result.SummariesGenerated++;
             }
+            catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.BadRequest)
+            {
+                // Non-retryable error (e.g., payload too large for model context).
+                // Mark releases as not stale to break the infinite retry loop.
+                _logger.LogWarning(ex,
+                    "AI API returned 400 for package {PackageId} v{MajorVersion} (prerelease={IsPrerelease}). " +
+                    "Marking releases as not stale to stop retrying.",
+                    packageId, group.MajorVersion, group.IsPrerelease);
+
+                foreach (var release in group.Releases.Where(r => r.SummaryStale))
+                {
+                    release.SummaryStale = false;
+                }
+
+                result.Errors.Add(new SummaryGenerationError(
+                    packageId, group.MajorVersion, group.IsPrerelease, ex.Message));
+            }
             catch (Exception ex)
             {
                 _logger.LogError(ex,
@@ -203,9 +226,17 @@ public class SummaryGenerationService
         }
 
         var releaseInputs = recentReleases
-            .Select(r => new ReleaseInput(r.Tag, r.Title, r.Body, r.PublishedAt))
+            .Select(r => new ReleaseInput(r.Tag, r.Title, Truncate(r.Body, MaxBodyCharsPerRelease), r.PublishedAt))
             .ToList();
 
         return await _aiClient.SummarizeReleaseNotesAsync(packageName, releaseInputs, cancellationToken);
+    }
+
+    private static string? Truncate(string? value, int maxLength)
+    {
+        if (value == null || value.Length <= maxLength)
+            return value;
+
+        return string.Concat(value.AsSpan(0, maxLength), "\n\n[truncated]");
     }
 }
