@@ -21,7 +21,7 @@
   "dependencies": {
     "@azure/functions": "^4.0.0",
     "@date-fns/utc": "^2.1.1",
-    "@prisma/adapter-mssql": "^7.4.2",
+    "@prisma/adapter-mssql": "^7.5.0",
     "@prisma/client": "^7.4.2",
     "@react-email/components": "^1.0.8",
     "@react-email/render": "^2.0.4",
