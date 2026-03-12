@@ -35,6 +35,7 @@ import {
   useGetPackagesHealth,
   useResetPackageSync,
   useDisablePackageSync,
+  useTriggerPackageSync,
   getGetPackagesHealthQueryKey,
 } from './generated/admin-packages/admin-packages'
 import { useGetFeed } from './generated/feed/feed'
@@ -140,11 +141,23 @@ export function usePackagesByOwner(owner: string) {
   })
 }
 
-export function usePackageByOwnerRepo(owner: string, repo: string) {
+export function usePackageByOwnerRepo(
+  owner: string,
+  repo: string,
+  opts?: {
+    refetchInterval?:
+      | number
+      | false
+      | ((query: { state: { data: unknown } }) => number | false)
+  }
+) {
   return useGetPackageByOwnerRepo(owner, repo, {
     query: {
       select: (res) =>
         validateResponse(GetPackageByOwnerRepoResponse, res.data),
+      ...(opts?.refetchInterval !== undefined && {
+        refetchInterval: opts.refetchInterval,
+      }),
     },
   })
 }
@@ -347,6 +360,7 @@ export function usePackageHealth() {
 export {
   useResetPackageSync,
   useDisablePackageSync,
+  useTriggerPackageSync,
   getGetPackagesHealthQueryKey,
 }
 

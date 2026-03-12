@@ -12,6 +12,7 @@ import {
   usePackageHealth,
   useResetPackageSync,
   useDisablePackageSync,
+  useTriggerPackageSync,
   getGetPackagesHealthQueryKey,
 } from '../api/hooks'
 import { useQueryClient } from '@tanstack/react-query'
@@ -105,16 +106,20 @@ interface HealthRowProps {
   pkg: PackageHealthDto
   onReset: (id: string) => void
   onDisable: (id: string) => void
+  onTriggerSync: (id: string) => void
   isResetting: boolean
   isDisabling: boolean
+  isSyncing: boolean
 }
 
 function HealthRow({
   pkg,
   onReset,
   onDisable,
+  onTriggerSync,
   isResetting,
   isDisabling,
+  isSyncing,
 }: HealthRowProps) {
   const status = getStatus(pkg)
   const githubUrl = `https://github.com/${pkg.githubOwner}/${pkg.githubRepo}`
@@ -162,8 +167,16 @@ function HealthRow({
           <Button
             variant="secondary"
             size="sm"
+            onClick={() => onTriggerSync(pkg.id)}
+            disabled={isSyncing || isResetting || isDisabling}
+          >
+            {isSyncing ? 'Syncing...' : 'Sync Now'}
+          </Button>
+          <Button
+            variant="secondary"
+            size="sm"
             onClick={() => onReset(pkg.id)}
-            disabled={isResetting || isDisabling}
+            disabled={isResetting || isDisabling || isSyncing}
           >
             {isResetting ? 'Resetting...' : 'Reset'}
           </Button>
@@ -171,7 +184,9 @@ function HealthRow({
             variant="ghost"
             size="sm"
             onClick={() => onDisable(pkg.id)}
-            disabled={isResetting || isDisabling || pkg.isSyncDisabled}
+            disabled={
+              isResetting || isDisabling || isSyncing || pkg.isSyncDisabled
+            }
             className="text-major hover:text-major"
           >
             {isDisabling ? 'Disabling...' : 'Disable'}
@@ -235,10 +250,12 @@ export function AdminHealth() {
   const [filter, setFilter] = useState<FilterMode>('all')
   const [resettingId, setResettingId] = useState<string | null>(null)
   const [disablingId, setDisablingId] = useState<string | null>(null)
+  const [syncingId, setSyncingId] = useState<string | null>(null)
 
   const { data: healthResponse, isLoading } = usePackageHealth()
   const resetSync = useResetPackageSync()
   const disableSync = useDisablePackageSync()
+  const triggerSync = useTriggerPackageSync()
 
   const packages = healthResponse?.status === 200 ? healthResponse.data : []
 
@@ -291,6 +308,21 @@ export function AdminHealth() {
       }
     },
     [disableSync, queryClient]
+  )
+
+  const handleTriggerSync = useCallback(
+    async (id: string) => {
+      setSyncingId(id)
+      try {
+        await triggerSync.mutateAsync({ id })
+        queryClient.invalidateQueries({
+          queryKey: getGetPackagesHealthQueryKey(),
+        })
+      } finally {
+        setSyncingId(null)
+      }
+    },
+    [triggerSync, queryClient]
   )
 
   if (authLoading || !isAdmin) {
@@ -421,8 +453,10 @@ export function AdminHealth() {
                         pkg={pkg}
                         onReset={handleReset}
                         onDisable={handleDisable}
+                        onTriggerSync={handleTriggerSync}
                         isResetting={resettingId === pkg.id}
                         isDisabling={disablingId === pkg.id}
+                        isSyncing={syncingId === pkg.id}
                       />
                     ))}
                   </tbody>

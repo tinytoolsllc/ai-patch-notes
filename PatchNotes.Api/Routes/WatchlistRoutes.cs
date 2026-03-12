@@ -217,7 +217,11 @@ public static class WatchlistRoutes
                 // Fire-and-forget: ping sync for newly-watched packages
                 var syncUrl = configuration["SyncFunction:Url"];
                 var syncKey = configuration["SyncFunction:Key"];
-                if (!string.IsNullOrEmpty(syncUrl))
+                if (string.IsNullOrEmpty(syncUrl))
+                {
+                    logger.LogWarning("SyncFunction:Url is not configured — skipping sync trigger for new packages");
+                }
+                else
                 {
                     _ = Task.Run(async () =>
                     {
@@ -229,7 +233,8 @@ public static class WatchlistRoutes
                                 syncRequest.Headers.Add("x-functions-key", syncKey);
                             syncRequest.Content = new StringContent("");
                             syncRequest.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
-                            await http.SendAsync(syncRequest, appLifetime.ApplicationStopping);
+                            var response = await http.SendAsync(syncRequest, appLifetime.ApplicationStopping);
+                            logger.LogInformation("SyncNewPackages ping returned {StatusCode}", (int)response.StatusCode);
                         }
                         catch (Exception ex)
                         {
@@ -372,7 +377,11 @@ public static class WatchlistRoutes
             {
                 var syncUrl = configuration["SyncFunction:Url"];
                 var syncKey = configuration["SyncFunction:Key"];
-                if (!string.IsNullOrEmpty(syncUrl))
+                if (string.IsNullOrEmpty(syncUrl))
+                {
+                    logger.LogWarning("SyncFunction:Url is not configured — skipping sync trigger for new package {Owner}/{Repo}", owner, repo);
+                }
+                else
                 {
                     _ = Task.Run(async () =>
                     {
@@ -384,11 +393,12 @@ public static class WatchlistRoutes
                                 request.Headers.Add("x-functions-key", syncKey);
                             request.Content = new StringContent("");
                             request.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
-                            await http.SendAsync(request, appLifetime.ApplicationStopping);
+                            var response = await http.SendAsync(request, appLifetime.ApplicationStopping);
+                            logger.LogInformation("SyncNewPackages ping for {Owner}/{Repo} returned {StatusCode}", owner, repo, (int)response.StatusCode);
                         }
                         catch (Exception ex)
                         {
-                            logger.LogWarning(ex, "Failed to ping SyncNewPackages function");
+                            logger.LogWarning(ex, "Failed to ping SyncNewPackages function for {Owner}/{Repo}", owner, repo);
                         }
                     }, appLifetime.ApplicationStopping);
                 }

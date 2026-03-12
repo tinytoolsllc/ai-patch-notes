@@ -302,6 +302,93 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       > => {
       return useMutation(getDisablePackageSyncMutationOptions(options), queryClient);
     }
+    export type triggerPackageSyncResponse204 = {
+  data: void
+  status: 204
+}
+
+export type triggerPackageSyncResponse404 = {
+  data: void
+  status: 404
+}
+
+export type triggerPackageSyncResponse503 = {
+  data: void
+  status: 503
+}
+
+export type triggerPackageSyncResponseSuccess = (triggerPackageSyncResponse204) & {
+  headers: Headers;
+};
+export type triggerPackageSyncResponseError = (triggerPackageSyncResponse404 | triggerPackageSyncResponse503) & {
+  headers: Headers;
+};
+
+export type triggerPackageSyncResponse = (triggerPackageSyncResponseSuccess | triggerPackageSyncResponseError)
+
+export const getTriggerPackageSyncUrl = (id: string,) => {
+
+
+  
+
+  return `/api/admin/packages/${id}/trigger-sync`
+}
+
+export const triggerPackageSync = async (id: string, options?: RequestInit): Promise<triggerPackageSyncResponse> => {
+  
+  return customFetch<triggerPackageSyncResponse>(getTriggerPackageSyncUrl(id),
+  {      
+    ...options,
+    method: 'POST'
+    
+    
+  }
+);}
+  
+
+
+
+export const getTriggerPackageSyncMutationOptions = <TError = void,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof triggerPackageSync>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof triggerPackageSync>>, TError,{id: string}, TContext> => {
+
+const mutationKey = ['triggerPackageSync'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof triggerPackageSync>>, {id: string}> = (props) => {
+          const {id} = props ?? {};
+
+          return  triggerPackageSync(id,requestOptions)
+        }
+
+
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type TriggerPackageSyncMutationResult = NonNullable<Awaited<ReturnType<typeof triggerPackageSync>>>
+    
+    export type TriggerPackageSyncMutationError = void
+
+    export const useTriggerPackageSync = <TError = void,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof triggerPackageSync>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof triggerPackageSync>>,
+        TError,
+        {id: string},
+        TContext
+      > => {
+      return useMutation(getTriggerPackageSyncMutationOptions(options), queryClient);
+    }
     export type resetPackageSummariesResponse204 = {
   data: void
   status: 204

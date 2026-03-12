@@ -12,4 +12,6 @@ export interface PackageDetailInfoDto {
   githubRepo: string;
   /** @nullable */
   npmName?: string | null;
+  /** @nullable */
+  lastFetchedAt?: string | null;
 }

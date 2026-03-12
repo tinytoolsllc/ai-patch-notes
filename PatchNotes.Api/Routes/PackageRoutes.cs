@@ -1,3 +1,4 @@
+using System.Net.Http.Headers;
 using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using PatchNotes.Data;
@@ -191,7 +192,7 @@ public static class PackageRoutes
             var package = await db.Packages
                 .AsNoTracking()
                 .Where(p => p.GithubOwner == owner && p.GithubRepo == repo)
-                .Select(p => new { p.Id, p.Name, p.GithubOwner, p.GithubRepo, p.NpmName })
+                .Select(p => new { p.Id, p.Name, p.GithubOwner, p.GithubRepo, p.NpmName, p.LastFetchedAt })
                 .FirstOrDefaultAsync();
 
             if (package == null)
@@ -259,6 +260,7 @@ public static class PackageRoutes
                     GithubOwner = package.GithubOwner,
                     GithubRepo = package.GithubRepo,
                     NpmName = package.NpmName,
+                    LastFetchedAt = package.LastFetchedAt,
                 },
                 Groups = groupDtos,
             });
@@ -531,6 +533,61 @@ public static class PackageRoutes
         .Produces(StatusCodes.Status404NotFound)
         .WithName("DisablePackageSync");
 
+        // POST /api/admin/packages/{id}/trigger-sync - Queue a package for immediate sync (admin only)
+        adminPackages.MapPost("/{id:length(21)}/trigger-sync", async (string id, PatchNotesDbContext db, IConfiguration configuration, IHttpClientFactory httpClientFactory, ILoggerFactory loggerFactory, IHostApplicationLifetime appLifetime) =>
+        {
+            var logger = loggerFactory.CreateLogger("PatchNotes.Api.Routes.PackageRoutes");
+            var package = await db.Packages.FindAsync(id);
+            if (package == null)
+            {
+                return Results.NotFound(new ApiError("Package not found"));
+            }
+
+            var syncUrl = configuration["SyncFunction:Url"];
+            if (string.IsNullOrEmpty(syncUrl))
+            {
+                return Results.Json(
+                    new ApiError("Sync function URL not configured"),
+                    statusCode: StatusCodes.Status503ServiceUnavailable);
+            }
+
+            // Reset state so SyncNewPackages picks it up
+            package.LastFetchedAt = null;
+            package.ConsecutiveFailures = 0;
+            package.IsSyncDisabled = false;
+            package.LastFailureMessage = null;
+            await db.SaveChangesAsync();
+
+            // Ping the sync function
+            var syncKey = configuration["SyncFunction:Key"];
+            _ = Task.Run(async () =>
+            {
+                try
+                {
+                    using var http = httpClientFactory.CreateClient();
+                    using var request = new HttpRequestMessage(HttpMethod.Post, syncUrl);
+                    if (!string.IsNullOrEmpty(syncKey))
+                        request.Headers.Add("x-functions-key", syncKey);
+                    request.Content = new StringContent("");
+                    request.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+                    var response = await http.SendAsync(request, appLifetime.ApplicationStopping);
+                    logger.LogInformation("Trigger sync for {Package} returned {StatusCode}", package.Name, (int)response.StatusCode);
+                }
+                catch (Exception ex)
+                {
+                    logger.LogWarning(ex, "Failed to trigger sync for {Package}", package.Name);
+                }
+            }, appLifetime.ApplicationStopping);
+
+            return Results.NoContent();
+        })
+        .AddEndpointFilterFactory(requireAuth)
+        .AddEndpointFilterFactory(requireAdmin)
+        .Produces(StatusCodes.Status204NoContent)
+        .Produces(StatusCodes.Status404NotFound)
+        .Produces(StatusCodes.Status503ServiceUnavailable)
+        .WithName("TriggerPackageSync");
+
         // POST /api/admin/packages/{id}/reset-summaries - Mark all releases as stale and delete summaries (admin only)
         adminPackages.MapPost("/{id:length(21)}/reset-summaries", async (string id, PatchNotesDbContext db) =>
         {
@@ -651,6 +708,7 @@ public class PackageDetailInfoDto
     public required string GithubOwner { get; set; }
     public required string GithubRepo { get; set; }
     public string? NpmName { get; set; }
+    public DateTimeOffset? LastFetchedAt { get; set; }
 }
 
 public class PackageDetailGroupDto
