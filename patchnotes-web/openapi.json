@@ -456,6 +456,37 @@
         }
       }
     },
+    "/api/admin/packages/{id}/trigger-sync": {
+      "post": {
+        "tags": [
+          "AdminPackages"
+        ],
+        "operationId": "TriggerPackageSync",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "maxLength": 21,
+              "minLength": 21,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "503": {
+            "description": "Service Unavailable"
+          }
+        }
+      }
+    },
     "/api/admin/packages/{id}/reset-summaries": {
       "post": {
         "tags": [
@@ -1744,6 +1775,13 @@
               "null",
               "string"
             ]
+          },
+          "lastFetchedAt": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
           }
         }
       },

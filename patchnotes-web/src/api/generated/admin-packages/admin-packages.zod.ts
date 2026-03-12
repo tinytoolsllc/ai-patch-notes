@@ -38,6 +38,15 @@ export const DisablePackageSyncParams = zod.object({
   "id": zod.string().min(disablePackageSyncPathIdMin).max(disablePackageSyncPathIdMax)
 })
 
+export const triggerPackageSyncPathIdMin = 21;
+export const triggerPackageSyncPathIdMax = 21;
+
+
+
+export const TriggerPackageSyncParams = zod.object({
+  "id": zod.string().min(triggerPackageSyncPathIdMin).max(triggerPackageSyncPathIdMax)
+})
+
 export const resetPackageSummariesPathIdMin = 21;
 export const resetPackageSummariesPathIdMax = 21;
 

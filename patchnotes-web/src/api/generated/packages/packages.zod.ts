@@ -166,7 +166,8 @@ export const GetPackageByOwnerRepoResponse = zod.object({
   "name": zod.string(),
   "githubOwner": zod.string(),
   "githubRepo": zod.string(),
-  "npmName": zod.string().nullish()
+  "npmName": zod.string().nullish(),
+  "lastFetchedAt": zod.iso.datetime({"offset":true}).nullish()
 }),
   "groups": zod.array(zod.object({
   "majorVersion": zod.number().optional(),

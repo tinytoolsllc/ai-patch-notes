@@ -2,7 +2,10 @@ import { useState, useCallback, useMemo } from 'react'
 import { Link } from '@tanstack/react-router'
 import { AppHeader, Container } from '../components/ui'
 import { usePackageByOwnerRepo } from '../api/hooks'
-import type { PackageDetailGroupDto } from '../api/generated/model'
+import type {
+  PackageDetailGroupDto,
+  PackageDetailResponseDto,
+} from '../api/generated/model'
 import { detectPrereleaseType } from '../utils/dateFormat'
 import { SummaryCard, type SummaryGroup } from '../components/releases'
 import { HeroCard } from '../components/landing/HeroCard'
@@ -76,7 +79,14 @@ function PageHeader({ owner, repo }: { owner: string; repo: string }) {
 }
 
 export function PackageDetailByRepo({ owner, repo }: PackageDetailByRepoProps) {
-  const { data, isLoading, error } = usePackageByOwnerRepo(owner, repo)
+  const isSyncing = (d: PackageDetailResponseDto | undefined) =>
+    d != null && d.groups.length === 0 && !d.package.lastFetchedAt
+  const { data, isLoading, error } = usePackageByOwnerRepo(owner, repo, {
+    refetchInterval: (query) =>
+      isSyncing(query.state.data as PackageDetailResponseDto | undefined)
+        ? 30_000
+        : false,
+  })
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set())
 
   const toggleExpanded = useCallback((groupId: string) => {
@@ -144,11 +154,19 @@ export function PackageDetailByRepo({ owner, repo }: PackageDetailByRepoProps) {
             ))}
           </div>
 
-          {data.groups.length === 0 && (
-            <p className="text-text-secondary text-center py-8">
-              No releases found for this package.
-            </p>
-          )}
+          {data.groups.length === 0 &&
+            (!data.package.lastFetchedAt ? (
+              <div className="text-center py-12">
+                <div className="inline-block h-6 w-6 animate-spin rounded-full border-2 border-current border-t-transparent text-brand-primary" />
+                <p className="text-text-secondary mt-3">
+                  Syncing releases for this package&hellip;
+                </p>
+              </div>
+            ) : (
+              <p className="text-text-secondary text-center py-8">
+                No releases found for this package.
+              </p>
+            ))}
         </Container>
       </main>
     </div>
