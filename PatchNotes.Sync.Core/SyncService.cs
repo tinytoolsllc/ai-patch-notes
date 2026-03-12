@@ -179,21 +179,28 @@ public class SyncService
                     if (followed != null && followed != body)
                     {
                         _logger.LogInformation(
-                            "Followed release links for {Package} {Tag}",
-                            package.Name, ghRelease.TagName);
+                            "[{Owner}/{Repo}] Followed release links for {Tag}",
+                            package.GithubOwner, package.GithubRepo, ghRelease.TagName);
                         body = followed;
                     }
                 }
                 catch (Exception ex)
                 {
                     _logger.LogWarning(ex,
-                        "Failed to follow release links for {Package} {Tag}, keeping original body",
-                        package.Name, ghRelease.TagName);
+                        "[{Owner}/{Repo}] Failed to follow release links for {Tag}, keeping original body",
+                        package.GithubOwner, package.GithubRepo, ghRelease.TagName);
                 }
             }
 
             // Resolve external changelog references
-            if (_changelogResolver != null && ChangelogResolver.IsChangelogReference(body))
+            var isRef = ChangelogResolver.IsChangelogReference(body);
+            _logger.LogInformation(
+                "[{Owner}/{Repo}] Changelog reference check for {Tag}: isRef={IsRef}, bodyLength={BodyLength}, bodyPreview={BodyPreview}",
+                package.GithubOwner, package.GithubRepo, ghRelease.TagName, isRef,
+                body?.Length ?? 0,
+                body?.Length > 200 ? body[..200] + "…" : body ?? "(null)");
+
+            if (_changelogResolver != null && isRef)
             {
                 try
                 {
@@ -204,16 +211,22 @@ public class SyncService
                     if (resolved != null)
                     {
                         _logger.LogInformation(
-                            "Resolved changelog reference for {Package} {Tag}",
-                            package.Name, ghRelease.TagName);
+                            "[{Owner}/{Repo}] Resolved changelog reference for {Tag}, resolvedLength={Length}",
+                            package.GithubOwner, package.GithubRepo, ghRelease.TagName, resolved.Length);
                         body = resolved;
+                    }
+                    else
+                    {
+                        _logger.LogWarning(
+                            "[{Owner}/{Repo}] Changelog resolver returned null for {Tag} — keeping original body",
+                            package.GithubOwner, package.GithubRepo, ghRelease.TagName);
                     }
                 }
                 catch (Exception ex)
                 {
                     _logger.LogWarning(ex,
-                        "Failed to resolve changelog for {Package} {Tag}, keeping original body",
-                        package.Name, ghRelease.TagName);
+                        "[{Owner}/{Repo}] Failed to resolve changelog for {Tag}, keeping original body",
+                        package.GithubOwner, package.GithubRepo, ghRelease.TagName);
                 }
             }
 

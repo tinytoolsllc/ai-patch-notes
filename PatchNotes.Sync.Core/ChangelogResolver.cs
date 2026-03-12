@@ -106,7 +106,7 @@ public class ChangelogResolver
             var key = $"{link.Value.owner}/{link.Value.repo}/{link.Value.tag}";
             if (!visited.Add(key))
             {
-                _logger.LogDebug("Circular release link detected at {Key}", key);
+                _logger.LogDebug("[{Owner}/{Repo}] Circular release link detected at {Key}", link.Value.owner, link.Value.repo, key);
                 break;
             }
 
@@ -117,16 +117,16 @@ public class ChangelogResolver
 
                 if (release == null || string.IsNullOrWhiteSpace(release.Body))
                 {
-                    _logger.LogDebug("Release {Key} not found or has empty body", key);
+                    _logger.LogDebug("[{Owner}/{Repo}] Release {Key} not found or has empty body", link.Value.owner, link.Value.repo, key);
                     break;
                 }
 
-                _logger.LogDebug("Followed release link to {Key} (hop {Hop})", key, hop + 1);
+                _logger.LogDebug("[{Owner}/{Repo}] Followed release link to {Key} (hop {Hop})", link.Value.owner, link.Value.repo, key, hop + 1);
                 body = release.Body;
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex, "Failed to follow release link to {Key}", key);
+                _logger.LogWarning(ex, "[{Owner}/{Repo}] Failed to follow release link to {Key}", link.Value.owner, link.Value.repo, key);
                 break;
             }
         }
@@ -196,59 +196,110 @@ public class ChangelogResolver
     {
         // First, try to extract a file path from a GitHub URL in the body
         var urlPath = ExtractPathFromBody(body);
+        if (urlPath == null)
+        {
+            _logger.LogInformation(
+                "[{Owner}/{Repo}] ResolveAsync {Tag}: no GitHub blob URL found in body, falling back to standard paths",
+                owner, repo, tagName);
+        }
+        else
+        {
+            _logger.LogInformation(
+                "[{Owner}/{Repo}] ResolveAsync {Tag}: extracted URL path {Path}",
+                owner, repo, tagName, urlPath);
+        }
+
         if (urlPath != null)
         {
             try
             {
                 var content = await _github.GetFileContentAsync(owner, repo, urlPath, cancellationToken);
+                _logger.LogInformation(
+                    "[{Owner}/{Repo}] Fetched {Path} for {Tag}: contentLength={Length}",
+                    owner, repo, urlPath, tagName, content?.Length ?? 0);
+
                 if (content != null)
                 {
                     var section = ExtractVersionSection(content, tagName);
+                    _logger.LogInformation(
+                        "[{Owner}/{Repo}] ExtractVersionSection from {Path} for tag {Tag}: sectionLength={Length}",
+                        owner, repo, urlPath, tagName, section?.Length ?? 0);
+
                     if (section != null)
                     {
-                        _logger.LogDebug(
-                            "Resolved changelog for {Owner}/{Repo} {Tag} from URL path {Path}",
-                            owner, repo, tagName, urlPath);
                         return section;
+                    }
+                    else
+                    {
+                        // Log the headings we found so we can debug version matching
+                        var headings = HeadingPattern.Matches(content);
+                        var headingList = string.Join(", ",
+                            headings.Cast<Match>().Take(10).Select(m => m.Groups["version"].Value));
+                        _logger.LogWarning(
+                            "[{Owner}/{Repo}] No version match for tag {Tag} in {Path}. First headings found: [{Headings}]",
+                            owner, repo, tagName, urlPath, headingList);
                     }
                 }
             }
             catch (Exception ex)
             {
                 _logger.LogWarning(ex,
-                    "Failed to fetch changelog {Path} from {Owner}/{Repo}",
-                    urlPath, owner, repo);
+                    "[{Owner}/{Repo}] Failed to fetch changelog {Path}",
+                    owner, repo, urlPath);
             }
         }
 
         // Fall back to standard changelog paths
+        if (urlPath != null)
+        {
+            _logger.LogInformation(
+                "[{Owner}/{Repo}] URL path {Path} did not yield a result for {Tag}, falling back to standard changelog paths",
+                owner, repo, urlPath, tagName);
+        }
+
         foreach (var path in ChangelogPaths)
         {
             try
             {
                 var content = await _github.GetFileContentAsync(owner, repo, path, cancellationToken);
                 if (content == null)
+                {
+                    _logger.LogDebug("[{Owner}/{Repo}] Standard path {Path} not found", owner, repo, path);
                     continue;
+                }
+
+                _logger.LogInformation(
+                    "[{Owner}/{Repo}] Fetched standard path {Path} for {Tag}: contentLength={Length}",
+                    owner, repo, path, tagName, content.Length);
 
                 var section = ExtractVersionSection(content, tagName);
                 if (section != null)
                 {
-                    _logger.LogDebug(
-                        "Resolved changelog for {Owner}/{Repo} {Tag} from {Path}",
-                        owner, repo, tagName, path);
+                    _logger.LogInformation(
+                        "[{Owner}/{Repo}] Resolved changelog for {Tag} from {Path}, sectionLength={Length}",
+                        owner, repo, tagName, path, section.Length);
                     return section;
+                }
+                else
+                {
+                    var headings = HeadingPattern.Matches(content);
+                    var headingList = string.Join(", ",
+                        headings.Cast<Match>().Take(10).Select(m => m.Groups["version"].Value));
+                    _logger.LogInformation(
+                        "[{Owner}/{Repo}] No version match for tag {Tag} in standard path {Path}. First headings: [{Headings}]",
+                        owner, repo, tagName, path, headingList);
                 }
             }
             catch (Exception ex)
             {
                 _logger.LogWarning(ex,
-                    "Failed to fetch changelog {Path} from {Owner}/{Repo}",
-                    path, owner, repo);
+                    "[{Owner}/{Repo}] Failed to fetch changelog {Path}",
+                    owner, repo, path);
             }
         }
 
-        _logger.LogDebug(
-            "Could not resolve changelog for {Owner}/{Repo} {Tag}",
+        _logger.LogWarning(
+            "[{Owner}/{Repo}] Could not resolve changelog for {Tag} from any path",
             owner, repo, tagName);
         return null;
     }
