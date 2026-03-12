@@ -80,7 +80,7 @@ function PageHeader({ owner, repo }: { owner: string; repo: string }) {
 
 export function PackageDetailByRepo({ owner, repo }: PackageDetailByRepoProps) {
   const isSyncing = (d: PackageDetailResponseDto | undefined) =>
-    d != null && d.groups.length === 0 && !d.package.lastFetchedAt
+    d != null && d.groups?.length === 0 && !d.package?.lastFetchedAt
   const { data, isLoading, error } = usePackageByOwnerRepo(owner, repo, {
     refetchInterval: (query) =>
       isSyncing(query.state.data as PackageDetailResponseDto | undefined)
