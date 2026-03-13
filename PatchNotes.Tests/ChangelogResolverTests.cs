@@ -467,6 +467,47 @@ public class ChangelogResolverTests
 
     #endregion
 
+    #region IsLikelyConventionalCommitsOnly Tests
+
+    [Theory]
+    [InlineData("### Features\n\n* update rolldown ([#123](https://github.com/owner/repo/issues/123))")]
+    [InlineData("### Bug Fixes\n\n* fix crash on startup")]
+    [InlineData("### BREAKING CHANGES\n\n* removed old API")]
+    [InlineData("### Performance Improvements\n\n* faster builds")]
+    [InlineData("### Documentation\n\n* updated readme")]
+    [InlineData("### Code Refactoring\n\n* cleanup")]
+    [InlineData("### Tests\n\n* added unit tests")]
+    [InlineData("## What's Changed\n\n* fix by @user")]
+    public void IsLikelyConventionalCommitsOnly_ShortConventionalBody_ReturnsTrue(string body)
+    {
+        ChangelogResolver.IsLikelyConventionalCommitsOnly(body).Should().BeTrue();
+    }
+
+    [Fact]
+    public void IsLikelyConventionalCommitsOnly_LongBody_ReturnsFalse()
+    {
+        var body = "### Features\n\n" + new string('x', 500);
+        ChangelogResolver.IsLikelyConventionalCommitsOnly(body).Should().BeFalse();
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("   ")]
+    public void IsLikelyConventionalCommitsOnly_NullOrEmpty_ReturnsFalse(string? body)
+    {
+        ChangelogResolver.IsLikelyConventionalCommitsOnly(body).Should().BeFalse();
+    }
+
+    [Fact]
+    public void IsLikelyConventionalCommitsOnly_ProseBody_ReturnsFalse()
+    {
+        var body = "We're thrilled to announce the release of v8.0.0!";
+        ChangelogResolver.IsLikelyConventionalCommitsOnly(body).Should().BeFalse();
+    }
+
+    #endregion
+
     #region ExtractGitHubReleaseLink Tests
 
     [Theory]

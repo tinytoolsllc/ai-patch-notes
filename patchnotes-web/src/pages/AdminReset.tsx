@@ -194,8 +194,9 @@ function Pagination({
   return (
     <div className="flex items-center justify-between px-6 py-3 border-t border-border-default">
       <span className="text-sm text-text-secondary">
-        Showing {offset + 1}\u2013{Math.min(offset + pageSize, total)} of{' '}
-        {total}
+        Showing {offset + 1}
+        {'\u2013'}
+        {Math.min(offset + pageSize, total)} of {total}
       </span>
       <div className="flex gap-2">
         <Button

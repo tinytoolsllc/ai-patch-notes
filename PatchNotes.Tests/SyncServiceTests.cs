@@ -1069,6 +1069,188 @@ public class SyncServiceTests : IDisposable
 
     #endregion
 
+    #region ReResolveStaleChangelogsAsync Tests
+
+    [Fact]
+    public async Task ReResolveStaleChangelogsAsync_WithoutResolver_ReturnsZero()
+    {
+        var result = await _syncService.ReResolveStaleChangelogsAsync();
+        result.Should().Be(0);
+    }
+
+    [Fact]
+    public async Task ReResolveStaleChangelogsAsync_UpdatesBody_WhenBetterContentAvailable()
+    {
+        // Arrange
+        var mockChangelogLogger = new Mock<ILogger<ChangelogResolver>>();
+        var changelogResolver = new ChangelogResolver(_mockGitHub.Object, mockChangelogLogger.Object);
+        var syncService = new SyncService(_db, _mockGitHub.Object, _mockLogger.Object, changelogResolver);
+
+        var package = new Package { Name = "vite", Url = "https://github.com/vitejs/vite", GithubOwner = "vitejs", GithubRepo = "vite" };
+        _db.Packages.Add(package);
+        _db.Releases.Add(new Release
+        {
+            PackageId = package.Id,
+            Tag = "v8.0.0",
+            Body = "### Features\n\n* update rolldown",
+            PublishedAt = DateTimeOffset.UtcNow.AddHours(-1),
+            FetchedAt = DateTimeOffset.UtcNow.AddHours(-1),
+            ChangelogStale = true,
+            SummaryStale = false
+        });
+        await _db.SaveChangesAsync();
+
+        var fullChangelog = "## 8.0.0\n\nVite 8 is here! Full announcement with breaking changes and features.\n\n## 7.0.0\n\nOld version.";
+        _mockGitHub
+            .Setup(x => x.GetFileContentAsync("vitejs", "vite", "CHANGELOG.md", It.IsAny<CancellationToken>()))
+            .ReturnsAsync(fullChangelog);
+
+        // Act
+        var result = await syncService.ReResolveStaleChangelogsAsync();
+
+        // Assert
+        result.Should().Be(1);
+        var release = await _db.Releases.SingleAsync();
+        release.Body.Should().Contain("Vite 8 is here!");
+        release.ChangelogStale.Should().BeFalse();
+        release.SummaryStale.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task ReResolveStaleChangelogsAsync_ExpiresOldReleases()
+    {
+        // Arrange
+        var mockChangelogLogger = new Mock<ILogger<ChangelogResolver>>();
+        var changelogResolver = new ChangelogResolver(_mockGitHub.Object, mockChangelogLogger.Object);
+        var syncService = new SyncService(_db, _mockGitHub.Object, _mockLogger.Object, changelogResolver);
+
+        var package = new Package { Name = "pkg", Url = "https://github.com/owner/repo", GithubOwner = "owner", GithubRepo = "repo" };
+        _db.Packages.Add(package);
+        _db.Releases.Add(new Release
+        {
+            PackageId = package.Id,
+            Tag = "v1.0.0",
+            Body = "### Features\n\n* some feature",
+            PublishedAt = DateTimeOffset.UtcNow.AddHours(-13), // older than 12h
+            FetchedAt = DateTimeOffset.UtcNow.AddHours(-13),
+            ChangelogStale = true
+        });
+        await _db.SaveChangesAsync();
+
+        // Act
+        var result = await syncService.ReResolveStaleChangelogsAsync();
+
+        // Assert - expired, not updated
+        result.Should().Be(0);
+        var release = await _db.Releases.SingleAsync();
+        release.ChangelogStale.Should().BeFalse();
+        release.Body.Should().Contain("some feature"); // unchanged
+    }
+
+    [Fact]
+    public async Task ReResolveStaleChangelogsAsync_LeavesFlag_WhenNoImprovement()
+    {
+        // Arrange
+        var mockChangelogLogger = new Mock<ILogger<ChangelogResolver>>();
+        var changelogResolver = new ChangelogResolver(_mockGitHub.Object, mockChangelogLogger.Object);
+        var syncService = new SyncService(_db, _mockGitHub.Object, _mockLogger.Object, changelogResolver);
+
+        var package = new Package { Name = "pkg", Url = "https://github.com/owner/repo", GithubOwner = "owner", GithubRepo = "repo" };
+        _db.Packages.Add(package);
+        _db.Releases.Add(new Release
+        {
+            PackageId = package.Id,
+            Tag = "v1.0.0",
+            Body = "### Features\n\n* some feature",
+            PublishedAt = DateTimeOffset.UtcNow.AddHours(-1),
+            FetchedAt = DateTimeOffset.UtcNow.AddHours(-1),
+            ChangelogStale = true
+        });
+        await _db.SaveChangesAsync();
+
+        // Resolver returns same short content
+        var changelog = "## 1.0.0\n\n### Features\n\n* some feature\n\n## 0.9.0\n\nOld.";
+        _mockGitHub
+            .Setup(x => x.GetFileContentAsync("owner", "repo", "CHANGELOG.md", It.IsAny<CancellationToken>()))
+            .ReturnsAsync(changelog);
+
+        // Act
+        var result = await syncService.ReResolveStaleChangelogsAsync();
+
+        // Assert - no improvement, flag stays
+        result.Should().Be(0);
+        var release = await _db.Releases.SingleAsync();
+        release.ChangelogStale.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task SyncPackageAsync_FlagsChangelogStale_WhenResolvedToConventionalCommits()
+    {
+        // Arrange
+        var mockChangelogLogger = new Mock<ILogger<ChangelogResolver>>();
+        var changelogResolver = new ChangelogResolver(_mockGitHub.Object, mockChangelogLogger.Object);
+        var syncService = new SyncService(_db, _mockGitHub.Object, _mockLogger.Object, changelogResolver);
+
+        var package = new Package { Name = "vite", Url = "https://github.com/vitejs/vite", GithubOwner = "vitejs", GithubRepo = "vite" };
+        _db.Packages.Add(package);
+        await _db.SaveChangesAsync();
+
+        var referenceBody = "Please refer to [CHANGELOG.md](https://github.com/vitejs/vite/blob/v8.0.0/packages/vite/CHANGELOG.md) for details.";
+        SetupGitHubReleases("vitejs", "vite", [
+            CreateRelease("v8.0.0", DateTimeOffset.UtcNow, "Vite 8.0.0", referenceBody)
+        ]);
+
+        // Changelog only has short conventional-commits content
+        var changelog = "## 8.0.0\n\n### Features\n\n* update rolldown\n\n## 7.0.0\n\nOld.";
+        _mockGitHub
+            .Setup(x => x.GetFileContentAsync("vitejs", "vite", "packages/vite/CHANGELOG.md", It.IsAny<CancellationToken>()))
+            .ReturnsAsync(changelog);
+
+        // Act
+        var result = await syncService.SyncPackageAsync(package);
+
+        // Assert
+        result.ReleasesAdded.Should().Be(1);
+        var release = await _db.Releases.SingleAsync();
+        release.ChangelogStale.Should().BeTrue();
+        release.Body.Should().Contain("update rolldown");
+    }
+
+    [Fact]
+    public async Task SyncPackageAsync_DoesNotFlagChangelogStale_WhenBodyIsLong()
+    {
+        // Arrange
+        var mockChangelogLogger = new Mock<ILogger<ChangelogResolver>>();
+        var changelogResolver = new ChangelogResolver(_mockGitHub.Object, mockChangelogLogger.Object);
+        var syncService = new SyncService(_db, _mockGitHub.Object, _mockLogger.Object, changelogResolver);
+
+        var package = new Package { Name = "vite", Url = "https://github.com/vitejs/vite", GithubOwner = "vitejs", GithubRepo = "vite" };
+        _db.Packages.Add(package);
+        await _db.SaveChangesAsync();
+
+        var referenceBody = "Please refer to [CHANGELOG.md](https://github.com/vitejs/vite/blob/v8.0.0/packages/vite/CHANGELOG.md) for details.";
+        SetupGitHubReleases("vitejs", "vite", [
+            CreateRelease("v8.0.0", DateTimeOffset.UtcNow, "Vite 8.0.0", referenceBody)
+        ]);
+
+        // Full announcement
+        var longContent = "Vite 8 is here! " + new string('x', 600);
+        var changelog = $"## 8.0.0\n\n{longContent}\n\n## 7.0.0\n\nOld.";
+        _mockGitHub
+            .Setup(x => x.GetFileContentAsync("vitejs", "vite", "packages/vite/CHANGELOG.md", It.IsAny<CancellationToken>()))
+            .ReturnsAsync(changelog);
+
+        // Act
+        var result = await syncService.SyncPackageAsync(package);
+
+        // Assert
+        result.ReleasesAdded.Should().Be(1);
+        var release = await _db.Releases.SingleAsync();
+        release.ChangelogStale.Should().BeFalse();
+    }
+
+    #endregion
+
     #region SyncPackageAsync + ChangelogResolver Integration Tests
 
     [Fact]

@@ -40,21 +40,22 @@ model ProcessedWebhookEvents {
 }
 
 model Releases {
-  PackageId    String   @db.NVarChar(21)
-  Tag          String   @db.NVarChar(128)
-  Title        String?  @db.NVarChar(Max)
-  Body         String?  @db.NVarChar(Max)
-  PublishedAt  DateTime @db.DateTimeOffset
-  FetchedAt    DateTime @db.DateTimeOffset
-  Id           String   @id(map: "PK_Releases") @default("", map: "DF__Releases__Id__5CD6CB2B") @db.NVarChar(21)
-  SummaryStale Boolean  @default(dbgenerated("CONVERT([bit],(1))"), map: "DF__Releases__Summar__693CA210")
-  IsPrerelease Boolean  @default(dbgenerated("CONVERT([bit],(0))"), map: "DF__Releases__IsPrer__6B24EA82")
-  MajorVersion Int      @default(0, map: "DF__Releases__MajorV__6C190EBB")
-  MinorVersion Int      @default(0, map: "DF__Releases__MinorV__6D0D32F4")
-  PatchVersion Int      @default(0, map: "DF__Releases__PatchV__6E01572D")
-  CreatedAt    DateTime @default(dbgenerated("0001-01-01T00:00:00.0000000+00:00"), map: "DF__Releases__Create__75A278F5") @db.DateTimeOffset
-  UpdatedAt    DateTime @default(dbgenerated("0001-01-01T00:00:00.0000000+00:00"), map: "DF__Releases__Update__76969D2E") @db.DateTimeOffset
-  Packages     Packages @relation(fields: [PackageId], references: [Id], onDelete: Cascade, onUpdate: NoAction, map: "FK_Releases_Packages_PackageId")
+  PackageId      String   @db.NVarChar(21)
+  Tag            String   @db.NVarChar(128)
+  Title          String?  @db.NVarChar(Max)
+  Body           String?  @db.NVarChar(Max)
+  PublishedAt    DateTime @db.DateTimeOffset
+  FetchedAt      DateTime @db.DateTimeOffset
+  Id             String   @id(map: "PK_Releases") @default("", map: "DF__Releases__Id__5CD6CB2B") @db.NVarChar(21)
+  SummaryStale   Boolean  @default(dbgenerated("CONVERT([bit],(1))"), map: "DF__Releases__Summar__693CA210")
+  IsPrerelease   Boolean  @default(dbgenerated("CONVERT([bit],(0))"), map: "DF__Releases__IsPrer__6B24EA82")
+  MajorVersion   Int      @default(0, map: "DF__Releases__MajorV__6C190EBB")
+  MinorVersion   Int      @default(0, map: "DF__Releases__MinorV__6D0D32F4")
+  PatchVersion   Int      @default(0, map: "DF__Releases__PatchV__6E01572D")
+  CreatedAt      DateTime @default(dbgenerated("0001-01-01T00:00:00.0000000+00:00"), map: "DF__Releases__Create__75A278F5") @db.DateTimeOffset
+  UpdatedAt      DateTime @default(dbgenerated("0001-01-01T00:00:00.0000000+00:00"), map: "DF__Releases__Update__76969D2E") @db.DateTimeOffset
+  ChangelogStale Boolean  @default(dbgenerated("CONVERT([bit],(0))"), map: "DF__Releases__Change__04E4BC85")
+  Packages       Packages @relation(fields: [PackageId], references: [Id], onDelete: Cascade, onUpdate: NoAction, map: "FK_Releases_Packages_PackageId")
 
   @@index([PackageId], map: "IX_Releases_PackageId")
   @@index([PackageId, MajorVersion, IsPrerelease], map: "IX_Releases_PackageId_MajorVersion_IsPrerelease")

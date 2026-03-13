@@ -62,6 +62,10 @@ public class SyncPipeline
                 _logger.LogInformation("Backfilled version fields for {Count} existing releases", backfilled);
             }
 
+            // Re-resolve stale changelogs (releases with short conventional-commits bodies)
+            var reResolved = await syncService.ReResolveStaleChangelogsAsync(ct);
+            result.ChangelogsReResolved = reResolved;
+
             var db = scope.ServiceProvider.GetRequiredService<PatchNotesDbContext>();
             var packages = await db.Packages.Where(p => !p.IsSyncDisabled).ToListAsync(ct);
 

@@ -16,6 +16,7 @@ public record PipelineResult
     public int PackagesSynced { get; internal set; }
     public int PackagesWithNewReleases { get; internal set; }
     public int ReleasesAdded { get; internal set; }
+    public int ChangelogsReResolved { get; internal set; }
     public List<SyncError> SyncErrors { get; } = [];
 
     // Written exclusively by the consumer task (SyncPipeline.ConsumeAsync)

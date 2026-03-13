@@ -231,6 +231,14 @@ public class SyncService
             }
 
             var parsed = VersionParser.ParseTagValues(ghRelease.TagName);
+            var changelogStale = isRef && ChangelogResolver.IsLikelyConventionalCommitsOnly(body);
+            if (changelogStale)
+            {
+                _logger.LogInformation(
+                    "[{Owner}/{Repo}] Flagged {Tag} for changelog re-resolution (bodyLength={Length})",
+                    package.GithubOwner, package.GithubRepo, ghRelease.TagName, body?.Length ?? 0);
+            }
+
             var release = new Release
             {
                 PackageId = package.Id,
@@ -242,7 +250,8 @@ public class SyncService
                 MajorVersion = parsed.MajorVersion,
                 MinorVersion = parsed.MinorVersion,
                 PatchVersion = parsed.PatchVersion,
-                IsPrerelease = parsed.IsPrerelease
+                IsPrerelease = parsed.IsPrerelease,
+                ChangelogStale = changelogStale
             };
 
             newReleases.Add(release);
@@ -348,6 +357,87 @@ public class SyncService
             .Where(r => r.PackageId == packageId && (r.SummaryStale))
             .OrderByDescending(r => r.PublishedAt)
             .ToListAsync(cancellationToken);
+    }
+
+    /// <summary>
+    /// Re-attempts changelog resolution for releases flagged as ChangelogStale
+    /// that were published within the last 12 hours. Clears the flag on expired releases.
+    /// </summary>
+    public async Task<int> ReResolveStaleChangelogsAsync(CancellationToken cancellationToken = default)
+    {
+        if (_changelogResolver == null)
+            return 0;
+
+        var cutoff = DateTimeOffset.UtcNow.AddHours(-12);
+
+        var staleReleases = await _db.Releases
+            .Include(r => r.Package)
+            .Where(r => r.ChangelogStale)
+            .ToListAsync(cancellationToken);
+
+        if (staleReleases.Count == 0)
+            return 0;
+
+        var updated = 0;
+        var expired = 0;
+
+        foreach (var release in staleReleases)
+        {
+            // Expire releases older than 12 hours
+            if (release.PublishedAt <= cutoff)
+            {
+                release.ChangelogStale = false;
+                expired++;
+                _logger.LogDebug("Expiring stale changelog flag for {Tag}", release.Tag);
+                continue;
+            }
+
+            var package = release.Package;
+
+            try
+            {
+                var resolved = await _changelogResolver.ResolveAsync(
+                    package.GithubOwner, package.GithubRepo,
+                    release.Tag, release.Body, cancellationToken);
+
+                if (resolved != null
+                    && (resolved.Length > (release.Body?.Length ?? 0)
+                        || !ChangelogResolver.IsLikelyConventionalCommitsOnly(resolved)))
+                {
+                    _logger.LogInformation(
+                        "[{Owner}/{Repo}] Re-resolved changelog for {Tag}: {OldLen} -> {NewLen} chars",
+                        package.GithubOwner, package.GithubRepo, release.Tag,
+                        release.Body?.Length ?? 0, resolved.Length);
+
+                    release.Body = resolved;
+                    release.ChangelogStale = false;
+                    release.SummaryStale = true;
+                    updated++;
+                }
+                else
+                {
+                    _logger.LogDebug(
+                        "[{Owner}/{Repo}] Re-resolution for {Tag} did not improve changelog, will retry",
+                        package.GithubOwner, package.GithubRepo, release.Tag);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex,
+                    "[{Owner}/{Repo}] Failed to re-resolve changelog for {Tag}",
+                    package.GithubOwner, package.GithubRepo, release.Tag);
+            }
+        }
+
+        if (updated > 0 || expired > 0)
+        {
+            await _db.SaveChangesAsync(cancellationToken);
+            _logger.LogInformation(
+                "Stale changelog re-resolution: {Updated} updated, {Expired} expired",
+                updated, expired);
+        }
+
+        return updated;
     }
 
     /// <summary>
