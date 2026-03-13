@@ -38,5 +38,11 @@ public class Release : IHasCreatedAt, IHasUpdatedAt
     /// </summary>
     public bool SummaryStale { get; set; } = true;
 
+    /// <summary>
+    /// Indicates the changelog body looks like auto-generated conventional-commits output
+    /// and should be re-resolved on subsequent sync runs (up to 12 hours after PublishedAt).
+    /// </summary>
+    public bool ChangelogStale { get; set; }
+
     public Package Package { get; set; } = null!;
 }

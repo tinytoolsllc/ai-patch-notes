@@ -29,17 +29,20 @@ public class SyncTimerFunction(
             Console.WriteLine(
                 $"[SyncReleases] Completed in {elapsed.TotalSeconds:F1}s — " +
                 $"{result.PackagesSynced} packages, {result.ReleasesAdded} new releases, " +
-                $"{result.SummariesGenerated} summaries, {result.SyncErrors.Count} sync errors, {result.SummaryErrors.Count} summary errors");
+                $"{result.SummariesGenerated} summaries, {result.ChangelogsReResolved} changelogs re-resolved, " +
+                $"{result.SyncErrors.Count} sync errors, {result.SummaryErrors.Count} summary errors");
 
             logger.LogInformation(
                 "SyncReleases completed in {ElapsedSeconds:F1}s — " +
                 "{Packages} packages ({PackagesWithNewReleases} with new releases), {Releases} new releases, " +
-                "{Summaries} summaries generated, {SyncErrors} sync errors, {SummaryErrors} summary errors",
+                "{Summaries} summaries generated, {ChangelogsReResolved} changelogs re-resolved, " +
+                "{SyncErrors} sync errors, {SummaryErrors} summary errors",
                 elapsed.TotalSeconds,
                 result.PackagesSynced,
                 result.PackagesWithNewReleases,
                 result.ReleasesAdded,
                 result.SummariesGenerated,
+                result.ChangelogsReResolved,
                 result.SyncErrors.Count,
                 result.SummaryErrors.Count);
 
@@ -50,6 +53,7 @@ public class SyncTimerFunction(
                 ["packagesWithNewReleases"] = result.PackagesWithNewReleases.ToString(),
                 ["releasesAdded"] = result.ReleasesAdded.ToString(),
                 ["summariesGenerated"] = result.SummariesGenerated.ToString(),
+                ["changelogsReResolved"] = result.ChangelogsReResolved.ToString(),
                 ["syncErrors"] = result.SyncErrors.Count.ToString(),
                 ["summaryErrors"] = result.SummaryErrors.Count.ToString(),
                 ["isPastDue"] = timerInfo.IsPastDue.ToString(),

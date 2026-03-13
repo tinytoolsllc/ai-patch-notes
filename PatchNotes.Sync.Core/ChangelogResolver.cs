@@ -346,6 +346,28 @@ public class ChangelogResolver
         return null;
     }
 
+    /// <summary>
+    /// Checks if a changelog body looks like auto-generated conventional-commits output
+    /// rather than a hand-written release announcement. Used to flag releases for
+    /// re-resolution on subsequent sync runs.
+    /// </summary>
+    public static bool IsLikelyConventionalCommitsOnly(string? body)
+    {
+        if (string.IsNullOrWhiteSpace(body) || body.Length >= 500)
+            return false;
+
+        var trimmed = body.TrimStart();
+        return trimmed.StartsWith("### Features", StringComparison.OrdinalIgnoreCase)
+            || trimmed.StartsWith("### Bug Fixes", StringComparison.OrdinalIgnoreCase)
+            || trimmed.StartsWith("### Performance Improvements", StringComparison.OrdinalIgnoreCase)
+            || trimmed.StartsWith("### BREAKING CHANGES", StringComparison.OrdinalIgnoreCase)
+            || trimmed.StartsWith("### Reverts", StringComparison.OrdinalIgnoreCase)
+            || trimmed.StartsWith("### Documentation", StringComparison.OrdinalIgnoreCase)
+            || trimmed.StartsWith("### Code Refactoring", StringComparison.OrdinalIgnoreCase)
+            || trimmed.StartsWith("### Tests", StringComparison.OrdinalIgnoreCase)
+            || trimmed.StartsWith("## What's Changed", StringComparison.OrdinalIgnoreCase);
+    }
+
     private static bool VersionMatches(string headingVersion, string targetVersion)
     {
         // Exact match
