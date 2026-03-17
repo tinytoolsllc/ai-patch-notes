@@ -5,21 +5,26 @@
 The Application Insights SDK is being deprecated in favor of OpenTelemetry. The .NET Functions project (`PatchNotes.Functions`) is additionally blocked: it's pinned to `Microsoft.ApplicationInsights.WorkerService` 2.23.0 because 3.x removes `ITelemetryInitializer`, which crashes the isolated worker. Migrating all projects to OpenTelemetry resolves this version pin and aligns the entire stack with the supported path forward.
 
 References:
+
 - Azure Functions: https://learn.microsoft.com/en-us/azure/azure-functions/opentelemetry-howto?tabs=app-insights%2Cihostapplicationbuilder&pivots=programming-language-csharp
 - ASP.NET Core: https://learn.microsoft.com/en-us/azure/azure-monitor/app/opentelemetry-enable?tabs=aspnetcore
 - Node.js: https://learn.microsoft.com/en-us/azure/azure-functions/opentelemetry-howto?tabs=app-insights&pivots=programming-language-typescript
+- Step by Step: https://github.com/microsoft/ApplicationInsights-dotnet/issues/3106#issuecomment-4072571304
 
 ## Scope
 
 All three projects, migrated and deployed in phases:
 
 ### Phase 1 — `PatchNotes.Functions` (.NET isolated worker)
+
 Highest priority. Resolves the incompatible NuGet package and validates the OTel pipeline end-to-end.
 
 ### Phase 2 — `PatchNotes.Api` (ASP.NET Core)
+
 Low risk. No `TelemetryClient` usage — only `ILogger`. Swap one package and one line of registration code. Deploy after Phase 1 is verified in staging.
 
 ### Phase 3 — `patchnotes-email` (Node.js Azure Functions)
+
 Most involved. Has a custom `telemetry.ts` wrapper with `trackEvent`/`trackException`/`flush` used across 4 function files plus tests. Deploy independently after Phases 1–2 are stable.
 
 ## Phase 1 — PatchNotes.Functions
@@ -29,11 +34,13 @@ Most involved. Has a custom `telemetry.ts` wrapper with `trackEvent`/`trackExcep
 In `PatchNotes.Functions/PatchNotes.Functions.csproj`:
 
 **Remove:**
+
 - `Microsoft.ApplicationInsights.WorkerService` 2.23.0
 - `Microsoft.Azure.Functions.Worker.ApplicationInsights` 2.50.0
 - The `<!-- DO NOT upgrade to 3.x -->` comment
 
 **Add:**
+
 - `Microsoft.Azure.Functions.Worker.OpenTelemetry`
 - `OpenTelemetry.Extensions.Hosting`
 - `Azure.Monitor.OpenTelemetry.Exporter`
@@ -80,16 +87,16 @@ Remove all `Console.WriteLine(...)` calls. These don't produce App Insights tele
 
 ```json
 {
-    "version": "2.0",
-    "telemetryMode": "OpenTelemetry",
-    "logging": {
-        "logLevel": {
-            "default": "Information",
-            "Function.SyncReleases": "Information",
-            "PatchNotes": "Information"
-        }
-    },
-    "functionTimeout": "00:10:00"
+  "version": "2.0",
+  "telemetryMode": "OpenTelemetry",
+  "logging": {
+    "logLevel": {
+      "default": "Information",
+      "Function.SyncReleases": "Information",
+      "PatchNotes": "Information"
+    }
+  },
+  "functionTimeout": "00:10:00"
 }
 ```
 
@@ -117,9 +124,11 @@ This function only uses `ILogger`, no `TelemetryClient`. No changes needed, but 
 In `PatchNotes.Api/PatchNotes.Api.csproj`:
 
 **Remove:**
+
 - `Microsoft.ApplicationInsights.AspNetCore` 3.0.0
 
 **Add:**
+
 - `Azure.Monitor.OpenTelemetry.AspNetCore`
 
 This is the full Azure Monitor distro for ASP.NET Core. It includes Live Metrics by default.
@@ -154,9 +163,11 @@ No other code changes needed — the API project uses only `ILogger`, no `Teleme
 ### 3.1. Update npm packages
 
 **Remove:**
+
 - `applicationinsights` (v3.14.0)
 
 **Add:**
+
 - `@opentelemetry/api`
 - `@opentelemetry/auto-instrumentations-node`
 - `@azure/monitor-opentelemetry-exporter`
@@ -168,33 +179,53 @@ The current `src/lib/telemetry.ts` wraps the App Insights SDK with `trackEvent`,
 
 ```typescript
 // src/lib/telemetry.ts
-import { AzureFunctionsInstrumentation } from '@azure/functions-opentelemetry-instrumentation';
-import { AzureMonitorLogExporter, AzureMonitorTraceExporter } from '@azure/monitor-opentelemetry-exporter';
-import { getNodeAutoInstrumentations, getResourceDetectors } from '@opentelemetry/auto-instrumentations-node';
-import { registerInstrumentations } from '@opentelemetry/instrumentation';
-import { detectResourcesSync } from '@opentelemetry/resources';
-import { LoggerProvider, SimpleLogRecordProcessor } from '@opentelemetry/sdk-logs';
-import { NodeTracerProvider, SimpleSpanProcessor } from '@opentelemetry/sdk-trace-node';
+import { AzureFunctionsInstrumentation } from "@azure/functions-opentelemetry-instrumentation";
+import {
+  AzureMonitorLogExporter,
+  AzureMonitorTraceExporter,
+} from "@azure/monitor-opentelemetry-exporter";
+import {
+  getNodeAutoInstrumentations,
+  getResourceDetectors,
+} from "@opentelemetry/auto-instrumentations-node";
+import { registerInstrumentations } from "@opentelemetry/instrumentation";
+import { detectResourcesSync } from "@opentelemetry/resources";
+import {
+  LoggerProvider,
+  SimpleLogRecordProcessor,
+} from "@opentelemetry/sdk-logs";
+import {
+  NodeTracerProvider,
+  SimpleSpanProcessor,
+} from "@opentelemetry/sdk-trace-node";
 
 const resource = detectResourcesSync({ detectors: getResourceDetectors() });
 
 const tracerProvider = new NodeTracerProvider({ resource });
-tracerProvider.addSpanProcessor(new SimpleSpanProcessor(new AzureMonitorTraceExporter()));
+tracerProvider.addSpanProcessor(
+  new SimpleSpanProcessor(new AzureMonitorTraceExporter()),
+);
 tracerProvider.register();
 
 const loggerProvider = new LoggerProvider({ resource });
-loggerProvider.addLogRecordProcessor(new SimpleLogRecordProcessor(new AzureMonitorLogExporter()));
+loggerProvider.addLogRecordProcessor(
+  new SimpleLogRecordProcessor(new AzureMonitorLogExporter()),
+);
 
 registerInstrumentations({
-    tracerProvider,
-    loggerProvider,
-    instrumentations: [getNodeAutoInstrumentations(), new AzureFunctionsInstrumentation()],
+  tracerProvider,
+  loggerProvider,
+  instrumentations: [
+    getNodeAutoInstrumentations(),
+    new AzureFunctionsInstrumentation(),
+  ],
 });
 ```
 
 **Decision: same as Phase 1 — structured logs, not custom spans.** Replace the `trackEvent`/`trackException`/`flush` wrapper functions with `console.log`/`console.error` structured logging. The OTel pipeline captures these automatically.
 
 The custom events that will move from `AppEvents` to `AppTraces`:
+
 - `EmailFunctionStarted` (cold start in telemetry.ts)
 - `DigestCompleted`, `DigestEmailFailed` (sendDigest.ts)
 - `WelcomeEmailSent`, `WelcomeEmailFailed` (sendWelcome.ts)
@@ -215,20 +246,20 @@ Or create a separate `src/index.ts` that imports the telemetry setup and re-expo
 
 ```json
 {
-    "version": "2.0",
-    "telemetryMode": "OpenTelemetry",
-    "logging": {
-        "logLevel": {
-            "default": "Information",
-            "Function.sendDigest": "Information",
-            "Function.sendWelcome": "Information",
-            "Function.sendTestEmail": "Information"
-        }
-    },
-    "extensionBundle": {
-        "id": "Microsoft.Azure.Functions.ExtensionBundle",
-        "version": "[4.*, 5.0.0)"
+  "version": "2.0",
+  "telemetryMode": "OpenTelemetry",
+  "logging": {
+    "logLevel": {
+      "default": "Information",
+      "Function.sendDigest": "Information",
+      "Function.sendWelcome": "Information",
+      "Function.sendTestEmail": "Information"
     }
+  },
+  "extensionBundle": {
+    "id": "Microsoft.Azure.Functions.ExtensionBundle",
+    "version": "[4.*, 5.0.0)"
+  }
 }
 ```
 
@@ -247,6 +278,7 @@ Or create a separate `src/index.ts` that imports the telemetry setup and re-expo
 Each phase should be deployed and verified independently before starting the next.
 
 ### Phase 1 testing
+
 1. Run locally with `func start` and verify logs appear in console
 2. Deploy to staging and confirm telemetry appears in App Insights:
    - Function invocation traces under "Recent function invocations"
@@ -255,16 +287,19 @@ Each phase should be deployed and verified independently before starting the nex
 3. Verify the hourly `SyncReleases` timer fires and completes with telemetry
 
 ### Phase 2 testing
+
 1. Run locally and confirm request logging works
 2. Deploy to staging and check for duplicate request telemetry (the known distro issue)
 3. Verify exception tracking by triggering a known error path
 
 ### Phase 3 testing
+
 1. Run locally with `func start` and verify email function logs appear
 2. Deploy to staging and trigger a test email
 3. Verify digest timer function completes with telemetry
 
 ### Cross-phase testing
+
 - `/check-azure` skill must be updated to query `AppTraces` instead of `AppEvents` for the custom events that moved. This should be done as part of Phase 1, since the sync function events are the first to move.
 
 ## Operational Notes
