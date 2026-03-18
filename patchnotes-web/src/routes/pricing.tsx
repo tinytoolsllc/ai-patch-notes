@@ -1,9 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { Pricing } from '../pages/Pricing'
 import { seoHead } from '../seo'
 
 export const Route = createFileRoute('/pricing')({
-  component: Pricing,
   head: () => ({
     ...seoHead({
       title: 'Pricing | My Release Notes',

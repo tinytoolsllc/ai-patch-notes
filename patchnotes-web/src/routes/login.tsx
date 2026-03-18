@@ -1,9 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { Login } from '../pages/Login'
 import { seoHead } from '../seo'
 
 export const Route = createFileRoute('/login')({
-  component: Login,
   validateSearch: (search: Record<string, unknown>) => ({
     returnUrl:
       typeof search.returnUrl === 'string' ? search.returnUrl : undefined,

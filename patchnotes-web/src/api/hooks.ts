@@ -38,7 +38,7 @@ import {
   useTriggerPackageSync,
   getGetPackagesHealthQueryKey,
 } from './generated/admin-packages/admin-packages'
-import { useGetFeed } from './generated/feed/feed'
+import { useGetFeed, getGetFeedQueryOptions } from './generated/feed/feed'
 import { GetFeedResponse } from './generated/feed/feed.zod'
 
 import {
@@ -401,3 +401,5 @@ export function useFeed(options?: FeedOptions) {
     },
   })
 }
+
+export { getGetFeedQueryOptions }

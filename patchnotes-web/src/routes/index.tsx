@@ -1,9 +1,13 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { HomePage } from '../pages/HomePage'
+import { getGetFeedQueryOptions } from '../api/hooks'
 import { seoHead } from '../seo'
 
 export const Route = createFileRoute('/')({
-  component: HomePage,
+  loader: ({ context: { queryClient } }) => {
+    queryClient.ensureQueryData(
+      getGetFeedQueryOptions({ excludePrerelease: true })
+    )
+  },
   head: () => ({
     ...seoHead({
       title: 'My Release Notes - Track GitHub Releases | myreleasenotes.ai',
