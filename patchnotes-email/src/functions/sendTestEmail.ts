@@ -6,7 +6,7 @@ import { getPrismaClient } from "../lib/prisma.js";
 import { renderTemplate, interpolateSubject } from "../lib/templateRenderer.js";
 import { subDays } from "date-fns";
 import { UTCDate } from "@date-fns/utc";
-import { nanoid } from "nanoid";
+import { nanoid } from "../lib/nanoid.js";
 
 interface SendTestEmailRequest {
     templateId: string;
