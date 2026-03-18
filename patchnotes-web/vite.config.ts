@@ -12,11 +12,7 @@ export default defineConfig({
   },
   plugins: [
     TanStackRouterVite(),
-    react({
-      babel: {
-        plugins: [['babel-plugin-react-compiler', {}]],
-      },
-    }),
+    react(),
     tailwindcss(),
     VitePWA({
       registerType: 'autoUpdate',
