@@ -28,7 +28,7 @@
     "applicationinsights": "^3.14.0",
     "date-fns": "^4.1.0",
     "esbuild-wasm": "^0.27.3",
-    "nanoid": "^3.3.11",
+    "nanoid": "^5.1.7",
     "react": "catalog:",
     "resend": "^6.9.3"
   },
