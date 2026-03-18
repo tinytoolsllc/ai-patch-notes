@@ -9,7 +9,7 @@ catalog:
   "@types/react": ^19.2.14
   "@types/node": 22.x
   tailwindcss: ^4.2.1
-  vitest: ^4.0.18
+  vitest: ^4.1.0
 onlyBuiltDependencies:
   - esbuild
   - msw
