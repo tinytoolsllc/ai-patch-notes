@@ -22,10 +22,10 @@ if (import.meta.env.DEV) {
 }
 
 export function getStytchLoginConfig(returnUrl?: string) {
-  const base = `${window.location.origin}/authenticate`
-  const redirectURL = returnUrl
-    ? `${base}?returnUrl=${encodeURIComponent(returnUrl)}`
-    : base
+  if (returnUrl) {
+    localStorage.setItem('stytch_return_url', returnUrl)
+  }
+  const redirectURL = `${window.location.origin}/authenticate`
 
   return {
     products,

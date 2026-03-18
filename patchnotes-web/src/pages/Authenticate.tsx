@@ -12,7 +12,10 @@ export function Authenticate() {
 
   const { token, tokenType, returnUrl } = useMemo(() => {
     const params = new URLSearchParams(window.location.search)
-    const raw = params.get('returnUrl')
+    // Check localStorage first, then fall back to query param for backwards compat
+    const stored = localStorage.getItem('stytch_return_url')
+    localStorage.removeItem('stytch_return_url')
+    const raw = stored ?? params.get('returnUrl')
     return {
       token: params.get('token'),
       tokenType: params.get('stytch_token_type'),
