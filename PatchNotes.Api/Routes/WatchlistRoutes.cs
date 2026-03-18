@@ -76,6 +76,7 @@ public static class WatchlistRoutes
             var packages = await db.Watchlists
                 .AsNoTracking()
                 .Where(w => w.UserId == user.Id)
+                .OrderBy(w => w.Package.GithubOwner).ThenBy(w => w.Package.GithubRepo)
                 .Select(w => new WatchlistPackageDto(
                     w.Package.Id,
                     w.Package.Name,

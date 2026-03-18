@@ -270,17 +270,27 @@ export function WatchlistPage() {
                   </p>
                 </div>
               ) : (
-                (watchlist ?? []).map((pkg) => (
-                  <WatchedPackageItem
-                    key={pkg.id}
-                    pkg={pkg}
-                    onRemove={() => handleRemove(pkg.id)}
-                    isRemoving={
-                      removeFromWatchlist.isPending &&
-                      removeFromWatchlist.variables === pkg.id
-                    }
-                  />
-                ))
+                [...(watchlist ?? [])]
+                  .sort((a, b) => {
+                    const nameA = (
+                      a.npmName ?? `${a.githubOwner}/${a.githubRepo}`
+                    ).toLowerCase()
+                    const nameB = (
+                      b.npmName ?? `${b.githubOwner}/${b.githubRepo}`
+                    ).toLowerCase()
+                    return nameA.localeCompare(nameB)
+                  })
+                  .map((pkg) => (
+                    <WatchedPackageItem
+                      key={pkg.id}
+                      pkg={pkg}
+                      onRemove={() => handleRemove(pkg.id)}
+                      isRemoving={
+                        removeFromWatchlist.isPending &&
+                        removeFromWatchlist.variables === pkg.id
+                      }
+                    />
+                  ))
               )}
             </Card>
           </div>
