@@ -70,7 +70,7 @@ export function PackageIcon({ name }: { name: string }) {
   )
 }
 
-export function PrereleaseTag({ type }: { type?: string }) {
+function PrereleaseTag({ type }: { type?: string }) {
   if (!type) return null
 
   const colors: Record<string, string> = {
