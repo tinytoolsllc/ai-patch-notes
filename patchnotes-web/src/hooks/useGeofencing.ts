@@ -1,15 +1,8 @@
 import { useQuery } from '@tanstack/react-query'
 import { API_ROOT } from '../api/client'
 
-export interface GeolocationData {
+interface GeolocationData {
   country_code: string
-}
-
-export interface GeofencingState {
-  isLoading: boolean
-  isAllowed: boolean | null
-  error: string | null
-  data: GeolocationData | null
 }
 
 const ALLOWED_COUNTRIES = ['US', 'CA']
@@ -28,7 +21,7 @@ async function fetchGeolocation(): Promise<GeolocationData> {
   return response.json()
 }
 
-export function useGeofencing(): GeofencingState {
+export function useGeofencing() {
   const { data, isLoading, error } = useQuery({
     queryKey: ['geolocation'],
     queryFn: fetchGeolocation,

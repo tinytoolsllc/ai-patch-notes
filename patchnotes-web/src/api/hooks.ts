@@ -19,7 +19,6 @@ import {
   useGetWatchlist,
   useGetWatchlistTemplates,
   getGetWatchlistQueryKey,
-  setWatchlist,
   addToWatchlist,
   removeFromWatchlist,
   addToWatchlistFromGitHub,
@@ -264,17 +263,6 @@ export function useWatchlistTemplates() {
   })
 }
 
-export function useSetWatchlist() {
-  const queryClient = useQueryClient()
-
-  return useMutation({
-    mutationFn: (packageIds: string[]) => setWatchlist({ packageIds }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: getGetWatchlistQueryKey() })
-    },
-  })
-}
-
 export function useAddToWatchlist() {
   const queryClient = useQueryClient()
 
@@ -384,11 +372,7 @@ export {
 
 // ── Feed Hook ───────────────────────────────────────────────
 
-export type {
-  FeedResponseDto,
-  FeedGroupDto,
-  FeedReleaseDto,
-} from './generated/model'
+export type { FeedResponseDto, FeedGroupDto } from './generated/model'
 
 interface FeedOptions {
   excludePrerelease?: boolean
