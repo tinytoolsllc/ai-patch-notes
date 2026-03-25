@@ -36,8 +36,8 @@ importers:
   patchnotes-email:
     dependencies:
       '@azure/functions':
-        specifier: ^4.0.0
-        version: 4.11.2
+        specifier: ^4.12.0
+        version: 4.12.0
       '@date-fns/utc':
         specifier: ^2.1.1
         version: 2.1.1
@@ -324,8 +324,8 @@ packages:
   '@azure/functions@3.5.1':
     resolution: {integrity: sha512-6UltvJiuVpvHSwLcK/Zc6NfUwlkDLOFFx97BHCJzlWNsfiWwzwmTsxJXg4kE/LemKTHxPpfoPE+kOJ8hAdiKFQ==}
 
-  '@azure/functions@4.11.2':
-    resolution: {integrity: sha512-U7qpPo0pUxDfdP3Q8gO5GLtust94nh8+RtIUvEKE4qU9yuDhL2vU1zzanuzkaV2j/TFv+EEmN8QDtchAgpeffw==}
+  '@azure/functions@4.12.0':
+    resolution: {integrity: sha512-aHBSvEDHOUhLhkivPiotoYfE6WPZdutv9OnXEkSqYtyWjbf1k/DoQ/Z9swqIbyaBSvh2xOR8ARKj5CR/2jqEOw==}
     engines: {node: '>=20.0'}
 
   '@azure/identity@4.13.0':
@@ -6224,7 +6224,7 @@ snapshots:
       long: 4.0.0
       uuid: 8.3.2
 
-  '@azure/functions@4.11.2':
+  '@azure/functions@4.12.0':
     dependencies:
       '@azure/functions-extensions-base': 0.2.0
       cookie: 0.7.2
@@ -9122,7 +9122,7 @@ snapshots:
   applicationinsights@3.14.0:
     dependencies:
       '@azure/core-auth': 1.10.1
-      '@azure/functions': 4.11.2
+      '@azure/functions': 4.12.0
       '@azure/functions-old': '@azure/functions@3.5.1'
       '@azure/identity': 4.13.0
       '@azure/monitor-opentelemetry': 1.16.0
