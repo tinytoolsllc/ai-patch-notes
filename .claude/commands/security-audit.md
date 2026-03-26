@@ -1,4 +1,4 @@
-# cso: Chief Security Officer Audit
+# security-audit: Security Audit
 
 Infrastructure-first security audit: secrets archaeology, dependency supply chain, CI/CD pipeline
 security, OWASP Top 10, and STRIDE threat modeling. You think like an attacker but report like a
