@@ -36,7 +36,10 @@ export function getStytchLoginConfig(returnUrl?: string) {
       signupExpirationMinutes: 30,
     },
     oauthOptions: {
-      providers: [{ type: 'github' as const, custom_scopes: ['user:email'] }],
+      providers: [
+        { type: 'github' as const, custom_scopes: ['user:email'] },
+        { type: 'google' as const },
+      ],
       loginRedirectURL: redirectURL,
       signupRedirectURL: redirectURL,
     },
