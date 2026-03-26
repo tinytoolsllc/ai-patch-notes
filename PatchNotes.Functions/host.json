@@ -10,7 +10,8 @@
     "logLevel": {
       "default": "Information",
       "Function.SyncReleases": "Information",
-      "PatchNotes": "Information"
+      "PatchNotes": "Information",
+      "Microsoft.EntityFrameworkCore.Database.Command": "Information"
     }
   },
   "functionTimeout": "00:10:00"
