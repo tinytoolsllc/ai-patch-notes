@@ -1,4 +1,4 @@
-# qa-only: Report-Only QA Testing
+# qa: Report-Only QA Testing
 
 Systematically QA test a web application and produce a structured report. This skill finds bugs
 and documents them with screenshots and repro steps — it NEVER fixes anything.
