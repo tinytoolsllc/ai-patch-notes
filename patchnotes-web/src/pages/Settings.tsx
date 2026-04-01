@@ -108,11 +108,14 @@ export function Settings() {
   const name = nameOverride ?? serverName
 
   // Redirect if not authenticated
-  useEffect(() => {
-    if (isInitialized && !user) {
-      navigate({ to: '/login', search: { returnUrl: '/settings' } })
-    }
-  }, [isInitialized, user, navigate])
+  useEffect(
+    function redirectUnauthenticated() {
+      if (isInitialized && !user) {
+        navigate({ to: '/login', search: { returnUrl: '/settings' } })
+      }
+    },
+    [isInitialized, user, navigate]
+  )
 
   const handleSave = () => {
     setSaved(false)

@@ -120,26 +120,29 @@ function DropdownMenu({
 }) {
   const menuRef = useRef<HTMLDivElement>(null)
 
-  useEffect(() => {
-    if (!isOpen) return
+  useEffect(
+    function closeMenuOnOutsideInteraction() {
+      if (!isOpen) return
 
-    const handleClickOutside = (e: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
-        onClose()
+      const handleClickOutside = (e: MouseEvent) => {
+        if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+          onClose()
+        }
       }
-    }
 
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose()
-    }
+      const handleEscape = (e: KeyboardEvent) => {
+        if (e.key === 'Escape') onClose()
+      }
 
-    document.addEventListener('mousedown', handleClickOutside)
-    document.addEventListener('keydown', handleEscape)
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside)
-      document.removeEventListener('keydown', handleEscape)
-    }
-  }, [isOpen, onClose])
+      document.addEventListener('mousedown', handleClickOutside)
+      document.addEventListener('keydown', handleEscape)
+      return () => {
+        document.removeEventListener('mousedown', handleClickOutside)
+        document.removeEventListener('keydown', handleEscape)
+      }
+    },
+    [isOpen, onClose]
+  )
 
   if (!isOpen) return null
 
@@ -300,11 +303,14 @@ export function UserMenu() {
   const location = useLocation()
 
   // Check subscription status when user is available
-  useEffect(() => {
-    if (user) {
-      checkSubscription()
-    }
-  }, [user, checkSubscription])
+  useEffect(
+    function checkSubscriptionOnLogin() {
+      if (user) {
+        checkSubscription()
+      }
+    },
+    [user, checkSubscription]
+  )
 
   const handleLogout = async () => {
     setIsOpen(false)

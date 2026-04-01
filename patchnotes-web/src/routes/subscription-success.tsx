@@ -9,9 +9,12 @@ function SubscriptionSuccess() {
   const { checkSubscription } = useSubscriptionStore()
 
   // Refresh subscription status on mount
-  useEffect(() => {
-    checkSubscription()
-  }, [checkSubscription])
+  useEffect(
+    function refreshSubscriptionStatus() {
+      checkSubscription()
+    },
+    [checkSubscription]
+  )
 
   return (
     <div className="min-h-screen bg-surface-secondary">

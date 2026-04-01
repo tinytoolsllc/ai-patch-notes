@@ -260,21 +260,27 @@ export function AdminHealth() {
   const packages = healthResponse?.status === 200 ? healthResponse.data : []
 
   // Auto-refresh every 30 seconds
-  useEffect(() => {
-    const timer = setInterval(() => {
-      queryClient.invalidateQueries({
-        queryKey: getGetPackagesHealthQueryKey(),
-      })
-    }, 30_000)
-    return () => clearInterval(timer)
-  }, [queryClient])
+  useEffect(
+    function autoRefreshHealthStatus() {
+      const timer = setInterval(() => {
+        queryClient.invalidateQueries({
+          queryKey: getGetPackagesHealthQueryKey(),
+        })
+      }, 30_000)
+      return () => clearInterval(timer)
+    },
+    [queryClient]
+  )
 
   // Auth gate
-  useEffect(() => {
-    if (!authLoading && !isAdmin) {
-      navigate({ to: '/' })
-    }
-  }, [authLoading, isAdmin, navigate])
+  useEffect(
+    function redirectNonAdmins() {
+      if (!authLoading && !isAdmin) {
+        navigate({ to: '/' })
+      }
+    },
+    [authLoading, isAdmin, navigate]
+  )
 
   const handleRefresh = useCallback(() => {
     queryClient.invalidateQueries({ queryKey: getGetPackagesHealthQueryKey() })

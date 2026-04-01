@@ -252,11 +252,14 @@ export function AdminReset() {
     action: ResetAction
   } | null>(null)
 
-  useEffect(() => {
-    if (!authLoading && !isAdmin) {
-      navigate({ to: '/' })
-    }
-  }, [authLoading, isAdmin, navigate])
+  useEffect(
+    function redirectNonAdmins() {
+      if (!authLoading && !isAdmin) {
+        navigate({ to: '/' })
+      }
+    },
+    [authLoading, isAdmin, navigate]
+  )
 
   if (authLoading || !isAdmin) {
     return (

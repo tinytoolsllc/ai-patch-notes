@@ -10,26 +10,32 @@ interface ModalProps extends HTMLAttributes<HTMLDivElement> {
 
 export const Modal = forwardRef<HTMLDivElement, ModalProps>(
   ({ open, onClose, title, className = '', children, ...props }, ref) => {
-    useEffect(() => {
-      if (open) {
-        document.body.style.overflow = 'hidden'
-      } else {
-        document.body.style.overflow = ''
-      }
-      return () => {
-        document.body.style.overflow = ''
-      }
-    }, [open])
-
-    useEffect(() => {
-      const handleEscape = (e: KeyboardEvent) => {
-        if (e.key === 'Escape' && open) {
-          onClose()
+    useEffect(
+      function lockBodyScroll() {
+        if (open) {
+          document.body.style.overflow = 'hidden'
+        } else {
+          document.body.style.overflow = ''
         }
-      }
-      document.addEventListener('keydown', handleEscape)
-      return () => document.removeEventListener('keydown', handleEscape)
-    }, [open, onClose])
+        return () => {
+          document.body.style.overflow = ''
+        }
+      },
+      [open]
+    )
+
+    useEffect(
+      function closeOnEscapeKey() {
+        const handleEscape = (e: KeyboardEvent) => {
+          if (e.key === 'Escape' && open) {
+            onClose()
+          }
+        }
+        document.addEventListener('keydown', handleEscape)
+        return () => document.removeEventListener('keydown', handleEscape)
+      },
+      [open, onClose]
+    )
 
     if (!open) return null
 
