@@ -25,55 +25,49 @@ export function Authenticate() {
     !token || !tokenType ? 'Invalid authentication link' : null
   )
 
-  useEffect(() => {
-    if (!isInitialized || error) return
+  useEffect(
+    function authenticateWithToken() {
+      if (!isInitialized || error) return
 
-    if (user) {
-      navigate({ to: returnUrl })
-      return
-    }
-
-    if (hasAuthenticated.current) return
-    hasAuthenticated.current = true
-
-    const authenticate = async () => {
-      if (!token) return // TypeScript guard - error state already handles this
-      try {
-        if (tokenType === 'magic_links') {
-          await stytch.magicLinks.authenticate(token, {
-            session_duration_minutes: 43200, // 30 days
-          })
-        } else if (tokenType === 'oauth') {
-          await stytch.oauth.authenticate(token, {
-            session_duration_minutes: 43200, // 30 days
-          })
-        } else {
-          setError(`Unknown token type: ${tokenType}`)
-          return
-        }
-
-        // Sync user to backend database
-        const loginResponse = await api.post<{ isNewUser?: boolean }>(
-          '/users/login'
-        )
-        navigate({ to: loginResponse?.isNewUser ? '/onboarding' : returnUrl })
-      } catch (err) {
-        console.error('Authentication failed:', err)
-        setError('Authentication failed. Please try again.')
+      if (user) {
+        navigate({ to: returnUrl })
+        return
       }
-    }
 
-    authenticate()
-  }, [
-    stytch,
-    token,
-    tokenType,
-    user,
-    isInitialized,
-    navigate,
-    error,
-    returnUrl,
-  ])
+      if (hasAuthenticated.current) return
+      hasAuthenticated.current = true
+
+      const authenticate = async () => {
+        if (!token) return // TypeScript guard - error state already handles this
+        try {
+          if (tokenType === 'magic_links') {
+            await stytch.magicLinks.authenticate(token, {
+              session_duration_minutes: 43200, // 30 days
+            })
+          } else if (tokenType === 'oauth') {
+            await stytch.oauth.authenticate(token, {
+              session_duration_minutes: 43200, // 30 days
+            })
+          } else {
+            setError(`Unknown token type: ${tokenType}`)
+            return
+          }
+
+          // Sync user to backend database
+          const loginResponse = await api.post<{ isNewUser?: boolean }>(
+            '/users/login'
+          )
+          navigate({ to: loginResponse?.isNewUser ? '/onboarding' : returnUrl })
+        } catch (err) {
+          console.error('Authentication failed:', err)
+          setError('Authentication failed. Please try again.')
+        }
+      }
+
+      authenticate()
+    },
+    [stytch, token, tokenType, user, isInitialized, navigate, error, returnUrl]
+  )
 
   if (error) {
     return (

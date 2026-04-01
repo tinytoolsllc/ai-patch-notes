@@ -63,7 +63,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     [removeToast]
   )
 
-  useEffect(() => {
+  useEffect(function cleanupToastTimeouts() {
     const timeouts = timeoutRefs.current
     return () => {
       timeouts.forEach((t) => clearTimeout(t))
@@ -77,9 +77,12 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     [showToast]
   )
 
-  useEffect(() => {
-    setGlobalErrorHandler(showError)
-  }, [showError])
+  useEffect(
+    function registerGlobalErrorHandler() {
+      setGlobalErrorHandler(showError)
+    },
+    [showError]
+  )
 
   return (
     <ToastContext value={{ showToast, showError }}>

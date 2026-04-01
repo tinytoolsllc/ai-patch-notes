@@ -77,17 +77,20 @@ export function PackagePicker({
   )
 
   // Persist selection to localStorage (only when not using watchlist)
-  useEffect(() => {
-    if (useWatchlist) return
-    try {
-      localStorage.setItem(
-        fullStorageKey,
-        JSON.stringify([...localSelectedIds])
-      )
-    } catch {
-      // Ignore storage errors
-    }
-  }, [localSelectedIds, fullStorageKey, useWatchlist])
+  useEffect(
+    function persistSelectionToLocalStorage() {
+      if (useWatchlist) return
+      try {
+        localStorage.setItem(
+          fullStorageKey,
+          JSON.stringify([...localSelectedIds])
+        )
+      } catch {
+        // Ignore storage errors
+      }
+    },
+    [localSelectedIds, fullStorageKey, useWatchlist]
+  )
 
   const applyUpdate = useCallback(
     (updater: (prev: Set<string>) => Set<string>) => {

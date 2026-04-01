@@ -19,11 +19,14 @@ export function OnboardingPage() {
   const applyTemplate = useApplyTemplate()
   const [applying, setApplying] = useState<string | null>(null)
 
-  useEffect(() => {
-    if (isInitialized && !user) {
-      navigate({ to: '/login', search: { returnUrl: '/onboarding' } })
-    }
-  }, [isInitialized, user, navigate])
+  useEffect(
+    function redirectUnauthenticated() {
+      if (isInitialized && !user) {
+        navigate({ to: '/login', search: { returnUrl: '/onboarding' } })
+      }
+    },
+    [isInitialized, user, navigate]
+  )
 
   if (!isInitialized || !user) {
     return (

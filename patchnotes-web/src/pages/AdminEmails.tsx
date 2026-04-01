@@ -123,7 +123,7 @@ export function AdminEmails() {
     }
   }
 
-  useEffect(() => {
+  useEffect(function cleanupStatusTimeouts() {
     return () => {
       clearStatusTimeout()
       clearTestStatusTimeout()
@@ -160,11 +160,14 @@ export function AdminEmails() {
   })
 
   // Auth gate: redirect non-admins
-  useEffect(() => {
-    if (!authLoading && !isAdmin) {
-      navigate({ to: '/' })
-    }
-  }, [authLoading, isAdmin, navigate])
+  useEffect(
+    function redirectNonAdmins() {
+      if (!authLoading && !isAdmin) {
+        navigate({ to: '/' })
+      }
+    },
+    [authLoading, isAdmin, navigate]
+  )
 
   const activeTemplateId = selectedTemplateId ?? templates?.[0]?.id ?? ''
   const currentTemplate = templates?.find((t) => t.id === activeTemplateId)

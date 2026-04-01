@@ -29,11 +29,14 @@ export function Login() {
   // Destination for already-authenticated users and Back link
   const destination = validReturnUrl ?? '/'
 
-  useEffect(() => {
-    if (isInitialized && user) {
-      navigate({ to: destination })
-    }
-  }, [user, isInitialized, navigate, destination])
+  useEffect(
+    function redirectAuthenticatedUser() {
+      if (isInitialized && user) {
+        navigate({ to: destination })
+      }
+    },
+    [user, isInitialized, navigate, destination]
+  )
 
   if (!isInitialized) {
     return (

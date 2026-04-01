@@ -128,11 +128,14 @@ export function WatchlistPage() {
     useGithubSearch(debouncedQuery)
 
   // Redirect if not authenticated
-  useEffect(() => {
-    if (isInitialized && !user) {
-      navigate({ to: '/login', search: { returnUrl: '/watchlist' } })
-    }
-  }, [isInitialized, user, navigate])
+  useEffect(
+    function redirectUnauthenticated() {
+      if (isInitialized && !user) {
+        navigate({ to: '/login', search: { returnUrl: '/watchlist' } })
+      }
+    },
+    [isInitialized, user, navigate]
+  )
 
   if (!isInitialized || !user) {
     return (
