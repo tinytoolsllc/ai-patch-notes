@@ -21,15 +21,15 @@
   "dependencies": {
     "@azure/functions": "^4.12.0",
     "@date-fns/utc": "^2.1.1",
-    "@prisma/adapter-mssql": "^7.5.0",
-    "@prisma/client": "^7.5.0",
-    "@react-email/components": "^1.0.10",
-    "@react-email/render": "^2.0.4",
+    "@prisma/adapter-mssql": "^7.6.0",
+    "@prisma/client": "^7.6.0",
+    "@react-email/components": "^1.0.11",
+    "@react-email/render": "^2.0.5",
     "applicationinsights": "^3.14.0",
     "date-fns": "^4.1.0",
     "esbuild-wasm": "^0.27.4",
     "react": "catalog:",
-    "resend": "^6.9.4"
+    "resend": "^6.10.0"
   },
   "packageManager": "pnpm@10.28.0",
   "devDependencies": {
