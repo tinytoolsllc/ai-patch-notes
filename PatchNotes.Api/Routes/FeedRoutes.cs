@@ -50,6 +50,13 @@ public static class FeedRoutes
                     .ToListAsync();
             }
 
+            // Fetch package metadata separately to avoid correlated subqueries
+            var packageLookup = await db.Packages
+                .AsNoTracking()
+                .Where(p => watchlistIds.Contains(p.Id))
+                .Select(p => new { p.Id, p.Name, p.NpmName, p.GithubOwner, p.GithubRepo })
+                .ToDictionaryAsync(p => p.Id);
+
             IQueryable<Release> releaseQuery = db.Releases
                 .AsNoTracking()
                 .Where(r => watchlistIds.Contains(r.PackageId));
@@ -78,11 +85,6 @@ public static class FeedRoutes
                             PublishedAt = r.PublishedAt,
                         })
                         .ToList(),
-                    // Grab package info from any member of the group
-                    PackageName = g.First().Package.Name,
-                    NpmName = g.First().Package.NpmName,
-                    GithubOwner = g.First().Package.GithubOwner,
-                    GithubRepo = g.First().Package.GithubRepo,
                 })
                 .OrderByDescending(g => g.LastUpdated)
                 .ToListAsync();
@@ -149,6 +151,7 @@ public static class FeedRoutes
             var feedGroups = filteredGroups.Select(g =>
             {
                 summaryLookup.TryGetValue((g.PackageId, g.MajorVersion, g.IsPrerelease), out var summary);
+                packageLookup.TryGetValue(g.PackageId, out var pkg);
 
                 // Limit displayed releases to the same window used for summary generation
                 var cutoff = g.LastUpdated - SummaryWindow;
@@ -161,10 +164,10 @@ public static class FeedRoutes
                 return new FeedGroupDto
                 {
                     PackageId = g.PackageId,
-                    PackageName = g.PackageName,
-                    NpmName = g.NpmName,
-                    GithubOwner = g.GithubOwner,
-                    GithubRepo = g.GithubRepo,
+                    PackageName = pkg?.Name ?? g.PackageId,
+                    NpmName = pkg?.NpmName,
+                    GithubOwner = pkg?.GithubOwner ?? "",
+                    GithubRepo = pkg?.GithubRepo ?? "",
                     MajorVersion = g.MajorVersion,
                     IsPrerelease = g.IsPrerelease,
                     VersionRange = $"v{g.MajorVersion}.x",
