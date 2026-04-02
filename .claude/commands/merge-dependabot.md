@@ -25,7 +25,6 @@ If no PRs exist, inform the user and stop.
 
 These packages have major version bumps that are **incompatible** — skip any PRs for them:
 
-- **nanoid >=4.0.0** (patchnotes-email) — v4+/v5+ is ESM-only, incompatible with CJS build
 - **Microsoft.ApplicationInsights.WorkerService >=3.0.0** (NuGet) — v3 removes `ITelemetryInitializer`, crashes the Functions worker
 
 These are also configured as `ignore` rules in `.github/dependabot.yml`, but if a PR slips through, do not merge it.
