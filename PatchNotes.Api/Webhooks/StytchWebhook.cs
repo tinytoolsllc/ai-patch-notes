@@ -221,7 +221,8 @@ public static class StytchWebhook
             await db.SaveChangesAsync();
 
             return Results.Ok(new { received = true });
-        });
+        })
+        .ExcludeFromDescription();
 
         return app;
     }

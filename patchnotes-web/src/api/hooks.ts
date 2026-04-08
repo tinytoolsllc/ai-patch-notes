@@ -10,7 +10,6 @@ import {
   useGetPackagesByOwner,
   useGetPackageByOwnerRepo,
   getGetPackagesQueryKey,
-  createPackage,
   deletePackage,
   updatePackage,
 } from './generated/packages/packages'
@@ -162,17 +161,6 @@ export function usePackageByOwnerRepo(
 }
 
 // ── Mutation Hooks ───────────────────────────────────────────
-
-export function useAddPackage() {
-  const queryClient = useQueryClient()
-
-  return useMutation({
-    mutationFn: (npmName: string) => createPackage({ npmName }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: getGetPackagesQueryKey() })
-    },
-  })
-}
 
 export function useDeletePackage() {
   const queryClient = useQueryClient()

@@ -146,7 +146,6 @@ app.MapUserRoutes();
 app.MapWatchlistRoutes();
 app.MapGitHubSearchRoutes();
 app.MapSubscriptionRoutes();
-app.MapSummaryRoutes();
 app.MapFeedRoutes();
 app.MapStytchWebhook();
 app.MapStripeWebhook();
@@ -154,7 +153,6 @@ app.MapEmailTemplateRoutes();
 app.MapSitemapRoutes();
 app.MapHtmlPageRoutes();
 app.MapGeoRoutes();
-app.MapShortLinkRoutes();
 
 app.Run();
 

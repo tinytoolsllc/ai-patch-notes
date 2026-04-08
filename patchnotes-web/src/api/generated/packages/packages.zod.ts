@@ -29,11 +29,6 @@ export const GetPackagesResponse = zod.object({
   "offset": zod.number().optional()
 })
 
-export const CreatePackageBody = zod.object({
-  "npmName": zod.string(),
-  "tagPrefix": zod.string().nullish()
-})
-
 export const getPackagePathIdMin = 21;
 export const getPackagePathIdMax = 21;
 

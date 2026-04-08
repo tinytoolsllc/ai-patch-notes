@@ -13,7 +13,6 @@ import {
   usePackage,
   useReleases,
   usePackageReleases,
-  useAddPackage,
   useDeletePackage,
   useUpdatePackage,
   useAddToWatchlist,
@@ -142,22 +141,6 @@ describe('usePackageReleases', () => {
     })
 
     expect(result.current.isFetching).toBe(false)
-  })
-})
-
-describe('useAddPackage', () => {
-  it('adds a new package successfully', async () => {
-    const { result } = renderHook(() => useAddPackage(), {
-      wrapper: createWrapper(),
-    })
-
-    result.current.mutate('axios')
-
-    await waitFor(() => expect(result.current.isSuccess).toBe(true))
-
-    expect(result.current.data).toMatchObject({
-      data: { npmName: 'axios' },
-    })
   })
 })
 

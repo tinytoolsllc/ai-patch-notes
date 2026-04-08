@@ -6,60 +6,10 @@
   },
   "servers": [
     {
-      "url": "http://localhost:2101/"
+      "url": "http://localhost:5000/"
     }
   ],
   "paths": {
-    "/webhooks/stytch": {
-      "post": {
-        "tags": [
-          "PatchNotes.Api"
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      }
-    },
-    "/webhooks/stripe": {
-      "post": {
-        "tags": [
-          "PatchNotes.Api"
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      }
-    },
-    "/s/{id}": {
-      "get": {
-        "tags": [
-          "ShortLinks"
-        ],
-        "operationId": "ResolveShortLink",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "301": {
-            "description": "Moved Permanently"
-          },
-          "404": {
-            "description": "Not Found"
-          }
-        }
-      }
-    },
     "/api/packages": {
       "get": {
         "tags": [
@@ -94,43 +44,6 @@
                 }
               }
             }
-          }
-        }
-      },
-      "post": {
-        "tags": [
-          "Packages"
-        ],
-        "operationId": "CreatePackage",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/AddPackageRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "201": {
-            "description": "Created",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PackageDto"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad Request"
-          },
-          "404": {
-            "description": "Not Found"
-          },
-          "409": {
-            "description": "Conflict"
           }
         }
       }
@@ -1092,104 +1005,6 @@
         }
       }
     },
-    "/api/packages/{id}/summaries": {
-      "get": {
-        "tags": [
-          "Summaries"
-        ],
-        "operationId": "GetPackageSummaries",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "includePrerelease",
-            "in": "query",
-            "schema": {
-              "type": "boolean"
-            }
-          },
-          {
-            "name": "majorVersion",
-            "in": "query",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/ReleaseSummaryDto"
-                  }
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Not Found"
-          }
-        }
-      }
-    },
-    "/api/summaries": {
-      "get": {
-        "tags": [
-          "Summaries"
-        ],
-        "operationId": "GetSummaries",
-        "parameters": [
-          {
-            "name": "packages",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "includePrerelease",
-            "in": "query",
-            "schema": {
-              "type": "boolean"
-            }
-          },
-          {
-            "name": "limit",
-            "in": "query",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/ReleaseSummaryDto"
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/feed": {
       "get": {
         "tags": [
@@ -1395,23 +1210,6 @@
         "properties": {
           "packageId": {
             "type": "string"
-          }
-        }
-      },
-      "AddPackageRequest": {
-        "required": [
-          "npmName"
-        ],
-        "type": "object",
-        "properties": {
-          "npmName": {
-            "type": "string"
-          },
-          "tagPrefix": {
-            "type": [
-              "null",
-              "string"
-            ]
           }
         }
       },
@@ -2196,49 +1994,6 @@
           }
         }
       },
-      "ReleaseSummaryDto": {
-        "required": [
-          "id",
-          "packageId",
-          "packageName"
-        ],
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "packageId": {
-            "type": "string"
-          },
-          "packageName": {
-            "type": "string"
-          },
-          "majorVersion": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "isPrerelease": {
-            "type": "boolean"
-          },
-          "summary": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "generatedAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "updatedAt": {
-            "type": [
-              "null",
-              "string"
-            ],
-            "format": "date-time"
-          }
-        }
-      },
       "SendTestEmailRequest": {
         "required": [
           "recipientEmail",
@@ -2514,12 +2269,6 @@
   },
   "tags": [
     {
-      "name": "PatchNotes.Api"
-    },
-    {
-      "name": "ShortLinks"
-    },
-    {
       "name": "Packages"
     },
     {
@@ -2539,9 +2288,6 @@
     },
     {
       "name": "Subscription"
-    },
-    {
-      "name": "Summaries"
     },
     {
       "name": "Feed"

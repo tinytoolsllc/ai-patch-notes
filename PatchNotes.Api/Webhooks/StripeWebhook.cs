@@ -118,7 +118,8 @@ public static class StripeWebhook
                 logger.LogError(ex, "Error handling Stripe webhook event {EventId}: {Message}", stripeEvent.Id, ex.Message);
                 return Results.Problem("Error processing webhook");
             }
-        });
+        })
+        .ExcludeFromDescription();
 
         return app;
     }

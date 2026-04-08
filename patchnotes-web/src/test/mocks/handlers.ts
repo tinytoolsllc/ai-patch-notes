@@ -154,21 +154,6 @@ export const handlers = [
     return HttpResponse.json(pkg)
   }),
 
-  // POST /packages
-  http.post(`${API_BASE}/packages`, async ({ request }) => {
-    const body = (await request.json()) as { npmName: string }
-    const newPackage: PackageDto = {
-      id: 'pkg-new-test-id',
-      name: body.npmName,
-      npmName: body.npmName,
-      githubOwner: 'owner',
-      githubRepo: body.npmName,
-      lastFetchedAt: null,
-      createdAt: new Date().toISOString(),
-    }
-    return HttpResponse.json(newPackage, { status: 201 })
-  }),
-
   // DELETE /packages/:id
   http.delete(`${API_BASE}/packages/:id`, () => {
     return new HttpResponse(null, { status: 204 })

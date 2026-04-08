@@ -6,7 +6,6 @@
  */
 
 export * from './addFromGitHubResponse';
-export * from './addPackageRequest';
 export * from './applyWatchlistTemplateRequest';
 export * from './applyWatchlistTemplateResponse';
 export * from './emailPreferencesDto';
@@ -18,9 +17,7 @@ export * from './getFeedParams';
 export * from './getPackageReleasesParams';
 export * from './getPackagesByOwnerParams';
 export * from './getPackagesParams';
-export * from './getPackageSummariesParams';
 export * from './getReleasesParams';
-export * from './getSummariesParams';
 export * from './gitHubRepoSearchResultDto';
 export * from './jsonElement';
 export * from './ownerPackageDto';
@@ -41,7 +38,6 @@ export * from './previewTemplateRequest';
 export * from './previewTemplateRequestProps';
 export * from './releaseDto';
 export * from './releasePackageDto';
-export * from './releaseSummaryDto';
 export * from './searchGitHubRepositoriesUserParams';
 export * from './sendTestEmailRequest';
 export * from './setWatchlistRequest';

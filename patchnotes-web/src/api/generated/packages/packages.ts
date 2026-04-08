@@ -24,7 +24,6 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
-  AddPackageRequest,
   GetPackageReleasesParams,
   GetPackagesByOwnerParams,
   GetPackagesParams,
@@ -155,100 +154,7 @@ export function useGetPackages<TData = Awaited<ReturnType<typeof getPackages>>, 
 
 
 
-export type createPackageResponse201 = {
-  data: PackageDto
-  status: 201
-}
-
-export type createPackageResponse400 = {
-  data: void
-  status: 400
-}
-
-export type createPackageResponse404 = {
-  data: void
-  status: 404
-}
-
-export type createPackageResponse409 = {
-  data: void
-  status: 409
-}
-
-export type createPackageResponseSuccess = (createPackageResponse201) & {
-  headers: Headers;
-};
-export type createPackageResponseError = (createPackageResponse400 | createPackageResponse404 | createPackageResponse409) & {
-  headers: Headers;
-};
-
-export type createPackageResponse = (createPackageResponseSuccess | createPackageResponseError)
-
-export const getCreatePackageUrl = () => {
-
-
-
-
-  return `/api/packages`
-}
-
-export const createPackage = async (addPackageRequest: AddPackageRequest, options?: RequestInit): Promise<createPackageResponse> => {
-
-  return customFetch<createPackageResponse>(getCreatePackageUrl(),
-  {
-    ...options,
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(
-      addPackageRequest,)
-  }
-);}
-
-
-
-
-export const getCreatePackageMutationOptions = <TError = void,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createPackage>>, TError,{data: AddPackageRequest}, TContext>, request?: SecondParameter<typeof customFetch>}
-): UseMutationOptions<Awaited<ReturnType<typeof createPackage>>, TError,{data: AddPackageRequest}, TContext> => {
-
-const mutationKey = ['createPackage'];
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createPackage>>, {data: AddPackageRequest}> = (props) => {
-          const {data} = props ?? {};
-
-          return  createPackage(data,requestOptions)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type CreatePackageMutationResult = NonNullable<Awaited<ReturnType<typeof createPackage>>>
-    export type CreatePackageMutationBody = AddPackageRequest
-    export type CreatePackageMutationError = void
-
-    export const useCreatePackage = <TError = void,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createPackage>>, TError,{data: AddPackageRequest}, TContext>, request?: SecondParameter<typeof customFetch>}
- , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof createPackage>>,
-        TError,
-        {data: AddPackageRequest},
-        TContext
-      > => {
-      return useMutation(getCreatePackageMutationOptions(options), queryClient);
-    }
-    export type getPackageResponse200 = {
+export type getPackageResponse200 = {
   data: PackageDetailDto
   status: 200
 }
