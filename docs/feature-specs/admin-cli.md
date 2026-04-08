@@ -2,6 +2,15 @@
 
 > A command-line tool for managing the PatchNotes application, usable by humans and AI agents.
 
+## Review Notes
+
+- The current CSRF middleware rejects non-GET requests without a browser `Origin` or `Sec-Fetch-Site` header, so CLI and CI write commands will still fail even if M2M bearer auth is added. The spec needs an explicit server-side exemption or alternate validation path for token-authenticated machine clients.
+- The proposed scope model is inconsistent. The doc defines `admin:read`, `admin:write`, and `admin:users`, but the sample `CreateAdminFilter()` only checks `admin:write`. The spec should define exactly which endpoints require which scope and how that check is enforced.
+- Extending the shared `CreateAuthFilter()` to accept M2M JWTs would implicitly allow machine auth on all existing authenticated routes, not just admin routes. The spec should constrain where M2M auth is accepted so user/watchlist/subscription endpoints do not accidentally start accepting machine credentials.
+- Some command-to-endpoint mappings do not match the current API. `packages add <owner/repo>` is not backed by the current `POST /api/packages` contract, which accepts `npmName` and infers the GitHub repo. `packages search <query>` also is not backed by `GET /api/packages`, which currently only supports pagination.
+- The pagination story is inconsistent. The spec says existing endpoints need no changes, but later requires a uniform `page`/`pageSize` contract while the current API uses a mix of raw arrays and `limit`/`offset`. The spec should decide whether the CLI adapts per endpoint or the API is normalized.
+- The JWKS guidance is contradictory. The sample code fetches keys once at startup, but the later recommendation says to rely on standard JWT bearer JWKS caching and refresh behavior. The spec should choose one approach and avoid a startup-only key snapshot.
+
 ## Motivation
 
 Admin operations currently require either:
