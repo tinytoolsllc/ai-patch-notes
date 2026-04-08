@@ -6,34 +6,10 @@
   },
   "servers": [
     {
-      "url": "http://localhost:2101/"
+      "url": "http://localhost:5000/"
     }
   ],
   "paths": {
-    "/webhooks/stytch": {
-      "post": {
-        "tags": [
-          "PatchNotes.Api"
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      }
-    },
-    "/webhooks/stripe": {
-      "post": {
-        "tags": [
-          "PatchNotes.Api"
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      }
-    },
     "/s/{id}": {
       "get": {
         "tags": [
@@ -2513,9 +2489,6 @@
     }
   },
   "tags": [
-    {
-      "name": "PatchNotes.Api"
-    },
     {
       "name": "ShortLinks"
     },
