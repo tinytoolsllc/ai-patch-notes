@@ -91,7 +91,7 @@ Create via Stytch dashboard or API. The `client_secret` is returned once — sto
 
 ### Server-side changes
 
-The API currently resolves auth in `RouteUtils.CreateAuthFilter()` by validating the `stytch_session` cookie via a Stytch API call on every request. Add JWT Bearer validation as a second auth path. The JWT is validated locally against Stytch's JWKS — no API call needed per request.
+The API currently resolves authenticated browser requests in `RouteUtils.CreateAuthFilter()` by validating the `stytch_session` cookie via a Stytch API call on every request. Add JWT Bearer validation as a second auth path for admin route groups via a new `CreateM2MAuthFilter()`. The JWT is validated locally against Stytch's JWKS — no Stytch API call needed per request.
 
 #### 1. Add JWT Bearer authentication in Program.cs
 
@@ -299,15 +299,15 @@ Stytch free tier includes 1,000 M2M tokens per month. With token caching (1 hour
 
 The CLI is an API client, so every CLI command needs a backing endpoint. This section maps all 10 database entities to admin endpoints, noting what already exists and what's new.
 
+Design rule: the PatchNotes CLI only talks to `/api/admin/*` endpoints on the PatchNotes API. If an equivalent non-admin endpoint already exists, add a separate admin-path endpoint for CLI usage rather than calling the non-admin route directly. This keeps admin-tool usage patterns separate from browser/public/session-based flows.
+
 ### Existing admin endpoints (no changes needed)
 
 These are already implemented and just need to accept M2M JWT auth alongside session cookies:
 
 | Endpoint | Method | CLI command |
 |---|---|---|
-| `/api/admin/packages/health` | GET | `packages list` |
-| `/api/packages/{id}` | PATCH | `packages update` |
-| `/api/packages/{id}` | DELETE | `packages delete` |
+| `/api/admin/packages/health` | GET | `packages list`, `sync status` |
 | `/api/admin/packages/{id}/reset-sync` | POST | `sync reset` |
 | `/api/admin/packages/{id}/disable-sync` | POST | `sync disable` |
 | `/api/admin/packages/{id}/trigger-sync` | POST | `sync trigger` |
@@ -318,26 +318,19 @@ These are already implemented and just need to accept M2M JWT auth alongside ses
 | `/api/admin/email-templates/{id}` | PUT | `email templates update` |
 | `/api/admin/email-templates/{id}/test` | POST | `email send-test` |
 
-### Existing public endpoints (usable as-is for read commands)
-
-These don't require auth and can be called directly by the CLI:
-
-| Endpoint | Method | CLI command |
-|---|---|---|
-| `/api/packages` | GET | `packages list` (paginated, `limit`/`offset`) |
-| `/api/packages/{id}` | GET | `packages show` |
-| `/api/packages/{id}/releases` | GET | `releases list` |
-| `/api/github/search` | GET | `packages search` (requires auth, uses `q` param) |
-
 ### New admin endpoints needed
 
-#### Packages (admin add)
+#### Packages and GitHub search
 
-Add a package by GitHub owner/repo directly:
+Add admin-path package management endpoints for all CLI package operations. Existing non-admin routes can remain for current web/session flows, but the CLI does not call them.
 
 | Endpoint | Method | Scope | Purpose |
 |---|---|---|---|
+| `GET /api/admin/packages/{id}` | GET | `admin:read` | Get package detail for admin/CLI usage |
 | `POST /api/admin/packages` | POST | `admin:write` | Add a package by GitHub owner/repo |
+| `PATCH /api/admin/packages/{id}` | PATCH | `admin:write` | Update package metadata/mapping |
+| `DELETE /api/admin/packages/{id}` | DELETE | `admin:write` | Delete a tracked package |
+| `GET /api/admin/github/search` | GET | `admin:read` | Search GitHub repositories for add flows |
 
 Request body:
 
@@ -352,6 +345,10 @@ Request body:
 ```
 
 Only `githubOwner` and `githubRepo` are required. `name` defaults to `owner/repo` if omitted. `npmName` is optional (some tracked repos aren't npm packages).
+
+`GET /api/admin/github/search` mirrors the current `/api/github/search?q=...` behavior but lives under `/api/admin/*` so it can use `CreateM2MAuthFilter()` and `admin:read`.
+
+`GET /api/admin/packages/{id}` can reuse the same underlying query logic as the current `GET /api/packages/{id}` route, but it is a separate endpoint with a separate contract for CLI/admin usage.
 
 #### Users
 
@@ -452,10 +449,11 @@ The `htmlBody` field is excluded from list responses (it's large). Include it on
 
 #### Watchlist Templates
 
-Read access is public (`/api/watchlist/templates`). Add admin write operations:
+The web app can keep using public template read access. The CLI uses admin endpoints only, so add an admin list endpoint alongside the write operations:
 
 | Endpoint | Method | Scope | Purpose |
 |---|---|---|---|
+| `GET /api/admin/watchlist-templates` | GET | `admin:read` | List watchlist templates for admin/CLI usage |
 | `POST /api/admin/watchlist-templates` | POST | `admin:write` | Create a new template |
 | `PATCH /api/admin/watchlist-templates/{id}` | PATCH | `admin:write` | Update template name/description/sort order |
 | `DELETE /api/admin/watchlist-templates/{id}` | DELETE | `admin:write` | Delete a template |
@@ -485,13 +483,18 @@ The existing trigger endpoint works per-package. Add a bulk trigger:
 
 | Endpoint | Method | Scope |
 |---|---|---|
+| `GET /api/admin/packages/{id}` | GET | `admin:read` |
 | `POST /api/admin/packages` | POST | `admin:write` |
+| `PATCH /api/admin/packages/{id}` | PATCH | `admin:write` |
+| `DELETE /api/admin/packages/{id}` | DELETE | `admin:write` |
+| `GET /api/admin/github/search` | GET | `admin:read` |
 | `GET /api/admin/users` | GET | `admin:read` |
 | `GET /api/admin/users/{id}` | GET | `admin:read` |
 | `GET /api/admin/releases` | GET | `admin:read` |
 | `GET /api/admin/summaries` | GET | `admin:read` |
 | `POST /api/admin/summaries/regenerate-all` | POST | `admin:write` |
 | `GET /api/admin/digest-emails` | GET | `admin:read` |
+| `GET /api/admin/watchlist-templates` | GET | `admin:read` |
 | `POST /api/admin/watchlist-templates` | POST | `admin:write` |
 | `PATCH /api/admin/watchlist-templates/{id}` | PATCH | `admin:write` |
 | `DELETE /api/admin/watchlist-templates/{id}` | DELETE | `admin:write` |
@@ -503,7 +506,7 @@ All new endpoints live under `/api/admin/` and use `CreateM2MAuthFilter()` + `Cr
 
 ### Pagination convention
 
-Existing public endpoints use `limit`/`offset` and return raw arrays. New admin endpoints use `page`/`pageSize` and return a wrapper object. The CLI adapts to each endpoint's existing contract — no API normalization needed.
+The CLI only calls `/api/admin/*`, but not all admin endpoints share the same shape today. Existing admin endpoints keep their current response shapes and query params. New admin list endpoints use a consistent `page`/`pageSize` wrapper contract.
 
 **New admin endpoints** use:
 
@@ -540,7 +543,7 @@ patchnotes packages show <id>     -- Package details
 patchnotes packages add <owner/repo> [--name <name>] [--npm-name <name>]
 patchnotes packages update <id> [--name <n>] [--npm-name <n>] [--tag-prefix <p>]
 patchnotes packages delete <id>
-patchnotes packages search <query>  -- Search GitHub repos (via /api/github/search)
+patchnotes packages search <query>  -- Search GitHub repos (via /api/admin/github/search)
 
 patchnotes sync status            -- Sync health overview (failures, disabled)
 patchnotes sync trigger <id>      -- Queue package for immediate sync
@@ -647,7 +650,9 @@ PatchNotes.Cli/
 Server-side:
 - Add JWT Bearer authentication alongside existing Stytch session auth
 - Configure JWKS validation against Stytch's endpoint
-- Extend `RouteUtils.CreateAuthFilter()` and `CreateAdminFilter()` to accept M2M JWTs with appropriate scopes
+- Add `RouteUtils.CreateM2MAuthFilter()` for `/api/admin/*` route groups
+- Update `CreateAdminFilter()` to enforce `admin:read` vs `admin:write`
+- Add a CSRF bypass for Bearer-authenticated requests
 - Create M2M clients in Stytch dashboard for initial testing
 
 CLI:
@@ -659,7 +664,7 @@ CLI:
 
 - `packages list`, `packages show`, `packages search`
 - `sync status`
-- `summaries status`
+- `summaries list`
 - `releases list`
 - `users list`, `users show`
 
