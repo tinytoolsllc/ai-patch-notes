@@ -2,15 +2,6 @@
 
 > A command-line tool for managing the PatchNotes application, usable by humans and AI agents.
 
-## Review Notes
-
-- The current CSRF middleware rejects non-GET requests without a browser `Origin` or `Sec-Fetch-Site` header, so CLI and CI write commands will still fail even if M2M bearer auth is added. The spec needs an explicit server-side exemption or alternate validation path for token-authenticated machine clients.
-- The proposed scope model is inconsistent. The doc defines `admin:read`, `admin:write`, and `admin:users`, but the sample `CreateAdminFilter()` only checks `admin:write`. The spec should define exactly which endpoints require which scope and how that check is enforced.
-- Extending the shared `CreateAuthFilter()` to accept M2M JWTs would implicitly allow machine auth on all existing authenticated routes, not just admin routes. The spec should constrain where M2M auth is accepted so user/watchlist/subscription endpoints do not accidentally start accepting machine credentials.
-- Some command-to-endpoint mappings do not match the current API. `packages add <owner/repo>` is not backed by the current `POST /api/packages` contract, which accepts `npmName` and infers the GitHub repo. `packages search <query>` also is not backed by `GET /api/packages`, which currently only supports pagination.
-- The pagination story is inconsistent. The spec says existing endpoints need no changes, but later requires a uniform `page`/`pageSize` contract while the current API uses a mix of raw arrays and `limit`/`offset`. The spec should decide whether the CLI adapts per endpoint or the API is normalized.
-- The JWKS guidance is contradictory. The sample code fetches keys once at startup, but the later recommendation says to rely on standard JWT bearer JWKS caching and refresh behavior. The spec should choose one approach and avoid a startup-only key snapshot.
-
 ## Motivation
 
 Admin operations currently require either:
@@ -70,13 +61,21 @@ CLI                         Stytch                      API
 
 Stytch M2M has native scope support. Scopes are assigned when creating the M2M client and embedded in the JWT `scope` claim.
 
-Define these scopes:
+Two scopes:
 
-- `admin:read` — read packages, users, sync status, summaries
-- `admin:write` — mutate packages, trigger syncs, reset summaries
-- `admin:users` — view and manage users
+- `admin:read` — all GET endpoints under `/api/admin/*`
+- `admin:write` — all mutating endpoints under `/api/admin/*` (POST, PATCH, PUT, DELETE)
 
-Server-side, the existing auth filter checks for a valid Stytch session. Extend it to also accept a valid M2M JWT, then check the `scope` claim for the required permission.
+Scope-to-endpoint mapping:
+
+| Scope | Endpoints |
+|---|---|
+| `admin:read` | `GET /api/admin/packages/health`, `GET /api/admin/users`, `GET /api/admin/users/{id}`, `GET /api/admin/releases`, `GET /api/admin/summaries`, `GET /api/admin/digest-emails`, `GET /api/admin/webhook-events`, `GET /api/admin/email-templates`, `GET /api/admin/email-templates/{id}` |
+| `admin:write` | All POST/PATCH/PUT/DELETE under `/api/admin/*` (reset-sync, disable-sync, trigger-sync, reset-summaries, reset-releases, summaries/regenerate-all, sync/trigger-all, watchlist-template CRUD, email-template update/test) |
+
+An M2M client with `admin:write` implicitly has `admin:read` — the admin filter checks `admin:write` for mutating methods and `admin:read` for GET.
+
+M2M auth is **not** accepted on non-admin routes. User, watchlist, subscription, and feed endpoints remain session-cookie-only. See the `CreateM2MAuthFilter()` section below.
 
 ### M2M client setup
 
@@ -84,7 +83,7 @@ Create M2M clients for each use case:
 
 | Client | Scopes | Purpose |
 |---|---|---|
-| `paul-cli` | `admin:read admin:write admin:users` | Personal admin CLI |
+| `paul-cli` | `admin:read admin:write` | Personal admin CLI |
 | `logwatcher-agent` | `admin:read admin:write` | LogWatcher issue filing |
 | `ci-readonly` | `admin:read` | CI health checks |
 
@@ -96,25 +95,23 @@ The API currently resolves auth in `RouteUtils.CreateAuthFilter()` by validating
 
 #### 1. Add JWT Bearer authentication in Program.cs
 
+Use the framework's built-in JWKS URI support. This handles key caching, background refresh, and rotation automatically — no manual one-shot fetch.
+
 ```csharp
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 
-// Fetch Stytch JWKS at startup
 var stytchProjectId = builder.Configuration["Stytch:ProjectId"]!;
 var stytchDomain = stytchProjectId.StartsWith("project-live")
     ? "api.stytch.com"
     : "test.stytch.com";
-var jwksUri = $"https://{stytchDomain}/v1/sessions/jwks/{stytchProjectId}";
-var jwksJson = await new HttpClient().GetStringAsync(jwksUri);
-var jwks = new JsonWebKeySet(jwksJson);
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
+        options.Authority = $"https://{stytchDomain}";
         options.TokenValidationParameters = new TokenValidationParameters
         {
-            IssuerSigningKeys = jwks.Keys,
             ValidateIssuer = true,
             ValidIssuer = $"stytch.com/{stytchProjectId}",
             ValidateAudience = true,
@@ -123,7 +120,8 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidAlgorithms = new[] { "RS256" },
             ClockSkew = TimeSpan.FromMinutes(2),
         };
-
+        options.MetadataAddress =
+            $"https://{stytchDomain}/v1/sessions/jwks/{stytchProjectId}";
         options.Events = new JwtBearerEvents
         {
             OnAuthenticationFailed = context =>
@@ -138,13 +136,31 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 Note: the JWKS URL path for B2C is `/v1/sessions/jwks/{projectId}` (not `/v1/b2b/sessions/jwks/`).
 
-#### 2. Extend CreateAuthFilter() for dual auth
-
-The filter should try the Bearer JWT first (if present), then fall back to the existing cookie path:
+Also add a CSRF bypass for Bearer-authenticated requests in `CsrfMiddleware`. Machine clients don't send `Origin` or `Sec-Fetch-Site` headers:
 
 ```csharp
+// In CsrfMiddleware.InvokeAsync, after the webhook bypass:
+var authHeader = context.Request.Headers.Authorization.FirstOrDefault();
+if (authHeader?.StartsWith("Bearer ") == true)
+{
+    await _next(context);
+    return;
+}
+```
+
+This is safe because Bearer tokens are not automatically attached by browsers (unlike cookies), so CSRF protection is not needed for token-authenticated requests.
+
+#### 2. Add CreateM2MAuthFilter() for admin routes only
+
+Do **not** modify the existing `CreateAuthFilter()`. Instead, add a separate filter that accepts M2M JWTs. This filter is only applied to `/api/admin/*` routes, so user, watchlist, and subscription endpoints remain session-cookie-only.
+
+```csharp
+/// <summary>
+/// Auth filter that accepts either a Stytch session cookie (existing)
+/// or an M2M Bearer JWT. Only apply to admin route groups.
+/// </summary>
 public static Func<EndpointFilterFactoryContext, EndpointFilterDelegate, EndpointFilterDelegate>
-    CreateAuthFilter()
+    CreateM2MAuthFilter()
 {
     return (context, next) => async invocationContext =>
     {
@@ -161,15 +177,17 @@ public static Func<EndpointFilterFactoryContext, EndpointFilterDelegate, Endpoin
                 var sub = result.Principal.FindFirstValue(ClaimTypes.NameIdentifier);
                 var scope = result.Principal.FindFirstValue("scope") ?? "";
                 httpContext.Items["M2MClientId"] = sub;
-                httpContext.Items["M2MScopes"] = scope.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                httpContext.Items["M2MScopes"] = scope.Split(' ',
+                    StringSplitOptions.RemoveEmptyEntries);
                 httpContext.Items["AuthMethod"] = "m2m";
                 return await next(invocationContext);
             }
             return Results.Unauthorized();
         }
 
-        // Path 2: Stytch session cookie (existing behavior)
-        var stytchClient = httpContext.RequestServices.GetRequiredService<IStytchClient>();
+        // Path 2: fall through to Stytch session cookie (existing behavior)
+        var stytchClient = httpContext.RequestServices
+            .GetRequiredService<IStytchClient>();
         var sessionToken = httpContext.Request.Cookies["stytch_session"];
         if (string.IsNullOrEmpty(sessionToken))
             return Results.Unauthorized();
@@ -190,7 +208,18 @@ public static Func<EndpointFilterFactoryContext, EndpointFilterDelegate, Endpoin
 }
 ```
 
-#### 3. Extend CreateAdminFilter() for scope checking
+Admin route groups use `CreateM2MAuthFilter()` instead of `CreateAuthFilter()`:
+
+```csharp
+// In PackageRoutes.cs (and other admin route files):
+var adminPackages = app.MapGroup("/api/admin/packages")
+    .AddEndpointFilterFactory(RouteUtils.CreateM2MAuthFilter())
+    .AddEndpointFilterFactory(RouteUtils.CreateAdminFilter());
+```
+
+Non-admin authenticated routes (`/api/users/me`, `/api/watchlist`, `/api/subscription/*`) continue using the existing `CreateAuthFilter()` unchanged — they only accept session cookies.
+
+#### 3. Update CreateAdminFilter() for scope checking
 
 ```csharp
 public static Func<EndpointFilterFactoryContext, EndpointFilterDelegate, EndpointFilterDelegate>
@@ -204,9 +233,15 @@ public static Func<EndpointFilterFactoryContext, EndpointFilterDelegate, Endpoin
         if (authMethod == "m2m")
         {
             var scopes = httpContext.Items["M2MScopes"] as string[] ?? [];
-            if (!scopes.Contains("admin:write"))
-                return Results.Json(new ApiError("Forbidden: missing admin:write scope"),
+            var requiredScope = IsReadOnlyRequest(httpContext)
+                ? "admin:read"
+                : "admin:write";
+
+            if (!scopes.Contains(requiredScope) && !scopes.Contains("admin:write"))
+                return Results.Json(
+                    new ApiError($"Forbidden: missing {requiredScope} scope"),
                     statusCode: StatusCodes.Status403Forbidden);
+
             return await next(invocationContext);
         }
 
@@ -219,7 +254,13 @@ public static Func<EndpointFilterFactoryContext, EndpointFilterDelegate, Endpoin
         return await next(invocationContext);
     };
 }
+
+private static bool IsReadOnlyRequest(HttpContext ctx) =>
+    HttpMethods.IsGet(ctx.Request.Method) ||
+    HttpMethods.IsHead(ctx.Request.Method);
 ```
+
+This checks `admin:read` for GET requests and `admin:write` for mutating requests. An `admin:write` scope implicitly grants `admin:read`.
 
 ### CLI-side token management
 
@@ -265,7 +306,6 @@ These are already implemented and just need to accept M2M JWT auth alongside ses
 | Endpoint | Method | CLI command |
 |---|---|---|
 | `/api/admin/packages/health` | GET | `packages list` |
-| `/api/packages` | POST | `packages add` |
 | `/api/packages/{id}` | PATCH | `packages update` |
 | `/api/packages/{id}` | DELETE | `packages delete` |
 | `/api/admin/packages/{id}/reset-sync` | POST | `sync reset` |
@@ -284,12 +324,34 @@ These don't require auth and can be called directly by the CLI:
 
 | Endpoint | Method | CLI command |
 |---|---|---|
-| `/api/packages` | GET | `packages search` (with query param) |
+| `/api/packages` | GET | `packages list` (paginated, `limit`/`offset`) |
 | `/api/packages/{id}` | GET | `packages show` |
 | `/api/packages/{id}/releases` | GET | `releases list` |
-| `/api/summaries` | GET | `summaries status` |
+| `/api/github/search` | GET | `packages search` (requires auth, uses `q` param) |
 
 ### New admin endpoints needed
+
+#### Packages (admin add)
+
+Add a package by GitHub owner/repo directly:
+
+| Endpoint | Method | Scope | Purpose |
+|---|---|---|---|
+| `POST /api/admin/packages` | POST | `admin:write` | Add a package by GitHub owner/repo |
+
+Request body:
+
+```json
+{
+  "githubOwner": "facebook",
+  "githubRepo": "react",
+  "name": "React",
+  "npmName": "react",
+  "tagPrefix": null
+}
+```
+
+Only `githubOwner` and `githubRepo` are required. `name` defaults to `owner/repo` if omitted. `npmName` is optional (some tracked repos aren't npm packages).
 
 #### Users
 
@@ -423,6 +485,7 @@ The existing trigger endpoint works per-package. Add a bulk trigger:
 
 | Endpoint | Method | Scope |
 |---|---|---|
+| `POST /api/admin/packages` | POST | `admin:write` |
 | `GET /api/admin/users` | GET | `admin:read` |
 | `GET /api/admin/users/{id}` | GET | `admin:read` |
 | `GET /api/admin/releases` | GET | `admin:read` |
@@ -436,11 +499,13 @@ The existing trigger endpoint works per-package. Add a bulk trigger:
 | `GET /api/admin/webhook-events` | GET | `admin:read` |
 | `POST /api/admin/sync/trigger-all` | POST | `admin:write` |
 
-All new endpoints live under `/api/admin/` and require both `CreateAuthFilter()` and `CreateAdminFilter()`. The scope check (`admin:read` vs `admin:write`) is handled by `CreateAdminFilter()` based on the HTTP method or an explicit scope parameter.
+All new endpoints live under `/api/admin/` and use `CreateM2MAuthFilter()` + `CreateAdminFilter()`. The scope check (`admin:read` vs `admin:write`) is handled by `CreateAdminFilter()` based on the HTTP method.
 
 ### Pagination convention
 
-All list endpoints use the same pagination shape:
+Existing public endpoints use `limit`/`offset` and return raw arrays. New admin endpoints use `page`/`pageSize` and return a wrapper object. The CLI adapts to each endpoint's existing contract — no API normalization needed.
+
+**New admin endpoints** use:
 
 ```json
 {
@@ -472,10 +537,10 @@ patchnotes auth logout            -- Remove stored credentials and cached token
 
 patchnotes packages list          -- List all packages with sync health
 patchnotes packages show <id>     -- Package details
-patchnotes packages add <owner/repo> [--npm-name <name>]
+patchnotes packages add <owner/repo> [--name <name>] [--npm-name <name>]
 patchnotes packages update <id> [--name <n>] [--npm-name <n>] [--tag-prefix <p>]
 patchnotes packages delete <id>
-patchnotes packages search <query>
+patchnotes packages search <query>  -- Search GitHub repos (via /api/github/search)
 
 patchnotes sync status            -- Sync health overview (failures, disabled)
 patchnotes sync trigger <id>      -- Queue package for immediate sync
