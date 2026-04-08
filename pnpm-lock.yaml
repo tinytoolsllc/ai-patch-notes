@@ -15,7 +15,7 @@ catalogs:
       version: 19.2.14
     '@typescript/native-preview':
       specifier: latest
-      version: 7.0.0-dev.20260401.1
+      version: 7.0.0-dev.20260408.1
     react:
       specifier: ^19.2.4
       version: 19.2.4
@@ -42,8 +42,8 @@ importers:
         specifier: ^2.1.1
         version: 2.1.1
       '@prisma/adapter-mssql':
-        specifier: ^7.6.0
-        version: 7.6.0(@azure/core-client@1.10.1)
+        specifier: ^7.7.0
+        version: 7.7.0(@azure/core-client@1.10.1)
       '@prisma/client':
         specifier: ^7.6.0
         version: 7.6.0(prisma@7.6.0(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(typescript@6.0.2))(typescript@6.0.2)
@@ -80,7 +80,7 @@ importers:
         version: 19.2.14
       '@typescript/native-preview':
         specifier: 'catalog:'
-        version: 7.0.0-dev.20260401.1
+        version: 7.0.0-dev.20260408.1
       azure-functions-core-tools:
         specifier: ^4.x
         version: 4.9.0
@@ -180,7 +180,7 @@ importers:
         version: 19.2.3(@types/react@19.2.14)
       '@typescript/native-preview':
         specifier: 'catalog:'
-        version: 7.0.0-dev.20260401.1
+        version: 7.0.0-dev.20260408.1
       '@vite-pwa/assets-generator':
         specifier: ^1.0.2
         version: 1.0.2
@@ -332,6 +332,10 @@ packages:
     resolution: {integrity: sha512-uWC0fssc+hs1TGGVkkghiaFkkS7NkTxfnCH+Hdg+yTehTpMcehpok4PgUKKdyCH+9ldu6FhiHRv84Ntqj1vVcw==}
     engines: {node: '>=20.0.0'}
 
+  '@azure/identity@4.13.1':
+    resolution: {integrity: sha512-5C/2WD5Vb1lHnZS16dNQRPMjN6oV/Upba+C9nBIs15PmOi6A3ZGs4Lr2u60zw4S04gi+u3cEXiqTVP7M4Pz3kw==}
+    engines: {node: '>=20.0.0'}
+
   '@azure/keyvault-common@2.0.0':
     resolution: {integrity: sha512-wRLVaroQtOqfg60cxkzUkGKrKMsCP6uYXAOomOIysSMyt1/YM0eUn9LqieAWM8DLcU4+07Fio2YGpPeqUbpP9w==}
     engines: {node: '>=18.0.0'}
@@ -356,13 +360,25 @@ packages:
     resolution: {integrity: sha512-/f3eHkSNUTl6DLQHm+bKecjBKcRQxbd/XLx8lvSYp8Nl/HRyPuIPOijt9Dt0sH50/SxOwQ62RnFCmFlGK+bR/w==}
     engines: {node: '>=0.8.0'}
 
+  '@azure/msal-browser@5.6.3':
+    resolution: {integrity: sha512-sTjMtUm+bJpENU/1WlRzHEsgEHppZDZ1EtNyaOODg/sQBtMxxJzGB+MOCM+T2Q5Qe1fKBrdxUmjyRxm0r7Ez9w==}
+    engines: {node: '>=0.8.0'}
+
   '@azure/msal-common@15.15.0':
     resolution: {integrity: sha512-/n+bN0AKlVa+AOcETkJSKj38+bvFs78BaP4rNtv3MJCmPH0YrHiskMRe74OhyZ5DZjGISlFyxqvf9/4QVEi2tw==}
+    engines: {node: '>=0.8.0'}
+
+  '@azure/msal-common@16.4.1':
+    resolution: {integrity: sha512-Bl8f+w37xkXsYh7QRkAKCFGYtWMYuOVO7Lv+BxILrvGz3HbIEF22Pt0ugyj0QPOl6NLrHcnNUQ9yeew98P/5iw==}
     engines: {node: '>=0.8.0'}
 
   '@azure/msal-node@3.8.8':
     resolution: {integrity: sha512-+f1VrJH1iI517t4zgmuhqORja0bL6LDQXfBqkjuMmfTYXTQQnh1EvwwxO3UbKLT05N0obF72SRHFrC1RBDv5Gg==}
     engines: {node: '>=16'}
+
+  '@azure/msal-node@5.1.2':
+    resolution: {integrity: sha512-DoeSJ9U5KPAIZoHsPywvfEj2MhBniQe0+FSpjLUTdWoIkI999GB5USkW6nNEHnIaLVxROHXvprWA1KzdS1VQ4A==}
+    engines: {node: '>=20'}
 
   '@azure/opentelemetry-instrumentation-azure-sdk@1.0.0-beta.9':
     resolution: {integrity: sha512-gNCFokEoQQEkhu2T8i1i+1iW2o9wODn2slu5tpqJmjV1W7qf9dxVv6GNXW1P1WC8wMga8BCc2t/oMhOK3iwRQg==}
@@ -1980,8 +1996,8 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@prisma/adapter-mssql@7.6.0':
-    resolution: {integrity: sha512-mljDd4lmJnFEACPtDlLnVwbSezt3LkSuITYPxO9jQuyo2cBKfI12suVcYcmxjXTmf4T22xR+6qSvkl70vaJgbw==}
+  '@prisma/adapter-mssql@7.7.0':
+    resolution: {integrity: sha512-K9y3nPGDWOH81KqVdfpJDUoMyla/S5qNwghWeplBhQ8MbQbygEK5uI92khxeelV9B2mYVtRRNN4y2ID7pw5heQ==}
 
   '@prisma/client-runtime-utils@7.6.0':
     resolution: {integrity: sha512-fD7jlqubsZvVODKvsp9lOpXVecx2aWGxC2l35Ioz2t+teUJ5CfR0SAMsi7UkU1VvaZmmm+DS6BdujF622nY7tQ==}
@@ -2007,11 +2023,14 @@ packages:
   '@prisma/debug@7.6.0':
     resolution: {integrity: sha512-LpHr3qos4lQZ6sxwjStf59YBht7m9/QF7NSQsMH6qGENWZu2w3UkQUGn1h5iRkDjnWRj3VHykOu9qFhps4ADvA==}
 
+  '@prisma/debug@7.7.0':
+    resolution: {integrity: sha512-12J62XdqCmpiwJHhHdQxZeY3ckVCWIFmcJP8hg5dPTceeiQ0wiojXGFYTluKqFQfu46fRLgb/rLALZMAx3+dTA==}
+
   '@prisma/dev@0.24.3':
     resolution: {integrity: sha512-ffHlQuKXZiaDt9Go0OnCTdJZrHxK0k7omJKNV86/VjpsXu5EIHZLK0T7JSWgvNlJwh56kW9JFu9v0qJciFzepg==}
 
-  '@prisma/driver-adapter-utils@7.6.0':
-    resolution: {integrity: sha512-D8j3p0RnhLuufMaRLX6QqtGgPC5Ao3l5oFP6Q5AL0rTHi4vna+NzGEipwCsfvcSvaGFCbsH3lsTMbb4WvY+ovA==}
+  '@prisma/driver-adapter-utils@7.7.0':
+    resolution: {integrity: sha512-gZXREeu6mOk7zXfGFJgh86p7Vhj0sXNKp+4Cg1tWYo7V2dfncP2qxS2BiTmbIIha8xPqItkl0WSw38RuSq1HoQ==}
 
   '@prisma/engines-version@7.6.0-1.75cbdc1eb7150937890ad5465d861175c6624711':
     resolution: {integrity: sha512-r51DLcJ8bDRSrBEJF3J4cinoWyGA7rfP2mG6lD90VqIbGNOkbfcLcXalSVjq5Y6brQS3vcjrq4GbyUb1Cb7vkw==}
@@ -2925,43 +2944,43 @@ packages:
     resolution: {integrity: sha512-XJ9UD9+bbDo4a4epraTwG3TsNPeiB9aShrUneAVXy8q4LuwowN+qu89/6ByLMINqvIMeI9H9hOHQtg/ijrYXzQ==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
 
-  '@typescript/native-preview-darwin-arm64@7.0.0-dev.20260401.1':
-    resolution: {integrity: sha512-9PCc1D4/zLic30g1upOw6ZmUl98fnrXYRv5wIZ6fxm1zZAObieRKUX3Jbr8M9N8iQQFxPIZPniIScsxAbmbJvw==}
+  '@typescript/native-preview-darwin-arm64@7.0.0-dev.20260408.1':
+    resolution: {integrity: sha512-YcPczNLfPDB13eUBYHkTOkL7HyWqqqEhho4eSxhAvigZuxvtHQ1uyILIvLVAwipEVzhJ8QciKmLdLucpfi4XyA==}
     cpu: [arm64]
     os: [darwin]
 
-  '@typescript/native-preview-darwin-x64@7.0.0-dev.20260401.1':
-    resolution: {integrity: sha512-wwzca1KrjSVC6ApXfITsg/wF4GGbhVYebc7zChpuyi+phrHfw6ThTPB5XFUH4nA32vqw0Hn/6KACipMgzg8GPA==}
+  '@typescript/native-preview-darwin-x64@7.0.0-dev.20260408.1':
+    resolution: {integrity: sha512-cHqkDg53xxxz21MThLBf4vx1kyIpRPEYNdEiQlvu9O35Tth49+aub6F+/YEMd9MG4TYZmxh1bEjkjErTUIElpA==}
     cpu: [x64]
     os: [darwin]
 
-  '@typescript/native-preview-linux-arm64@7.0.0-dev.20260401.1':
-    resolution: {integrity: sha512-1hgKibGi4QZF1J0hKltgY4nj4yKDmI4Ang5ar80I+YeUdGxV/fP2kU3bJang7QtHuSso6W+a52SF62zgqbzdow==}
+  '@typescript/native-preview-linux-arm64@7.0.0-dev.20260408.1':
+    resolution: {integrity: sha512-iHG0FEXq/QFsn+qlTPllxdcbvfQ9aRYggy4lc1z0+f11Nyk4YDNCSiR8WW7pbnOTx/VreGbbXhlpuJXTidqL8g==}
     cpu: [arm64]
     os: [linux]
 
-  '@typescript/native-preview-linux-arm@7.0.0-dev.20260401.1':
-    resolution: {integrity: sha512-bbIkRZYjtyoyCJ3wFES7qn3EwYO5Go1hxArL5X5oWiBmUHq5gMIxTZDv5mpWxopVf9Eyh4ErHefXjf1s4J+6Ag==}
+  '@typescript/native-preview-linux-arm@7.0.0-dev.20260408.1':
+    resolution: {integrity: sha512-w26Gv9yq9LIYIhxjkQC+i0wBPDdQdX+H06ZhyVRL5grKWTIsk9Xwjp9mDRB/dGlXBKcvnM25JH16OyAA0rFH3A==}
     cpu: [arm]
     os: [linux]
 
-  '@typescript/native-preview-linux-x64@7.0.0-dev.20260401.1':
-    resolution: {integrity: sha512-1ysZ4c/Wa3RYIlrwVceYlhb1m1hxQ4P2x92valZXH0bNWEPb+oiQ4Yf35O/vi5h8zDdX/ZQ59vivYl27cF1VVA==}
+  '@typescript/native-preview-linux-x64@7.0.0-dev.20260408.1':
+    resolution: {integrity: sha512-hMcUlUIzYbvbdq6j/B4RPL+kZR917NGnE9AgPZ7dJ92yamH/7LGT1Mnlc6McUx31yqTFBFHdTc7Cfx+ynua7Iw==}
     cpu: [x64]
     os: [linux]
 
-  '@typescript/native-preview-win32-arm64@7.0.0-dev.20260401.1':
-    resolution: {integrity: sha512-fZYLCRe36y1BuzRFFpU2/RQ212l6Y1dccRMh8oTB8HlAVAAwtbkb6cjEn0Ablj4Dy16+Ih8R9uHsxPLNhtKw1Q==}
+  '@typescript/native-preview-win32-arm64@7.0.0-dev.20260408.1':
+    resolution: {integrity: sha512-avJWIEKSx4rdBLZD1FOOTuxTU51dQfYb3jZvZMaXD4thJjq+6eSwfzu2elwL36AZDlnaxggGjB5nBxp0t54iOA==}
     cpu: [arm64]
     os: [win32]
 
-  '@typescript/native-preview-win32-x64@7.0.0-dev.20260401.1':
-    resolution: {integrity: sha512-I6ses4SjWvpbvSpm1BPFRrDeqrzu7JTchJG/a26iwwmTLv4fAGLc5/o6Kv9Naygozop1W3KOcVM5i3A9oxiIjQ==}
+  '@typescript/native-preview-win32-x64@7.0.0-dev.20260408.1':
+    resolution: {integrity: sha512-gpvEHkF/WoxkA3711c4uWNCZO9WAuwrq49COdNwxgOTzYHnMc1yCj8CpkCUJwU0f/Ydwp2s6/efn6gTMvtckPg==}
     cpu: [x64]
     os: [win32]
 
-  '@typescript/native-preview@7.0.0-dev.20260401.1':
-    resolution: {integrity: sha512-xJcN9WlY/P6xKjCMH4+DTzZSj/EKR6H9avuqUKs4eKyPEvaQ4bX+9Ys3Vl2qhlUaD7IRWY7HN7db0LHAGlWRSA==}
+  '@typescript/native-preview@7.0.0-dev.20260408.1':
+    resolution: {integrity: sha512-N0MZLEUnAoP/aRVk7MY119LDsESkbtEwIw+YeXi/jjx2XCqf7ni3GxIVsUYtf/troyuSedq3V/OUrkoCh5A9gA==}
     hasBin: true
 
   '@typespec/ts-http-runtime@0.3.3':
@@ -3640,8 +3659,8 @@ packages:
     resolution: {integrity: sha512-xUtoPkMggbz0MPyPiIWr1Kp4aeWJjDZ6SMvURhimjdZgsRuDplF5/s9hcgGhyXMhs+6vpnuoiZ2kFiu3FMnS8Q==}
     engines: {node: '>=18'}
 
-  es-abstract@1.24.1:
-    resolution: {integrity: sha512-zHXBLhP+QehSSbsS9Pt23Gg964240DPd6QCf8WpkqEXxQ7fhdZzYsocOr5u7apWonsS5EjZDmTF+/slGMyasvw==}
+  es-abstract@1.24.2:
+    resolution: {integrity: sha512-2FpH9Q5i2RRwyEP1AylXe6nYLR5OhaJTZwmlcP0dL/+JCbgg7yyEo/sEK6HeGZRf3dFpWwThaRHVApXSkW3xeg==}
     engines: {node: '>= 0.4'}
 
   es-define-property@1.0.1:
@@ -4589,6 +4608,10 @@ packages:
     resolution: {integrity: sha512-aY/R+aEsRelme17KGQa/1ZSIpLpNYYrhcrepKTZgE+W3WM16YMCaPwOHLHsmopZHELU0Ojin1lPVxKR0MihncA==}
     engines: {node: 20 || >=22}
 
+  lru-cache@11.3.3:
+    resolution: {integrity: sha512-JvNw9Y81y33E+BEYPr0U7omo+U9AySnsMsEiXgwT6yqd31VQWTLNQqmT4ou5eqPFUrTfIDFta2wKhB1hyohtAQ==}
+    engines: {node: 20 || >=22}
+
   lru-cache@5.1.1:
     resolution: {integrity: sha512-KpNARQA3Iwv+jTA0utUVVbrh+Jlrr1Fv0e56GGzAFOXN7dk/FviaDW8LHmK52DlcH4WP2n6gI8vN1aesBFgo9w==}
 
@@ -4784,8 +4807,8 @@ packages:
   ms@2.1.3:
     resolution: {integrity: sha512-6FlzubTLZG3J2a/NVCAleEhjzq5oxgHyaCU9yYXvcLsvoVaHJq/s5xXI6/XXP6tz7R9xAOtHnSO/tXtF3WRTlA==}
 
-  mssql@12.2.0:
-    resolution: {integrity: sha512-lwwLHAqcWOz8okjboQpIEp5OghUFGJhuuQZS3+WF1ZXbaEaCEGKOfiQET3w/5Xz0tyZfDNCQVCm9wp5GwXut6g==}
+  mssql@12.2.1:
+    resolution: {integrity: sha512-TU89g82WatOVcinw3etO/crKbd67ugC3Wm6TJDklHjp7211brVENWIs++UoPC2H+TWvyi0OSlzMou8GY15onOA==}
     engines: {node: '>=18'}
     hasBin: true
 
@@ -5191,8 +5214,8 @@ packages:
   regjsgen@0.8.0:
     resolution: {integrity: sha512-RvwtGe3d7LvWiDQXeQw8p5asZUmfU1G/l6WbUXeHta7Y2PEIvBTwH6E2EfmYUK8pxcxEdEmaomqyp0vZZ7C+3Q==}
 
-  regjsparser@0.13.0:
-    resolution: {integrity: sha512-NZQZdC5wOE/H3UT28fVGL+ikOZcEzfMGk/c3iN9UGxzWHMa1op7274oyiUVrAG4B2EuFhus8SvkaYnhvW92p9Q==}
+  regjsparser@0.13.1:
+    resolution: {integrity: sha512-dLsljMd9sqwRkby8zhO1gSg3PnJIBFid8f4CQj/sXx+7cKx+E7u0PKhZ+U4wmhx7EfmtvnA318oVaIkAB1lRJw==}
     hasBin: true
 
   remark-parse@11.0.0:
@@ -5372,8 +5395,8 @@ packages:
   shimmer@1.2.1:
     resolution: {integrity: sha512-sQTKC1Re/rM6XyFM6fIAGHRPVGvyXfgzIDvzoq608vM+jeyVD0Tu1E6Np0Kc2zAIFWIj963V2800iF/9LPieQw==}
 
-  side-channel-list@1.0.0:
-    resolution: {integrity: sha512-FCLHtRD/gnpCiCHEiJLOwdmFP+wzCmDEkc9y7NsYxeF4u7Btsn1ZuwgwJGxImImHicJArLP4R0yX4c2KCrMrTA==}
+  side-channel-list@1.0.1:
+    resolution: {integrity: sha512-mjn/0bi/oUURjc5Xl7IaWi/OJJJumuoJFQJfDDyO46+hBWsfaVM65TBHq2eoZBhzl9EchxOijpkbRC8SVBQU0w==}
     engines: {node: '>= 0.4'}
 
   side-channel-map@1.0.1:
@@ -6318,6 +6341,22 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
+  '@azure/identity@4.13.1':
+    dependencies:
+      '@azure/abort-controller': 2.1.2
+      '@azure/core-auth': 1.10.1
+      '@azure/core-client': 1.10.1
+      '@azure/core-rest-pipeline': 1.23.0
+      '@azure/core-tracing': 1.3.1
+      '@azure/core-util': 1.13.1
+      '@azure/logger': 1.3.0
+      '@azure/msal-browser': 5.6.3
+      '@azure/msal-node': 5.1.2
+      open: 10.2.0
+      tslib: 2.8.1
+    transitivePeerDependencies:
+      - supports-color
+
   '@azure/keyvault-common@2.0.0':
     dependencies:
       '@azure/abort-controller': 2.1.2
@@ -6410,11 +6449,23 @@ snapshots:
     dependencies:
       '@azure/msal-common': 15.15.0
 
+  '@azure/msal-browser@5.6.3':
+    dependencies:
+      '@azure/msal-common': 16.4.1
+
   '@azure/msal-common@15.15.0': {}
+
+  '@azure/msal-common@16.4.1': {}
 
   '@azure/msal-node@3.8.8':
     dependencies:
       '@azure/msal-common': 15.15.0
+      jsonwebtoken: 9.0.3
+      uuid: 8.3.2
+
+  '@azure/msal-node@5.1.2':
+    dependencies:
+      '@azure/msal-common': 16.4.1
       jsonwebtoken: 9.0.3
       uuid: 8.3.2
 
@@ -8135,11 +8186,11 @@ snapshots:
   '@oxc-resolver/binding-win32-x64-msvc@11.19.1':
     optional: true
 
-  '@prisma/adapter-mssql@7.6.0(@azure/core-client@1.10.1)':
+  '@prisma/adapter-mssql@7.7.0(@azure/core-client@1.10.1)':
     dependencies:
-      '@prisma/driver-adapter-utils': 7.6.0
+      '@prisma/driver-adapter-utils': 7.7.0
       async-mutex: 0.5.0
-      mssql: 12.2.0(@azure/core-client@1.10.1)
+      mssql: 12.2.1(@azure/core-client@1.10.1)
     transitivePeerDependencies:
       - '@azure/core-client'
       - supports-color
@@ -8166,6 +8217,8 @@ snapshots:
 
   '@prisma/debug@7.6.0': {}
 
+  '@prisma/debug@7.7.0': {}
+
   '@prisma/dev@0.24.3(typescript@6.0.2)':
     dependencies:
       '@electric-sql/pglite': 0.4.1
@@ -8188,9 +8241,9 @@ snapshots:
     transitivePeerDependencies:
       - typescript
 
-  '@prisma/driver-adapter-utils@7.6.0':
+  '@prisma/driver-adapter-utils@7.7.0':
     dependencies:
-      '@prisma/debug': 7.6.0
+      '@prisma/debug': 7.7.0
 
   '@prisma/engines-version@7.6.0-1.75cbdc1eb7150937890ad5465d861175c6624711': {}
 
@@ -9093,36 +9146,36 @@ snapshots:
       '@typescript-eslint/types': 8.58.0
       eslint-visitor-keys: 5.0.1
 
-  '@typescript/native-preview-darwin-arm64@7.0.0-dev.20260401.1':
+  '@typescript/native-preview-darwin-arm64@7.0.0-dev.20260408.1':
     optional: true
 
-  '@typescript/native-preview-darwin-x64@7.0.0-dev.20260401.1':
+  '@typescript/native-preview-darwin-x64@7.0.0-dev.20260408.1':
     optional: true
 
-  '@typescript/native-preview-linux-arm64@7.0.0-dev.20260401.1':
+  '@typescript/native-preview-linux-arm64@7.0.0-dev.20260408.1':
     optional: true
 
-  '@typescript/native-preview-linux-arm@7.0.0-dev.20260401.1':
+  '@typescript/native-preview-linux-arm@7.0.0-dev.20260408.1':
     optional: true
 
-  '@typescript/native-preview-linux-x64@7.0.0-dev.20260401.1':
+  '@typescript/native-preview-linux-x64@7.0.0-dev.20260408.1':
     optional: true
 
-  '@typescript/native-preview-win32-arm64@7.0.0-dev.20260401.1':
+  '@typescript/native-preview-win32-arm64@7.0.0-dev.20260408.1':
     optional: true
 
-  '@typescript/native-preview-win32-x64@7.0.0-dev.20260401.1':
+  '@typescript/native-preview-win32-x64@7.0.0-dev.20260408.1':
     optional: true
 
-  '@typescript/native-preview@7.0.0-dev.20260401.1':
+  '@typescript/native-preview@7.0.0-dev.20260408.1':
     optionalDependencies:
-      '@typescript/native-preview-darwin-arm64': 7.0.0-dev.20260401.1
-      '@typescript/native-preview-darwin-x64': 7.0.0-dev.20260401.1
-      '@typescript/native-preview-linux-arm': 7.0.0-dev.20260401.1
-      '@typescript/native-preview-linux-arm64': 7.0.0-dev.20260401.1
-      '@typescript/native-preview-linux-x64': 7.0.0-dev.20260401.1
-      '@typescript/native-preview-win32-arm64': 7.0.0-dev.20260401.1
-      '@typescript/native-preview-win32-x64': 7.0.0-dev.20260401.1
+      '@typescript/native-preview-darwin-arm64': 7.0.0-dev.20260408.1
+      '@typescript/native-preview-darwin-x64': 7.0.0-dev.20260408.1
+      '@typescript/native-preview-linux-arm': 7.0.0-dev.20260408.1
+      '@typescript/native-preview-linux-arm64': 7.0.0-dev.20260408.1
+      '@typescript/native-preview-linux-x64': 7.0.0-dev.20260408.1
+      '@typescript/native-preview-win32-arm64': 7.0.0-dev.20260408.1
+      '@typescript/native-preview-win32-x64': 7.0.0-dev.20260408.1
 
   '@typespec/ts-http-runtime@0.3.3':
     dependencies:
@@ -9339,7 +9392,7 @@ snapshots:
       array-buffer-byte-length: 1.0.2
       call-bind: 1.0.8
       define-properties: 1.2.1
-      es-abstract: 1.24.1
+      es-abstract: 1.24.2
       es-errors: 1.3.0
       get-intrinsic: 1.3.0
       is-array-buffer: 3.0.5
@@ -9832,7 +9885,7 @@ snapshots:
 
   environment@1.1.0: {}
 
-  es-abstract@1.24.1:
+  es-abstract@1.24.2:
     dependencies:
       array-buffer-byte-length: 1.0.2
       arraybuffer.prototype.slice: 1.0.4
@@ -10908,6 +10961,8 @@ snapshots:
 
   lru-cache@11.2.7: {}
 
+  lru-cache@11.3.3: {}
+
   lru-cache@5.1.1:
     dependencies:
       yallist: 3.1.1
@@ -11222,7 +11277,7 @@ snapshots:
 
   ms@2.1.3: {}
 
-  mssql@12.2.0(@azure/core-client@1.10.1):
+  mssql@12.2.1(@azure/core-client@1.10.1):
     dependencies:
       '@tediousjs/connection-string': 0.6.0
       commander: 11.1.0
@@ -11499,7 +11554,7 @@ snapshots:
 
   path-scurry@2.0.2:
     dependencies:
-      lru-cache: 11.2.7
+      lru-cache: 11.3.3
       minipass: 7.1.3
 
   path-to-regexp@6.3.0: {}
@@ -11718,7 +11773,7 @@ snapshots:
     dependencies:
       call-bind: 1.0.8
       define-properties: 1.2.1
-      es-abstract: 1.24.1
+      es-abstract: 1.24.2
       es-errors: 1.3.0
       es-object-atoms: 1.1.1
       get-intrinsic: 1.3.0
@@ -11745,13 +11800,13 @@ snapshots:
       regenerate: 1.4.2
       regenerate-unicode-properties: 10.2.2
       regjsgen: 0.8.0
-      regjsparser: 0.13.0
+      regjsparser: 0.13.1
       unicode-match-property-ecmascript: 2.0.0
       unicode-match-property-value-ecmascript: 2.2.1
 
   regjsgen@0.8.0: {}
 
-  regjsparser@0.13.0:
+  regjsparser@0.13.1:
     dependencies:
       jsesc: 3.1.0
 
@@ -11979,7 +12034,7 @@ snapshots:
 
   shimmer@1.2.1: {}
 
-  side-channel-list@1.0.0:
+  side-channel-list@1.0.1:
     dependencies:
       es-errors: 1.3.0
       object-inspect: 1.13.4
@@ -12003,7 +12058,7 @@ snapshots:
     dependencies:
       es-errors: 1.3.0
       object-inspect: 1.13.4
-      side-channel-list: 1.0.0
+      side-channel-list: 1.0.1
       side-channel-map: 1.0.1
       side-channel-weakmap: 1.0.2
 
@@ -12102,7 +12157,7 @@ snapshots:
       call-bind: 1.0.8
       call-bound: 1.0.4
       define-properties: 1.2.1
-      es-abstract: 1.24.1
+      es-abstract: 1.24.2
       es-errors: 1.3.0
       es-object-atoms: 1.1.1
       get-intrinsic: 1.3.0
@@ -12119,7 +12174,7 @@ snapshots:
       call-bound: 1.0.4
       define-data-property: 1.1.4
       define-properties: 1.2.1
-      es-abstract: 1.24.1
+      es-abstract: 1.24.2
       es-object-atoms: 1.1.1
       has-property-descriptors: 1.0.2
 
@@ -12201,7 +12256,7 @@ snapshots:
   tedious@19.2.1(@azure/core-client@1.10.1):
     dependencies:
       '@azure/core-auth': 1.10.1
-      '@azure/identity': 4.13.0
+      '@azure/identity': 4.13.1
       '@azure/keyvault-keys': 4.10.0(@azure/core-client@1.10.1)
       '@js-joda/core': 5.7.0
       '@types/node': 22.19.11
