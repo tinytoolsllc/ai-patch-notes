@@ -147,95 +147,6 @@ public class PackagesApiTests : IAsyncLifetime
 
     #endregion
 
-    #region POST /api/packages
-
-    [Fact]
-    public async Task PostPackage_GivenUnauthenticatedRequest_Returns403()
-    {
-        var response = await _client.PostAsJsonAsync("/api/packages", new { npmName = "test" });
-
-        // CSRF middleware rejects requests without Origin header before auth runs
-        response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
-    }
-
-    [Fact]
-    public async Task PostPackage_ReturnsBadRequest_WhenNpmNameMissing()
-    {
-        var response = await _authClient.PostAsJsonAsync("/api/packages", new { npmName = "" });
-
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-        var error = await response.Content.ReadFromJsonAsync<JsonElement>();
-        error.GetProperty("error").GetString().Should().Be("npmName is required");
-    }
-
-    [Fact]
-    public async Task PostPackage_ReturnsNotFound_WhenPackageNotOnNpm()
-    {
-        _fixture.NpmHandler.SetupPackageNotFound("nonexistent-package-xyz");
-
-        var response = await _authClient.PostAsJsonAsync("/api/packages", new { npmName = "nonexistent-package-xyz" });
-
-        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
-        var error = await response.Content.ReadFromJsonAsync<JsonElement>();
-        error.GetProperty("error").GetString().Should().Be("Package not found on npm");
-    }
-
-    [Fact]
-    public async Task PostPackage_ReturnsBadRequest_WhenPackageHasNoGitHubRepo()
-    {
-        _fixture.NpmHandler.SetupPackageWithoutRepo("package-without-repo");
-
-        var response = await _authClient.PostAsJsonAsync("/api/packages", new { npmName = "package-without-repo" });
-
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-        var error = await response.Content.ReadFromJsonAsync<JsonElement>();
-        error.GetProperty("error").GetString().Should().Be("Package does not have a GitHub repository");
-    }
-
-    [Fact]
-    public async Task PostPackage_CreatesPackage_WhenValid()
-    {
-        _fixture.NpmHandler.SetupPackage("express", "expressjs", "express");
-
-        var response = await _authClient.PostAsJsonAsync("/api/packages", new { npmName = "express" });
-
-        response.StatusCode.Should().Be(HttpStatusCode.Created);
-        var pkg = await response.Content.ReadFromJsonAsync<JsonElement>();
-        pkg.GetProperty("npmName").GetString().Should().Be("express");
-        pkg.GetProperty("githubOwner").GetString().Should().Be("expressjs");
-        pkg.GetProperty("githubRepo").GetString().Should().Be("express");
-        pkg.TryGetProperty("id", out var id).Should().BeTrue();
-        id.GetString().Should().NotBeNullOrEmpty();
-    }
-
-    [Fact]
-    public async Task PostPackage_ReturnsConflict_WhenPackageAlreadyExists()
-    {
-        // Arrange
-        using var scope = _fixture.Services.CreateScope();
-        var db = scope.ServiceProvider.GetRequiredService<PatchNotesDbContext>();
-        db.Packages.Add(new Package
-        {
-            Name = "duplicate-pkg",
-            Url = "https://github.com/owner/repo",
-            NpmName = "duplicate-pkg",
-            GithubOwner = "owner",
-            GithubRepo = "repo",
-        });
-        await db.SaveChangesAsync();
-
-        // Act
-        _fixture.NpmHandler.SetupPackage("duplicate-pkg", "other", "repo");
-        var response = await _authClient.PostAsJsonAsync("/api/packages", new { npmName = "duplicate-pkg" });
-
-        // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.Conflict);
-        var error = await response.Content.ReadFromJsonAsync<JsonElement>();
-        error.GetProperty("error").GetString().Should().Be("Package already exists");
-    }
-
-    #endregion
-
     #region DELETE /api/packages/{id}
 
     [Fact]
@@ -393,16 +304,6 @@ public class PackagesApiTests : IAsyncLifetime
         result.GetProperty("total").GetInt32().Should().Be(3);
         result.GetProperty("limit").GetInt32().Should().Be(1);
         result.GetProperty("offset").GetInt32().Should().Be(1);
-    }
-
-    [Fact]
-    public async Task PostPackage_ReturnsForbidden_WhenNonAdmin()
-    {
-        _fixture.NpmHandler.SetupPackage("forbidden-pkg", "owner", "repo");
-
-        var response = await _nonAdminClient.PostAsJsonAsync("/api/packages", new { npmName = "forbidden-pkg" });
-
-        response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
     }
 
     #endregion

@@ -131,5 +131,4 @@ public static class RouteUtils
 
 public record ApiError(string Error, string? Details = null);
 
-public record AddPackageRequest(string NpmName, string? TagPrefix = null);
 public record UpdatePackageRequest(string? GithubOwner, string? GithubRepo, string? TagPrefix = null, string? Name = null, string? NpmName = null, string? Url = null);
