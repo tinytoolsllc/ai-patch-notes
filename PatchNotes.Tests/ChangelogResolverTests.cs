@@ -247,6 +247,28 @@ public class ChangelogResolverTests
     }
 
     [Fact]
+    public void ExtractVersionSection_GivenSmallTagWrappedVersion_ReturnsMatchingSection()
+    {
+        var changelog = """
+            ## <small>[8.0.8](https://github.com/vitejs/vite/compare/v8.0.7...v8.0.8) (2026-04-09)</small>
+
+            ### Features
+
+            * update rolldown to 1.0.0-rc.15
+
+            ## <small>[8.0.7](https://github.com/vitejs/vite/compare/v8.0.6...v8.0.7) (2026-04-07)</small>
+
+            ### Bug Fixes
+
+            * use sync dns.getDefaultResultOrder
+            """;
+
+        var result = ChangelogResolver.ExtractVersionSection(changelog, "v8.0.8");
+        result.Should().Contain("update rolldown");
+        result.Should().NotContain("dns.getDefaultResultOrder");
+    }
+
+    [Fact]
     public void ExtractVersionSection_ReturnsNull_WhenVersionNotFound()
     {
         var changelog = """

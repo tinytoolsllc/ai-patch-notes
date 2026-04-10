@@ -49,9 +49,9 @@ public class ChangelogResolver
         @"https://github\.com/(?<owner>[^/]+)/(?<repo>[^/]+)/releases/tag/(?<tag>[^)\s#]+)",
         RegexOptions.Compiled);
 
-    // Matches headings like: ## [1.2.3], ## 1.2.3, # v1.2.3, ### 1.2.3 (2024-01-15)
+    // Matches any markdown heading (# through ####)
     private static readonly Regex HeadingPattern = new(
-        @"^(#{1,4})\s+\[?v?(?<version>[^\]\s(]+)\]?[^\r\n]*",
+        @"^(#{1,4})\s+(.+)$",
         RegexOptions.Multiline | RegexOptions.Compiled);
 
     public ChangelogResolver(IGitHubClient github, ILogger<ChangelogResolver> logger)
@@ -234,7 +234,7 @@ public class ChangelogResolver
                         // Log the headings we found so we can debug version matching
                         var headings = HeadingPattern.Matches(content);
                         var headingList = string.Join(", ",
-                            headings.Cast<Match>().Take(10).Select(m => m.Groups["version"].Value));
+                            headings.Cast<Match>().Take(10).Select(m => m.Groups[2].Value.Trim()));
                         _logger.LogWarning(
                             "[{Owner}/{Repo}] No version match for tag {Tag} in {Path}. First headings found: [{Headings}]",
                             owner, repo, tagName, urlPath, headingList);
@@ -284,7 +284,7 @@ public class ChangelogResolver
                 {
                     var headings = HeadingPattern.Matches(content);
                     var headingList = string.Join(", ",
-                        headings.Cast<Match>().Take(10).Select(m => m.Groups["version"].Value));
+                        headings.Cast<Match>().Take(10).Select(m => m.Groups[2].Value.Trim()));
                     _logger.LogInformation(
                         "[{Owner}/{Repo}] No version match for tag {Tag} in standard path {Path}. First headings: [{Headings}]",
                         owner, repo, tagName, path, headingList);
@@ -309,7 +309,6 @@ public class ChangelogResolver
     /// </summary>
     public static string? ExtractVersionSection(string content, string tagName)
     {
-        // Normalize the version: strip leading 'v' from tag for matching
         var version = tagName.TrimStart('v');
 
         var matches = HeadingPattern.Matches(content);
@@ -319,9 +318,10 @@ public class ChangelogResolver
         for (int i = 0; i < matches.Count; i++)
         {
             var match = matches[i];
-            var headingVersion = match.Groups["version"].Value;
+            var headingText = match.Groups[2].Value;
 
-            if (!VersionMatches(headingVersion, version))
+            // Just check if the heading contains the version string
+            if (!headingText.Contains(version, StringComparison.OrdinalIgnoreCase))
                 continue;
 
             var headingLevel = match.Groups[1].Value.Length;
@@ -368,14 +368,4 @@ public class ChangelogResolver
             || trimmed.StartsWith("## What's Changed", StringComparison.OrdinalIgnoreCase);
     }
 
-    private static bool VersionMatches(string headingVersion, string targetVersion)
-    {
-        // Exact match
-        if (string.Equals(headingVersion, targetVersion, StringComparison.OrdinalIgnoreCase))
-            return true;
-
-        // Strip leading 'v' from heading version too
-        var normalizedHeading = headingVersion.TrimStart('v');
-        return string.Equals(normalizedHeading, targetVersion, StringComparison.OrdinalIgnoreCase);
-    }
 }
