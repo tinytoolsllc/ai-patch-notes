@@ -24,7 +24,7 @@
     "@prisma/adapter-mssql": "^7.7.0",
     "@prisma/client": "^7.7.0",
     "@react-email/components": "^1.0.12",
-    "@react-email/render": "^2.0.5",
+    "@react-email/render": "^2.0.6",
     "applicationinsights": "^3.14.0",
     "date-fns": "^4.1.0",
     "esbuild-wasm": "^0.28.0",
