@@ -1,9 +1,6 @@
 {
   "name": "patchnotes-email",
   "version": "1.0.0",
-  "engines": {
-    "node": ">=22"
-  },
   "description": "",
   "main": "dist/src/functions/*.js",
   "scripts": {
@@ -31,7 +28,6 @@
     "react": "catalog:",
     "resend": "^6.11.0"
   },
-  "packageManager": "pnpm@10.28.0",
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "@types/node": "catalog:",
