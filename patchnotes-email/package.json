@@ -16,7 +16,7 @@
     "db:smoke-test": "pnpm tsx scripts/prisma-smoke-test.ts"
   },
   "dependencies": {
-    "@azure/functions": "^4.12.0",
+    "@azure/functions": "^4.13.0",
     "@date-fns/utc": "^2.1.1",
     "@prisma/adapter-mssql": "^7.7.0",
     "@prisma/client": "^7.7.0",
