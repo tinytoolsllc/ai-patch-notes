@@ -29,7 +29,7 @@ HTTP POST trigger (`/api/sync-new-packages`) that syncs packages which have neve
 | `GitHub:Token` | GitHub PAT for API access |
 | `AI:BaseUrl` | AI provider base URL |
 | `AI:ApiKey` | AI provider API key |
-| `AI:Model` | AI model name (e.g. `gemma3:27b`) |
+| `AI:Model` | AI model name (e.g. `gemma4:31b`) |
 
 In Azure, these are set as Function App application settings with `__` as the separator (e.g. `ConnectionStrings__PatchNotes`).
 
@@ -55,7 +55,7 @@ The API needs these settings to ping the Function after creating a new package:
     "ConnectionStrings__PatchNotes": "Data Source=patchnotes.db",
     "GitHub__Token": "<your-github-pat>",
     "AI__ApiKey": "<your-ai-key>",
-    "AI__Model": "gemma3:27b"
+    "AI__Model": "gemma4:31b"
   }
 }
 ```
