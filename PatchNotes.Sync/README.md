@@ -48,7 +48,7 @@ Configuration is loaded from `appsettings.json` and environment variables:
 - `GitHub:Token` - GitHub personal access token (increases API rate limit from 60 to 5000 requests/hour)
 - `AI:BaseUrl` - AI provider base URL (default: `https://ollama.com/v1/`)
 - `AI:ApiKey` - AI provider API key
-- `AI:Model` - AI model name (default: `gemma3:27b`)
+- `AI:Model` - AI model name (default: `gemma4:31b`)
 
 ## Directory Structure
 

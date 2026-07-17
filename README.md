@@ -33,7 +33,7 @@ A GitHub release viewer for npm packages. Track release notes across your favori
 - **Feed** - Combined feed with server-side grouping, filtering stable/pre-release
 - **Package Picker** - Filter releases by selected packages
 - **Sync Engine** - Fetch releases from GitHub with rate limit awareness
-- **AI Summaries** - Generate concise release note summaries using Ollama Cloud (gemma3:27b)
+- **AI Summaries** - Generate concise release note summaries using Ollama Cloud (gemma4:31b)
 - **Watchlist** - Per-user package watchlists with default packages on signup
 - **Subscriptions** - Stripe-powered Pro subscriptions
 - **Email Notifications** - Welcome, release, and weekly digest emails via Resend
@@ -69,7 +69,7 @@ Stripe__SecretKey=sk_test_...
 Stripe__WebhookSecret=whsec_...
 AI__ApiKey=...
 AI__BaseUrl=https://ollama.com/v1/
-AI__Model=gemma3:27b
+AI__Model=gemma4:31b
 RESEND_API_KEY=re_...
 DATABASE_URL=Server=localhost;Database=PatchNotes;User id=sa;Password=...;TrustServerCertificate=true
 ```
@@ -279,7 +279,7 @@ PatchNotes/
 - Entity Framework Core (SQLite dev / SQL Server prod)
 - Azure Functions (isolated worker, timer trigger)
 - GitHub API integration
-- AI summaries via Ollama Cloud (gemma3:27b, OpenAI-compatible API)
+- AI summaries via Ollama Cloud (gemma4:31b, OpenAI-compatible API)
 - Stytch B2C authentication
 - Stripe subscriptions
 

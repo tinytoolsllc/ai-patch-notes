@@ -24,5 +24,5 @@ public class AiClientOptions
     /// <summary>
     /// The model to use for summarization.
     /// </summary>
-    public string Model { get; set; } = "gemma3:27b";
+    public string Model { get; set; } = "gemma4:31b";
 }

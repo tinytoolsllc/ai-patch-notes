@@ -117,7 +117,7 @@ Configuration is loaded from `appsettings.json` and environment variables:
 
 - `AI:BaseUrl` - AI provider base URL (default: `https://ollama.com/v1/`)
 - `AI:ApiKey` - AI provider API key
-- `AI:Model` - AI model name (default: `gemma3:27b`)
+- `AI:Model` - AI model name (default: `gemma4:31b`)
 - `Stytch:ProjectId` - Stytch project ID
 - `Stytch:Secret` - Stytch secret
 - `Stytch:WebhookSecret` - Secret for webhook signature verification
