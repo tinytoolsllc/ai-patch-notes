@@ -5,6 +5,11 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+    ignore:
+      # @types/node major must track devEngines.runtime.node (>=22).
+      # Pinned to 22.x via the catalog in pnpm-workspace.yaml.
+      - dependency-name: "@types/node"
+        update-types: ["version-update:semver-major"]
     groups:
       dev-dependencies:
         patterns:
@@ -16,6 +21,11 @@ updates:
     directory: "/patchnotes-web"
     schedule:
       interval: "weekly"
+    ignore:
+      # @types/node major must track devEngines.runtime.node (>=22).
+      # Pinned to 22.x via the catalog in pnpm-workspace.yaml.
+      - dependency-name: "@types/node"
+        update-types: ["version-update:semver-major"]
     groups:
       production:
         dependency-type: "production"
@@ -31,6 +41,11 @@ updates:
     directory: "/patchnotes-email"
     schedule:
       interval: "weekly"
+    ignore:
+      # @types/node major must track devEngines.runtime.node (>=22).
+      # Pinned to 22.x via the catalog in pnpm-workspace.yaml.
+      - dependency-name: "@types/node"
+        update-types: ["version-update:semver-major"]
     groups:
       production:
         dependency-type: "production"
@@ -60,6 +75,11 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+    ignore:
+      # v6 bootstraps pnpm v11-rc, which is incompatible with our lockfile.
+      # Action is pinned to v5 in the workflows (see 5c866dd).
+      - dependency-name: "pnpm/action-setup"
+        versions: [">=6"]
     groups:
       actions:
         patterns:
