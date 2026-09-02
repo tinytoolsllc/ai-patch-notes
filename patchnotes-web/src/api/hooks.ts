@@ -144,9 +144,7 @@ export function usePackageByOwnerRepo(
   repo: string,
   opts?: {
     refetchInterval?:
-      | number
-      | false
-      | ((query: { state: { data: unknown } }) => number | false)
+      number | false | ((query: { state: { data: unknown } }) => number | false)
   }
 ) {
   return useGetPackageByOwnerRepo(owner, repo, {
