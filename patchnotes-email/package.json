@@ -4,8 +4,8 @@
   "description": "",
   "main": "dist/src/functions/*.js",
   "scripts": {
-    "build": "prisma generate && tsgo",
-    "watch": "tsgo -w",
+    "build": "prisma generate && tsc",
+    "watch": "tsc -w",
     "clean": "rimraf dist",
     "prestart": "pnpm clean && pnpm build",
     "start": "func start",
@@ -32,7 +32,6 @@
     "@eslint/js": "^10.0.1",
     "@types/node": "catalog:",
     "@types/react": "catalog:",
-    "@typescript/native-preview": "catalog:",
     "azure-functions-core-tools": "^4.x",
     "dotenv": "^17.4.2",
     "eslint": "^10.2.0",
