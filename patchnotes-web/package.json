@@ -24,8 +24,8 @@
     "*.{json,css,md,html}": "prettier --write"
   },
   "dependencies": {
-    "@stytch/react": "^20.0.5",
-    "@tanstack/react-pacer": "^0.22.1",
+    "@stytch/react": "^20.2.0",
+    "@tanstack/react-pacer": "^0.23.0",
     "@tanstack/react-query": "^5.100.14",
     "@tanstack/react-router": "^1.170.16",
     "lucide-react": "^1.16.0",
