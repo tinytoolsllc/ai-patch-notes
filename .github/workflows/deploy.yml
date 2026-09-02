@@ -85,8 +85,26 @@ jobs:
         run: |
           pnpm --filter patchnotes-email deploy publish/email-function --prod
           cp patchnotes-email/host.json publish/email-function/
-          # Re-install with hoisted layout so Azure Functions can resolve all deps
-          # (pnpm's symlinked node_modules breaks when deployed to Azure)
+          # Re-install with a hoisted layout so Azure Functions can resolve all deps.
+          #
+          # pnpm's node_modules is symlink-based. functions-action zips the folder
+          # preserving (not resolving) symlinks, and the Functions runtime does not
+          # follow symlinks in a zip deployment, so deps fail to resolve at runtime.
+          #
+          # This is NOT temporary scaffolding -- upstream has no fix and none is queued:
+          #   https://github.com/Azure/functions-action/issues/332
+          #     (open since 2026-03, zero comments, still labelled need-to-triage)
+          #   https://github.com/Azure/azure-functions-nodejs-library/issues/260
+          #     (open since 2024-05, still labelled "Needs: Attention")
+          # Please don't "clean this up" without checking those first.
+          #
+          # The empty pnpm-workspace.yaml detaches this directory from the parent
+          # workspace so pnpm doesn't walk up and re-attach it.
+          #
+          # NOTE: this is the only install in the repo using --no-frozen-lockfile, so
+          # it is the one place a pnpm major upgrade can silently change resolution.
+          # Validate any pnpm major bump by deploying and confirming the function
+          # actually starts -- green CI only proves the package builds.
           cd publish/email-function
           echo "node-linker=hoisted" > .npmrc
           echo "" > pnpm-workspace.yaml
