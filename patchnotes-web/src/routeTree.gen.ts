@@ -9,86 +9,106 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as WatchlistRouteImport } from './routes/watchlist'
-import { Route as SubscriptionSuccessRouteImport } from './routes/subscription-success'
-import { Route as SubscriptionCanceledRouteImport } from './routes/subscription-canceled'
-import { Route as SettingsRouteImport } from './routes/settings'
-import { Route as PrivacyRouteImport } from './routes/privacy'
-import { Route as PricingRouteImport } from './routes/pricing'
-import { Route as OnboardingRouteImport } from './routes/onboarding'
-import { Route as LoginRouteImport } from './routes/login'
-import { Route as AuthenticateRouteImport } from './routes/authenticate'
-import { Route as AdminRouteImport } from './routes/admin'
-import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as ReleasesReleaseIdRouteImport } from './routes/releases.$releaseId'
-import { Route as PackagesOwnerRouteImport } from './routes/packages.$owner'
-import { Route as AdminResetRouteImport } from './routes/admin_.reset'
-import { Route as AdminHealthRouteImport } from './routes/admin_.health'
+import { Route as AboutRouteImport } from './routes/about'
+import { Route as AdminRouteImport } from './routes/admin'
+import { Route as AuthenticateRouteImport } from './routes/authenticate'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as OnboardingRouteImport } from './routes/onboarding'
+import { Route as PricingRouteImport } from './routes/pricing'
+import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as SubscriptionCanceledRouteImport } from './routes/subscription-canceled'
+import { Route as SubscriptionSuccessRouteImport } from './routes/subscription-success'
+import { Route as WatchlistRouteImport } from './routes/watchlist'
 import { Route as AdminEmailsRouteImport } from './routes/admin_.emails'
+import { Route as AdminHealthRouteImport } from './routes/admin_.health'
+import { Route as AdminResetRouteImport } from './routes/admin_.reset'
+import { Route as PackagesOwnerRouteImport } from './routes/packages.$owner'
+import { Route as ReleasesReleaseIdRouteImport } from './routes/releases.$releaseId'
 import { Route as PackagesOwnerIndexRouteImport } from './routes/packages.$owner.index'
 import { Route as PackagesOwnerRepoRouteImport } from './routes/packages.$owner.$repo'
 
-const WatchlistRoute = WatchlistRouteImport.update({
-  id: '/watchlist',
-  path: '/watchlist',
-  getParentRoute: () => rootRouteImport,
-} as any).lazy(() => import('./routes/watchlist.lazy').then((d) => d.Route))
-const SubscriptionSuccessRoute = SubscriptionSuccessRouteImport.update({
-  id: '/subscription-success',
-  path: '/subscription-success',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SubscriptionCanceledRoute = SubscriptionCanceledRouteImport.update({
-  id: '/subscription-canceled',
-  path: '/subscription-canceled',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SettingsRoute = SettingsRouteImport.update({
-  id: '/settings',
-  path: '/settings',
-  getParentRoute: () => rootRouteImport,
-} as any).lazy(() => import('./routes/settings.lazy').then((d) => d.Route))
-const PrivacyRoute = PrivacyRouteImport.update({
-  id: '/privacy',
-  path: '/privacy',
-  getParentRoute: () => rootRouteImport,
-} as any).lazy(() => import('./routes/privacy.lazy').then((d) => d.Route))
-const PricingRoute = PricingRouteImport.update({
-  id: '/pricing',
-  path: '/pricing',
-  getParentRoute: () => rootRouteImport,
-} as any).lazy(() => import('./routes/pricing.lazy').then((d) => d.Route))
-const OnboardingRoute = OnboardingRouteImport.update({
-  id: '/onboarding',
-  path: '/onboarding',
-  getParentRoute: () => rootRouteImport,
-} as any).lazy(() => import('./routes/onboarding.lazy').then((d) => d.Route))
-const LoginRoute = LoginRouteImport.update({
-  id: '/login',
-  path: '/login',
-  getParentRoute: () => rootRouteImport,
-} as any).lazy(() => import('./routes/login.lazy').then((d) => d.Route))
-const AuthenticateRoute = AuthenticateRouteImport.update({
-  id: '/authenticate',
-  path: '/authenticate',
-  getParentRoute: () => rootRouteImport,
-} as any).lazy(() => import('./routes/authenticate.lazy').then((d) => d.Route))
-const AdminRoute = AdminRouteImport.update({
-  id: '/admin',
-  path: '/admin',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AboutRoute = AboutRouteImport.update({
-  id: '/about',
-  path: '/about',
-  getParentRoute: () => rootRouteImport,
-} as any).lazy(() => import('./routes/about.lazy').then((d) => d.Route))
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any).lazy(() => import('./routes/index.lazy').then((d) => d.Route))
+const AboutRoute = AboutRouteImport.update({
+  id: '/about',
+  path: '/about',
+  getParentRoute: () => rootRouteImport,
+} as any).lazy(() => import('./routes/about.lazy').then((d) => d.Route))
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticateRoute = AuthenticateRouteImport.update({
+  id: '/authenticate',
+  path: '/authenticate',
+  getParentRoute: () => rootRouteImport,
+} as any).lazy(() => import('./routes/authenticate.lazy').then((d) => d.Route))
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any).lazy(() => import('./routes/login.lazy').then((d) => d.Route))
+const OnboardingRoute = OnboardingRouteImport.update({
+  id: '/onboarding',
+  path: '/onboarding',
+  getParentRoute: () => rootRouteImport,
+} as any).lazy(() => import('./routes/onboarding.lazy').then((d) => d.Route))
+const PricingRoute = PricingRouteImport.update({
+  id: '/pricing',
+  path: '/pricing',
+  getParentRoute: () => rootRouteImport,
+} as any).lazy(() => import('./routes/pricing.lazy').then((d) => d.Route))
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any).lazy(() => import('./routes/privacy.lazy').then((d) => d.Route))
+const SettingsRoute = SettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any).lazy(() => import('./routes/settings.lazy').then((d) => d.Route))
+const SubscriptionCanceledRoute = SubscriptionCanceledRouteImport.update({
+  id: '/subscription-canceled',
+  path: '/subscription-canceled',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SubscriptionSuccessRoute = SubscriptionSuccessRouteImport.update({
+  id: '/subscription-success',
+  path: '/subscription-success',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WatchlistRoute = WatchlistRouteImport.update({
+  id: '/watchlist',
+  path: '/watchlist',
+  getParentRoute: () => rootRouteImport,
+} as any).lazy(() => import('./routes/watchlist.lazy').then((d) => d.Route))
+const AdminEmailsRoute = AdminEmailsRouteImport.update({
+  id: '/admin_/emails',
+  path: '/admin/emails',
+  getParentRoute: () => rootRouteImport,
+} as any).lazy(() => import('./routes/admin_.emails.lazy').then((d) => d.Route))
+const AdminHealthRoute = AdminHealthRouteImport.update({
+  id: '/admin_/health',
+  path: '/admin/health',
+  getParentRoute: () => rootRouteImport,
+} as any).lazy(() => import('./routes/admin_.health.lazy').then((d) => d.Route))
+const AdminResetRoute = AdminResetRouteImport.update({
+  id: '/admin_/reset',
+  path: '/admin/reset',
+  getParentRoute: () => rootRouteImport,
+} as any).lazy(() => import('./routes/admin_.reset.lazy').then((d) => d.Route))
+const PackagesOwnerRoute = PackagesOwnerRouteImport.update({
+  id: '/packages/$owner',
+  path: '/packages/$owner',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ReleasesReleaseIdRoute = ReleasesReleaseIdRouteImport.update({
   id: '/releases/$releaseId',
   path: '/releases/$releaseId',
@@ -96,26 +116,6 @@ const ReleasesReleaseIdRoute = ReleasesReleaseIdRouteImport.update({
 } as any).lazy(() =>
   import('./routes/releases.$releaseId.lazy').then((d) => d.Route),
 )
-const PackagesOwnerRoute = PackagesOwnerRouteImport.update({
-  id: '/packages/$owner',
-  path: '/packages/$owner',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminResetRoute = AdminResetRouteImport.update({
-  id: '/admin_/reset',
-  path: '/admin/reset',
-  getParentRoute: () => rootRouteImport,
-} as any).lazy(() => import('./routes/admin_.reset.lazy').then((d) => d.Route))
-const AdminHealthRoute = AdminHealthRouteImport.update({
-  id: '/admin_/health',
-  path: '/admin/health',
-  getParentRoute: () => rootRouteImport,
-} as any).lazy(() => import('./routes/admin_.health.lazy').then((d) => d.Route))
-const AdminEmailsRoute = AdminEmailsRouteImport.update({
-  id: '/admin_/emails',
-  path: '/admin/emails',
-  getParentRoute: () => rootRouteImport,
-} as any).lazy(() => import('./routes/admin_.emails.lazy').then((d) => d.Route))
 const PackagesOwnerIndexRoute = PackagesOwnerIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -279,74 +279,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/watchlist': {
-      id: '/watchlist'
-      path: '/watchlist'
-      fullPath: '/watchlist'
-      preLoaderRoute: typeof WatchlistRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/subscription-success': {
-      id: '/subscription-success'
-      path: '/subscription-success'
-      fullPath: '/subscription-success'
-      preLoaderRoute: typeof SubscriptionSuccessRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/subscription-canceled': {
-      id: '/subscription-canceled'
-      path: '/subscription-canceled'
-      fullPath: '/subscription-canceled'
-      preLoaderRoute: typeof SubscriptionCanceledRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/settings': {
-      id: '/settings'
-      path: '/settings'
-      fullPath: '/settings'
-      preLoaderRoute: typeof SettingsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/privacy': {
-      id: '/privacy'
-      path: '/privacy'
-      fullPath: '/privacy'
-      preLoaderRoute: typeof PrivacyRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/pricing': {
-      id: '/pricing'
-      path: '/pricing'
-      fullPath: '/pricing'
-      preLoaderRoute: typeof PricingRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/onboarding': {
-      id: '/onboarding'
-      path: '/onboarding'
-      fullPath: '/onboarding'
-      preLoaderRoute: typeof OnboardingRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/login': {
-      id: '/login'
-      path: '/login'
-      fullPath: '/login'
-      preLoaderRoute: typeof LoginRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/authenticate': {
-      id: '/authenticate'
-      path: '/authenticate'
-      fullPath: '/authenticate'
-      preLoaderRoute: typeof AuthenticateRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin': {
-      id: '/admin'
-      path: '/admin'
-      fullPath: '/admin'
-      preLoaderRoute: typeof AdminRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/about': {
@@ -356,32 +293,81 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AboutRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/releases/$releaseId': {
-      id: '/releases/$releaseId'
-      path: '/releases/$releaseId'
-      fullPath: '/releases/$releaseId'
-      preLoaderRoute: typeof ReleasesReleaseIdRouteImport
+    '/authenticate': {
+      id: '/authenticate'
+      path: '/authenticate'
+      fullPath: '/authenticate'
+      preLoaderRoute: typeof AuthenticateRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/packages/$owner': {
-      id: '/packages/$owner'
-      path: '/packages/$owner'
-      fullPath: '/packages/$owner'
-      preLoaderRoute: typeof PackagesOwnerRouteImport
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/admin_/reset': {
-      id: '/admin_/reset'
-      path: '/admin/reset'
-      fullPath: '/admin/reset'
-      preLoaderRoute: typeof AdminResetRouteImport
+    '/onboarding': {
+      id: '/onboarding'
+      path: '/onboarding'
+      fullPath: '/onboarding'
+      preLoaderRoute: typeof OnboardingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pricing': {
+      id: '/pricing'
+      path: '/pricing'
+      fullPath: '/pricing'
+      preLoaderRoute: typeof PricingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/subscription-canceled': {
+      id: '/subscription-canceled'
+      path: '/subscription-canceled'
+      fullPath: '/subscription-canceled'
+      preLoaderRoute: typeof SubscriptionCanceledRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/subscription-success': {
+      id: '/subscription-success'
+      path: '/subscription-success'
+      fullPath: '/subscription-success'
+      preLoaderRoute: typeof SubscriptionSuccessRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/watchlist': {
+      id: '/watchlist'
+      path: '/watchlist'
+      fullPath: '/watchlist'
+      preLoaderRoute: typeof WatchlistRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin_/emails': {
+      id: '/admin_/emails'
+      path: '/admin/emails'
+      fullPath: '/admin/emails'
+      preLoaderRoute: typeof AdminEmailsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin_/health': {
@@ -391,11 +377,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminHealthRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/admin_/emails': {
-      id: '/admin_/emails'
-      path: '/admin/emails'
-      fullPath: '/admin/emails'
-      preLoaderRoute: typeof AdminEmailsRouteImport
+    '/admin_/reset': {
+      id: '/admin_/reset'
+      path: '/admin/reset'
+      fullPath: '/admin/reset'
+      preLoaderRoute: typeof AdminResetRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/packages/$owner': {
+      id: '/packages/$owner'
+      path: '/packages/$owner'
+      fullPath: '/packages/$owner'
+      preLoaderRoute: typeof PackagesOwnerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/releases/$releaseId': {
+      id: '/releases/$releaseId'
+      path: '/releases/$releaseId'
+      fullPath: '/releases/$releaseId'
+      preLoaderRoute: typeof ReleasesReleaseIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/packages/$owner/': {

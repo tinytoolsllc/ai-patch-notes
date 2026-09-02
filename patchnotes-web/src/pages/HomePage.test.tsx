@@ -76,11 +76,17 @@ describe('HomePage', () => {
       await waitFor(() => {
         expect(screen.getByText('react')).toBeInTheDocument()
       })
+      // LazyMarkdown lazy-loads react-markdown behind a Suspense boundary with a
+      // null fallback, so the summary lands in a later paint than the package
+      // name. These must be awaited — a synchronous getByText here races the
+      // dynamic import and only passed by luck.
       // The markdown headings should be rendered (h2 → h4 in card)
-      expect(screen.getByText('TL;DR')).toBeInTheDocument()
-      expect(screen.getByText('Breaking')).toBeInTheDocument()
+      expect(await screen.findByText('TL;DR')).toBeInTheDocument()
+      expect(await screen.findByText('Breaking')).toBeInTheDocument()
       // Bullet list items should be rendered
-      expect(screen.getByText('Removed legacy context API')).toBeInTheDocument()
+      expect(
+        await screen.findByText('Removed legacy context API')
+      ).toBeInTheDocument()
     })
 
     it('sees the hero card', async () => {
