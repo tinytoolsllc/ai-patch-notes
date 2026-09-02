@@ -1,5 +1,8 @@
 {
   "private": true,
+  "scripts": {
+    "verify": "node scripts/verify.mjs"
+  },
   "devEngines": {
     "runtime": {
       "name": "node",

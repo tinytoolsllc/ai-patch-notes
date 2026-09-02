@@ -1,10 +1,5 @@
 export type PrereleaseType =
-  | 'canary'
-  | 'beta'
-  | 'alpha'
-  | 'rc'
-  | 'next'
-  | 'preview'
+  'canary' | 'beta' | 'alpha' | 'rc' | 'next' | 'preview'
 
 export function formatDate(dateString: string | undefined | null): string {
   if (!dateString) return ''
