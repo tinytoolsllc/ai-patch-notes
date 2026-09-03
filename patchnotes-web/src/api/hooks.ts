@@ -82,6 +82,7 @@ export function usePackages() {
 export function usePackage(id: string) {
   return useGetPackage(id, {
     query: {
+      enabled: !!id,
       select: (res) => validateResponse(GetPackageResponse, res.data),
     },
   })
@@ -114,6 +115,7 @@ export function useReleases(options?: ReleasesOptions) {
 export function useRelease(id: string) {
   return useGetRelease(id, {
     query: {
+      enabled: !!id,
       select: (res) => validateResponse(GetReleaseResponse, res.data),
     },
   })
@@ -122,6 +124,7 @@ export function useRelease(id: string) {
 export function usePackageReleases(packageId: string) {
   return useGetPackageReleases(packageId, undefined, {
     query: {
+      enabled: !!packageId,
       select: (res) =>
         validateResponse(GetPackageReleasesResponse, res.data).items,
     },
@@ -133,6 +136,7 @@ export function usePackageReleases(packageId: string) {
 export function usePackagesByOwner(owner: string) {
   return useGetPackagesByOwner(owner, undefined, {
     query: {
+      enabled: !!owner,
       select: (res) =>
         validateResponse(GetPackagesByOwnerResponse, res.data).items,
     },
@@ -149,6 +153,7 @@ export function usePackageByOwnerRepo(
 ) {
   return useGetPackageByOwnerRepo(owner, repo, {
     query: {
+      enabled: !!(owner && repo),
       select: (res) =>
         validateResponse(GetPackageByOwnerRepoResponse, res.data),
       ...(opts?.refetchInterval !== undefined && {

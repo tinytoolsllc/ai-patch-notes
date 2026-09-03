@@ -21,6 +21,9 @@ import {
   useGithubSearch,
   useResetSummaries,
   useResetReleases,
+  useRelease,
+  usePackagesByOwner,
+  usePackageByOwnerRepo,
 } from './hooks'
 
 function createWrapper() {
@@ -137,6 +140,49 @@ describe('usePackageReleases', () => {
 
   it('does not fetch when packageId is empty', async () => {
     const { result } = renderHook(() => usePackageReleases(''), {
+      wrapper: createWrapper(),
+    })
+
+    expect(result.current.isFetching).toBe(false)
+  })
+})
+
+// These three hooks pass a path parameter straight into the URL, so an empty
+// value would produce a request to a malformed path (`/api/releases/`). The
+// generated client used to disable such a query on its own, but orval now
+// only guards against null and undefined -- see the `enabled` options in
+// hooks.ts. Nothing else stops these, so they are covered here directly.
+describe('useRelease', () => {
+  it('does not fetch when id is empty', () => {
+    const { result } = renderHook(() => useRelease(''), {
+      wrapper: createWrapper(),
+    })
+
+    expect(result.current.isFetching).toBe(false)
+  })
+})
+
+describe('usePackagesByOwner', () => {
+  it('does not fetch when owner is empty', () => {
+    const { result } = renderHook(() => usePackagesByOwner(''), {
+      wrapper: createWrapper(),
+    })
+
+    expect(result.current.isFetching).toBe(false)
+  })
+})
+
+describe('usePackageByOwnerRepo', () => {
+  it('does not fetch when owner is empty', () => {
+    const { result } = renderHook(() => usePackageByOwnerRepo('', 'react'), {
+      wrapper: createWrapper(),
+    })
+
+    expect(result.current.isFetching).toBe(false)
+  })
+
+  it('does not fetch when repo is empty', () => {
+    const { result } = renderHook(() => usePackageByOwnerRepo('facebook', ''), {
       wrapper: createWrapper(),
     })
 
