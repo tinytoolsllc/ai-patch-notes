@@ -1,20 +1,16 @@
-import { type ReactNode } from 'react'
+import { type ReactNode } from "react";
 
 type TooltipProps = {
-  label: string
-  children: ReactNode
-  position?: 'top' | 'bottom'
-}
+  label: string;
+  children: ReactNode;
+  position?: "top" | "bottom";
+};
 
-export function Tooltip({
-  label,
-  children,
-  position = 'bottom',
-}: TooltipProps) {
+export function Tooltip({ label, children, position = "bottom" }: TooltipProps) {
   const positionClasses =
-    position === 'top'
-      ? 'bottom-full mb-2 after:top-full after:border-t-surface-inverse'
-      : 'top-full mt-2 after:bottom-full after:border-b-surface-inverse'
+    position === "top"
+      ? "bottom-full mb-2 after:top-full after:border-t-surface-inverse"
+      : "top-full mt-2 after:bottom-full after:border-b-surface-inverse";
 
   return (
     <div className="relative group/tooltip">
@@ -37,5 +33,5 @@ export function Tooltip({
         {label}
       </div>
     </div>
-  )
+  );
 }

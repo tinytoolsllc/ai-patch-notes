@@ -7,99 +7,97 @@ import {
   useEffect,
   useRef,
   type ReactNode,
-} from 'react'
-import { setGlobalErrorHandler } from '../queryClient'
+} from "react";
+import { setGlobalErrorHandler } from "../queryClient";
 
-type ToastType = 'error' | 'success' | 'info'
+type ToastType = "error" | "success" | "info";
 
 interface Toast {
-  id: string
-  message: string
-  type: ToastType
+  id: string;
+  message: string;
+  type: ToastType;
 }
 
 interface ToastContextValue {
-  showToast: (message: string, type?: ToastType) => void
-  showError: (message: string) => void
+  showToast: (message: string, type?: ToastType) => void;
+  showError: (message: string) => void;
 }
 
-const ToastContext = createContext<ToastContextValue | null>(null)
+const ToastContext = createContext<ToastContextValue | null>(null);
 
 export function useToast(): ToastContextValue {
-  const context = useContext(ToastContext)
+  const context = useContext(ToastContext);
   if (!context) {
-    throw new Error('useToast must be used within a ToastProvider')
+    throw new Error("useToast must be used within a ToastProvider");
   }
-  return context
+  return context;
 }
 
-const TOAST_DURATION = 5000
+const TOAST_DURATION = 5000;
 
 export function ToastProvider({ children }: { children: ReactNode }) {
-  const [toasts, setToasts] = useState<Toast[]>([])
-  const timeoutRefs = useRef<Map<string, ReturnType<typeof setTimeout>>>(
-    new Map()
-  )
+  const [toasts, setToasts] = useState<Toast[]>([]);
+  const timeoutRefs = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
 
   const removeToast = useCallback((id: string) => {
-    const timeout = timeoutRefs.current.get(id)
+    const timeout = timeoutRefs.current.get(id);
     if (timeout) {
-      clearTimeout(timeout)
-      timeoutRefs.current.delete(id)
+      clearTimeout(timeout);
+      timeoutRefs.current.delete(id);
     }
-    setToasts((prev) => prev.filter((t) => t.id !== id))
-  }, [])
+    setToasts((prev) => prev.filter((t) => t.id !== id));
+  }, []);
 
   const showToast = useCallback(
-    (message: string, type: ToastType = 'info') => {
-      const id = `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`
-      setToasts((prev) => [...prev, { id, message, type }])
+    (message: string, type: ToastType = "info") => {
+      const id = `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+      setToasts((prev) => [...prev, { id, message, type }]);
       const timeout = setTimeout(() => {
-        timeoutRefs.current.delete(id)
-        removeToast(id)
-      }, TOAST_DURATION)
-      timeoutRefs.current.set(id, timeout)
+        timeoutRefs.current.delete(id);
+        removeToast(id);
+      }, TOAST_DURATION);
+      timeoutRefs.current.set(id, timeout);
     },
-    [removeToast]
-  )
+    [removeToast],
+  );
 
   useEffect(function cleanupToastTimeouts() {
-    const timeouts = timeoutRefs.current
+    const timeouts = timeoutRefs.current;
     return () => {
-      timeouts.forEach((t) => clearTimeout(t))
-    }
-  }, [])
+      timeouts.forEach((t) => clearTimeout(t));
+    };
+  }, []);
 
   const showError = useCallback(
     (message: string) => {
-      showToast(message, 'error')
+      showToast(message, "error");
     },
-    [showToast]
-  )
+    [showToast],
+  );
 
   useEffect(
     function registerGlobalErrorHandler() {
-      setGlobalErrorHandler(showError)
+      setGlobalErrorHandler(showError);
     },
-    [showError]
-  )
+    [showError],
+  );
 
   return (
     <ToastContext value={{ showToast, showError }}>
       {children}
       <ToastContainer toasts={toasts} onDismiss={removeToast} />
     </ToastContext>
-  )
+  );
 }
 
 function ToastContainer({
   toasts,
   onDismiss,
 }: {
-  toasts: Toast[]
-  onDismiss: (id: string) => void
+  toasts: Toast[];
+  onDismiss: (id: string) => void;
 }) {
-  if (toasts.length === 0) return null
+  if (toasts.length === 0) return null;
 
   return (
     <div className="fixed bottom-4 right-4 z-50 flex flex-col gap-2">
@@ -107,21 +105,15 @@ function ToastContainer({
         <ToastItem key={toast.id} toast={toast} onDismiss={onDismiss} />
       ))}
     </div>
-  )
+  );
 }
 
-function ToastItem({
-  toast,
-  onDismiss,
-}: {
-  toast: Toast
-  onDismiss: (id: string) => void
-}) {
+function ToastItem({ toast, onDismiss }: { toast: Toast; onDismiss: (id: string) => void }) {
   const bgColor = {
-    error: 'bg-red-600',
-    success: 'bg-green-600',
-    info: 'bg-blue-600',
-  }[toast.type]
+    error: "bg-red-600",
+    success: "bg-green-600",
+    info: "bg-blue-600",
+  }[toast.type];
 
   return (
     <div
@@ -134,12 +126,7 @@ function ToastItem({
         className="text-white/80 hover:text-white"
         aria-label="Dismiss"
       >
-        <svg
-          className="h-4 w-4"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
+        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -149,5 +136,5 @@ function ToastItem({
         </svg>
       </button>
     </div>
-  )
+  );
 }

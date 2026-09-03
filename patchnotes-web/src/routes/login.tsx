@@ -1,18 +1,17 @@
-import { createFileRoute } from '@tanstack/react-router'
-import { seoHead } from '../seo'
+import { createFileRoute } from "@tanstack/react-router";
+import { seoHead } from "../seo";
 
-export const Route = createFileRoute('/login')({
+export const Route = createFileRoute("/login")({
   validateSearch: (search: Record<string, unknown>) => ({
-    returnUrl:
-      typeof search.returnUrl === 'string' ? search.returnUrl : undefined,
+    returnUrl: typeof search.returnUrl === "string" ? search.returnUrl : undefined,
   }),
   head: () => ({
     ...seoHead({
-      title: 'Sign In | My Release Notes',
+      title: "Sign In | My Release Notes",
       description:
-        'Sign in to My Release Notes to manage your watchlist and track GitHub releases.',
-      path: '/login',
+        "Sign in to My Release Notes to manage your watchlist and track GitHub releases.",
+      path: "/login",
       noindex: true,
     }),
   }),
-})
+});

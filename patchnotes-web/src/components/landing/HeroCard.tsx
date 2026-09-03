@@ -1,6 +1,6 @@
-import { useState } from 'react'
-import { Link, useLocation } from '@tanstack/react-router'
-import { useStytchUser } from '@stytch/react'
+import { useState } from "react";
+import { Link, useLocation } from "@tanstack/react-router";
+import { useStytchUser } from "@stytch/react";
 import {
   ChevronLeft,
   ChevronRight,
@@ -16,96 +16,91 @@ import {
   Zap,
   Shield,
   Clock,
-} from 'lucide-react'
-import { Card, Button } from '../ui'
-import { useFilterStore } from '../../stores/filterStore'
+} from "lucide-react";
+import { Card, Button } from "../ui";
+import { useFilterStore } from "../../stores/filterStore";
 
-const SLIDE_COUNT = 4
+const SLIDE_COUNT = 4;
 
 const PRICING_ROWS: { label: string; free: string; pro: string }[] = [
-  { label: 'Packages', free: '5', pro: 'Unlimited' },
-  { label: 'AI Summaries', free: '✓', pro: '✓' },
-  { label: 'Grouping & Filtering', free: '✓', pro: '✓' },
-  { label: 'No Ads', free: '✓', pro: '✓' },
-  { label: 'Weekly Email', free: '✗', pro: '✓' },
-]
+  { label: "Packages", free: "5", pro: "Unlimited" },
+  { label: "AI Summaries", free: "✓", pro: "✓" },
+  { label: "Grouping & Filtering", free: "✓", pro: "✓" },
+  { label: "No Ads", free: "✓", pro: "✓" },
+  { label: "Weekly Email", free: "✗", pro: "✓" },
+];
 
 const features = [
   {
     icon: Sparkles,
-    title: 'AI Summaries',
-    description:
-      'AI condenses changelogs into clear, actionable insights you can read in seconds.',
+    title: "AI Summaries",
+    description: "AI condenses changelogs into clear, actionable insights you can read in seconds.",
   },
   {
     icon: Package,
-    title: 'Track Any Package',
-    description:
-      'Watch any public GitHub repo. Get notified the moment new versions drop.',
+    title: "Track Any Package",
+    description: "Watch any public GitHub repo. Get notified the moment new versions drop.",
   },
   {
     icon: SlidersHorizontal,
-    title: 'Smart Filtering',
+    title: "Smart Filtering",
     description:
-      'Group by package, sort by date or name, and hide pre-releases you don\u2019t need.',
+      "Group by package, sort by date or name, and hide pre-releases you don\u2019t need.",
   },
   {
     icon: MonitorSmartphone,
-    title: 'Works Everywhere',
-    description: 'Fully responsive. Check releases from any device, any time.',
+    title: "Works Everywhere",
+    description: "Fully responsive. Check releases from any device, any time.",
   },
-]
+];
 
 const steps = [
   {
     icon: UserPlus,
-    title: 'Sign up free',
-    description: 'Create an account with just your email.',
+    title: "Sign up free",
+    description: "Create an account with just your email.",
   },
   {
     icon: PackageSearch,
-    title: 'Pick your packages',
-    description: 'Select the GitHub packages you want to track.',
+    title: "Pick your packages",
+    description: "Select the GitHub packages you want to track.",
   },
   {
     icon: Bell,
-    title: 'Stay updated',
-    description: 'Get a personalized feed with AI summaries.',
+    title: "Stay updated",
+    description: "Get a personalized feed with AI summaries.",
   },
-]
+];
 
 const highlights = [
   {
     icon: Zap,
-    title: 'AI Summaries',
-    description: 'Changelogs condensed into clear, actionable insights.',
+    title: "AI Summaries",
+    description: "Changelogs condensed into clear, actionable insights.",
   },
   {
     icon: Shield,
-    title: 'Always Free',
-    description: 'Track up to 5 packages at no cost, forever.',
+    title: "Always Free",
+    description: "Track up to 5 packages at no cost, forever.",
   },
   {
     icon: Clock,
-    title: 'Weekly Digest',
-    description: 'A curated summary of every release, delivered weekly.',
+    title: "Weekly Digest",
+    description: "A curated summary of every release, delivered weekly.",
   },
-]
+];
 
 // ---------------------------------------------------------------------------
 // Slide Bodies (content below the fixed header)
 // ---------------------------------------------------------------------------
 
 function HeroBodyMobile() {
-  const location = useLocation()
+  const location = useLocation();
   return (
     <div className="flex flex-col items-center gap-3">
       <div className="flex flex-col gap-1.5">
         {highlights.map((h) => (
-          <span
-            key={h.title}
-            className="flex items-center gap-2 text-sm text-text-secondary"
-          >
+          <span key={h.title} className="flex items-center gap-2 text-sm text-text-secondary">
             <Check className="w-4 h-4 text-emerald-500 shrink-0" />
             {h.title} — {h.description}
           </span>
@@ -115,11 +110,11 @@ function HeroBodyMobile() {
         <Button className="px-6 text-xs">Get Started Free</Button>
       </Link>
     </div>
-  )
+  );
 }
 
 function HeroBodyWeb() {
-  const location = useLocation()
+  const location = useLocation();
   return (
     <div className="flex flex-col items-center">
       <div className="flex items-center justify-center gap-8">
@@ -130,22 +125,16 @@ function HeroBodyWeb() {
             </div>
             <div>
               <p className="text-sm font-medium text-text-primary">{h.title}</p>
-              <p className="text-xs text-text-secondary max-w-[180px]">
-                {h.description}
-              </p>
+              <p className="text-xs text-text-secondary max-w-[180px]">{h.description}</p>
             </div>
           </div>
         ))}
       </div>
-      <Link
-        to="/login"
-        search={{ returnUrl: location.pathname }}
-        className="mt-3"
-      >
+      <Link to="/login" search={{ returnUrl: location.pathname }} className="mt-3">
         <Button className="px-6 text-xs">Get Started Free</Button>
       </Link>
     </div>
-  )
+  );
 }
 
 function HeroBody() {
@@ -158,7 +147,7 @@ function HeroBody() {
         <HeroBodyWeb />
       </div>
     </>
-  )
+  );
 }
 
 function FeaturesBodyMobile() {
@@ -167,21 +156,16 @@ function FeaturesBodyMobile() {
       {features.map((f) => (
         <div key={f.title} className="flex items-start gap-2">
           <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-brand-50 dark:bg-brand-950">
-            <f.icon
-              className="h-3.5 w-3.5 text-brand-600 dark:text-brand-400"
-              strokeWidth={1.5}
-            />
+            <f.icon className="h-3.5 w-3.5 text-brand-600 dark:text-brand-400" strokeWidth={1.5} />
           </div>
           <div>
             <p className="text-xs font-medium text-text-primary">{f.title}</p>
-            <p className="text-xs leading-tight text-text-secondary">
-              {f.description}
-            </p>
+            <p className="text-xs leading-tight text-text-secondary">{f.description}</p>
           </div>
         </div>
       ))}
     </div>
-  )
+  );
 }
 
 function FeaturesBodyWeb() {
@@ -190,10 +174,7 @@ function FeaturesBodyWeb() {
       {features.map((f) => (
         <div key={f.title} className="flex items-start gap-3">
           <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-brand-50 dark:bg-brand-950">
-            <f.icon
-              className="h-4 w-4 text-brand-600 dark:text-brand-400"
-              strokeWidth={1.5}
-            />
+            <f.icon className="h-4 w-4 text-brand-600 dark:text-brand-400" strokeWidth={1.5} />
           </div>
           <div>
             <p className="text-sm font-medium text-text-primary">{f.title}</p>
@@ -202,7 +183,7 @@ function FeaturesBodyWeb() {
         </div>
       ))}
     </div>
-  )
+  );
 }
 
 function FeaturesBody() {
@@ -215,7 +196,7 @@ function FeaturesBody() {
         <FeaturesBodyWeb />
       </div>
     </>
-  )
+  );
 }
 
 function HowItWorksBodyMobile() {
@@ -230,29 +211,22 @@ function HowItWorksBodyMobile() {
             </span>
           </div>
           <div>
-            <p className="text-xs font-medium text-text-primary">
-              {step.title}
-            </p>
-            <p className="text-xs leading-tight text-text-secondary">
-              {step.description}
-            </p>
+            <p className="text-xs font-medium text-text-primary">{step.title}</p>
+            <p className="text-xs leading-tight text-text-secondary">{step.description}</p>
           </div>
         </div>
       ))}
     </div>
-  )
+  );
 }
 
 function HowItWorksBodyWeb() {
-  const location = useLocation()
+  const location = useLocation();
   return (
     <div className="flex flex-col items-center">
       <div className="flex items-center justify-center gap-8">
         {steps.map((step, i) => (
-          <div
-            key={step.title}
-            className="flex flex-col items-center text-center"
-          >
+          <div key={step.title} className="flex flex-col items-center text-center">
             <div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand-600 text-white">
               <step.icon className="h-4 w-4" strokeWidth={1.5} />
               <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-surface-primary border-2 border-brand-600 text-2xs font-bold text-brand-600">
@@ -260,27 +234,19 @@ function HowItWorksBodyWeb() {
               </span>
             </div>
             <div>
-              <p className="text-sm font-medium text-text-primary">
-                {step.title}
-              </p>
-              <p className="text-xs text-text-secondary max-w-[180px]">
-                {step.description}
-              </p>
+              <p className="text-sm font-medium text-text-primary">{step.title}</p>
+              <p className="text-xs text-text-secondary max-w-[180px]">{step.description}</p>
             </div>
           </div>
         ))}
       </div>
-      <Link
-        to="/login"
-        search={{ returnUrl: location.pathname }}
-        className="mt-3"
-      >
+      <Link to="/login" search={{ returnUrl: location.pathname }} className="mt-3">
         <Button variant="secondary" className="px-5 text-xs">
           Create your free account
         </Button>
       </Link>
     </div>
-  )
+  );
 }
 
 function HowItWorksBody() {
@@ -293,7 +259,7 @@ function HowItWorksBody() {
         <HowItWorksBodyWeb />
       </div>
     </>
-  )
+  );
 }
 
 function PricingBody() {
@@ -319,11 +285,11 @@ function PricingBody() {
             <td className="py-1 px-2 text-center">
               <span
                 className={
-                  row.free === '\u2713'
-                    ? 'text-emerald-500'
-                    : row.free === '\u2717'
-                      ? 'text-text-tertiary'
-                      : 'text-text-primary font-medium'
+                  row.free === "\u2713"
+                    ? "text-emerald-500"
+                    : row.free === "\u2717"
+                      ? "text-text-tertiary"
+                      : "text-text-primary font-medium"
                 }
               >
                 {row.free}
@@ -332,9 +298,7 @@ function PricingBody() {
             <td className="py-1 px-2 text-center">
               <span
                 className={
-                  row.pro === '\u2713'
-                    ? 'text-emerald-500'
-                    : 'text-text-primary font-medium'
+                  row.pro === "\u2713" ? "text-emerald-500" : "text-text-primary font-medium"
                 }
               >
                 {row.pro}
@@ -344,7 +308,7 @@ function PricingBody() {
         ))}
       </tbody>
     </table>
-  )
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -353,43 +317,42 @@ function PricingBody() {
 
 const slides = [
   {
-    title: 'Never miss a release that matters',
-    subtitle: 'AI-powered summaries of every GitHub release.',
+    title: "Never miss a release that matters",
+    subtitle: "AI-powered summaries of every GitHub release.",
     Body: HeroBody,
   },
   {
-    title: 'Everything you need to stay current',
-    subtitle:
-      'Stop scrolling through changelogs. Get the information you need.',
+    title: "Everything you need to stay current",
+    subtitle: "Stop scrolling through changelogs. Get the information you need.",
     Body: FeaturesBody,
   },
   {
-    title: 'How it works',
-    subtitle: 'Get started in under a minute — no setup required.',
+    title: "How it works",
+    subtitle: "Get started in under a minute — no setup required.",
     Body: HowItWorksBody,
   },
   {
-    title: 'Simple pricing',
-    subtitle: 'Start free and upgrade when you need more. Cancel anytime.',
+    title: "Simple pricing",
+    subtitle: "Start free and upgrade when you need more. Cancel anytime.",
     Body: PricingBody,
   },
-]
+];
 
 // ---------------------------------------------------------------------------
 // Main Component
 // ---------------------------------------------------------------------------
 
 export function HeroCard() {
-  const { user } = useStytchUser()
-  const { heroDismissed, dismissHero } = useFilterStore()
-  const [index, setIndex] = useState(0)
+  const { user } = useStytchUser();
+  const { heroDismissed, dismissHero } = useFilterStore();
+  const [index, setIndex] = useState(0);
 
-  if (user || heroDismissed) return null
+  if (user || heroDismissed) return null;
 
-  const prev = () => setIndex((i) => (i - 1 + SLIDE_COUNT) % SLIDE_COUNT)
-  const next = () => setIndex((i) => (i + 1) % SLIDE_COUNT)
+  const prev = () => setIndex((i) => (i - 1 + SLIDE_COUNT) % SLIDE_COUNT);
+  const next = () => setIndex((i) => (i + 1) % SLIDE_COUNT);
 
-  const slide = slides[index]
+  const slide = slides[index];
 
   return (
     <Card padding="none" className="relative mb-6 overflow-hidden">
@@ -421,9 +384,7 @@ export function HeroCard() {
       <div className="px-8 pt-3 pb-1">
         {/* Fixed-position header */}
         <div className="text-center mb-2 sm:mb-3 h-[44px] sm:h-auto flex flex-col justify-center">
-          <h3 className="text-base font-semibold text-text-primary">
-            {slide.title}
-          </h3>
+          <h3 className="text-base font-semibold text-text-primary">{slide.title}</h3>
           <p className="text-xs text-text-tertiary mt-0.5">{slide.subtitle}</p>
         </div>
 
@@ -442,12 +403,12 @@ export function HeroCard() {
             aria-label={`Go to slide ${i + 1}`}
             className={`w-2 h-2 rounded-full transition-colors ${
               i === index
-                ? 'bg-brand-600 dark:bg-brand-400'
-                : 'bg-border-default hover:bg-text-tertiary'
+                ? "bg-brand-600 dark:bg-brand-400"
+                : "bg-border-default hover:bg-text-tertiary"
             }`}
           />
         ))}
       </div>
     </Card>
-  )
+  );
 }

@@ -1,31 +1,31 @@
-import { useState, useEffect, useCallback, useMemo } from 'react'
-import { Link } from '@tanstack/react-router'
-import { Sparkles } from 'lucide-react'
-import { Card } from '../ui/Card'
-import { Button } from '../ui/Button'
-import { Input } from '../ui/Input'
-import { Checkbox } from '../ui/Checkbox'
+import { useState, useEffect, useCallback, useMemo } from "react";
+import { Link } from "@tanstack/react-router";
+import { Sparkles } from "lucide-react";
+import { Card } from "../ui/Card";
+import { Button } from "../ui/Button";
+import { Input } from "../ui/Input";
+import { Checkbox } from "../ui/Checkbox";
 
 interface Package {
-  id: string
-  npmName?: string | null
-  githubOwner: string
-  githubRepo: string
+  id: string;
+  npmName?: string | null;
+  githubOwner: string;
+  githubRepo: string;
 }
 
 interface PackagePickerProps {
-  packages: Package[]
-  isLoading?: boolean
-  onSelectionChange?: (selectedIds: string[]) => void
-  onAddPackage?: (npmName: string) => Promise<void>
-  storageKey?: string
-  isPro?: boolean
-  packageLimit?: number
-  watchlistIds?: string[]
-  onWatchlistChange?: (selectedIds: string[]) => void
+  packages: Package[];
+  isLoading?: boolean;
+  onSelectionChange?: (selectedIds: string[]) => void;
+  onAddPackage?: (npmName: string) => Promise<void>;
+  storageKey?: string;
+  isPro?: boolean;
+  packageLimit?: number;
+  watchlistIds?: string[];
+  onWatchlistChange?: (selectedIds: string[]) => void;
 }
 
-const STORAGE_KEY_PREFIX = 'patchnotes:package-selection:'
+const STORAGE_KEY_PREFIX = "patchnotes:package-selection:";
 
 function PackageItemSkeleton() {
   return (
@@ -36,7 +36,7 @@ function PackageItemSkeleton() {
         <div className="h-3 w-32 rounded bg-surface-tertiary" />
       </div>
     </div>
-  )
+  );
 }
 
 export function PackagePicker({
@@ -44,123 +44,112 @@ export function PackagePicker({
   isLoading = false,
   onSelectionChange,
   onAddPackage,
-  storageKey = 'default',
+  storageKey = "default",
   isPro = false,
   packageLimit = 5,
   watchlistIds,
   onWatchlistChange,
 }: PackagePickerProps) {
-  const fullStorageKey = `${STORAGE_KEY_PREFIX}${storageKey}`
-  const useWatchlist = watchlistIds !== undefined
+  const fullStorageKey = `${STORAGE_KEY_PREFIX}${storageKey}`;
+  const useWatchlist = watchlistIds !== undefined;
 
   const [localSelectedIds, setLocalSelectedIds] = useState<Set<string>>(() => {
-    if (useWatchlist) return new Set(watchlistIds)
-    if (typeof window === 'undefined') return new Set()
+    if (useWatchlist) return new Set(watchlistIds);
+    if (typeof window === "undefined") return new Set();
     try {
-      const stored = localStorage.getItem(fullStorageKey)
+      const stored = localStorage.getItem(fullStorageKey);
       if (stored) {
-        const parsed = JSON.parse(stored) as unknown
-        if (Array.isArray(parsed)) return new Set(parsed as string[])
+        const parsed = JSON.parse(stored) as unknown;
+        if (Array.isArray(parsed)) return new Set(parsed as string[]);
       }
     } catch {
       // Ignore storage errors
     }
-    return new Set()
-  })
+    return new Set();
+  });
 
-  const [newPackageName, setNewPackageName] = useState('')
-  const [isAdding, setIsAdding] = useState(false)
+  const [newPackageName, setNewPackageName] = useState("");
+  const [isAdding, setIsAdding] = useState(false);
 
   const selectedIds = useMemo(
     () => (useWatchlist ? new Set(watchlistIds) : localSelectedIds),
-    [useWatchlist, watchlistIds, localSelectedIds]
-  )
+    [useWatchlist, watchlistIds, localSelectedIds],
+  );
 
   // Persist selection to localStorage (only when not using watchlist)
   useEffect(
     function persistSelectionToLocalStorage() {
-      if (useWatchlist) return
+      if (useWatchlist) return;
       try {
-        localStorage.setItem(
-          fullStorageKey,
-          JSON.stringify([...localSelectedIds])
-        )
+        localStorage.setItem(fullStorageKey, JSON.stringify([...localSelectedIds]));
       } catch {
         // Ignore storage errors
       }
     },
-    [localSelectedIds, fullStorageKey, useWatchlist]
-  )
+    [localSelectedIds, fullStorageKey, useWatchlist],
+  );
 
   const applyUpdate = useCallback(
     (updater: (prev: Set<string>) => Set<string>) => {
       if (useWatchlist) {
-        const next = [...updater(new Set(watchlistIds))]
-        onWatchlistChange?.(next)
-        onSelectionChange?.(next)
+        const next = [...updater(new Set(watchlistIds))];
+        onWatchlistChange?.(next);
+        onSelectionChange?.(next);
       } else {
-        const next = updater(localSelectedIds)
-        setLocalSelectedIds(next)
-        onSelectionChange?.([...next])
+        const next = updater(localSelectedIds);
+        setLocalSelectedIds(next);
+        onSelectionChange?.([...next]);
       }
     },
-    [
-      useWatchlist,
-      watchlistIds,
-      localSelectedIds,
-      onWatchlistChange,
-      onSelectionChange,
-    ]
-  )
+    [useWatchlist, watchlistIds, localSelectedIds, onWatchlistChange, onSelectionChange],
+  );
 
   const handleToggle = useCallback(
     (id: string) => {
       applyUpdate((prev) => {
-        const next = new Set(prev)
+        const next = new Set(prev);
         if (next.has(id)) {
-          next.delete(id)
+          next.delete(id);
         } else {
-          next.add(id)
+          next.add(id);
         }
-        return next
-      })
+        return next;
+      });
     },
-    [applyUpdate]
-  )
+    [applyUpdate],
+  );
 
   const handleSelectAll = useCallback(() => {
-    applyUpdate(() => new Set(packages.map((p) => p.id)))
-  }, [packages, applyUpdate])
+    applyUpdate(() => new Set(packages.map((p) => p.id)));
+  }, [packages, applyUpdate]);
 
   const handleDeselectAll = useCallback(() => {
-    applyUpdate(() => new Set())
-  }, [applyUpdate])
+    applyUpdate(() => new Set());
+  }, [applyUpdate]);
 
   const handleAddPackage = useCallback(async () => {
-    if (!newPackageName.trim() || !onAddPackage) return
+    if (!newPackageName.trim() || !onAddPackage) return;
 
-    setIsAdding(true)
+    setIsAdding(true);
     await onAddPackage(newPackageName.trim())
-      .then(() => setNewPackageName(''))
-      .finally(() => setIsAdding(false))
-  }, [newPackageName, onAddPackage])
+      .then(() => setNewPackageName(""))
+      .finally(() => setIsAdding(false));
+  }, [newPackageName, onAddPackage]);
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
-      if (e.key === 'Enter' && !e.shiftKey) {
-        e.preventDefault()
-        handleAddPackage()
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        handleAddPackage();
       }
     },
-    [handleAddPackage]
-  )
+    [handleAddPackage],
+  );
 
-  const allSelected =
-    packages.length > 0 && selectedIds.size === packages.length
-  const someSelected =
-    selectedIds.size > 0 && selectedIds.size < packages.length
-  const selectedCount = selectedIds.size
-  const isAtLimit = !isPro && packages.length >= packageLimit
+  const allSelected = packages.length > 0 && selectedIds.size === packages.length;
+  const someSelected = selectedIds.size > 0 && selectedIds.size < packages.length;
+  const selectedCount = selectedIds.size;
+  const isAtLimit = !isPro && packages.length >= packageLimit;
 
   return (
     <Card padding="none" className="overflow-hidden">
@@ -168,19 +157,13 @@ export function PackagePicker({
       <div className="px-4 py-3 border-b border-border-default bg-surface-secondary/50">
         <div className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <h3 className="text-sm font-semibold text-text-primary">
-              Packages
-            </h3>
+            <h3 className="text-sm font-semibold text-text-primary">Packages</h3>
             {!isLoading && packages.length > 0 && (
               <span className="text-xs text-text-tertiary tabular-nums">
                 {selectedCount} of {packages.length} selected
                 {!isPro && (
-                  <span
-                    className={
-                      isAtLimit ? 'text-amber-600 dark:text-amber-400' : ''
-                    }
-                  >
-                    {' '}
+                  <span className={isAtLimit ? "text-amber-600 dark:text-amber-400" : ""}>
+                    {" "}
                     ({packages.length}/{packageLimit})
                   </span>
                 )}
@@ -195,11 +178,7 @@ export function PackagePicker({
                 onClick={allSelected ? handleDeselectAll : handleSelectAll}
                 className="text-xs h-7 px-2"
               >
-                {allSelected
-                  ? 'Deselect all'
-                  : someSelected
-                    ? 'Select all'
-                    : 'Select all'}
+                {allSelected ? "Deselect all" : someSelected ? "Select all" : "Select all"}
               </Button>
             </div>
           )}
@@ -216,9 +195,7 @@ export function PackagePicker({
           </>
         ) : packages.length === 0 ? (
           <div className="py-8 px-4 text-center">
-            <p className="text-sm text-text-tertiary">
-              No packages tracked yet
-            </p>
+            <p className="text-sm text-text-tertiary">No packages tracked yet</p>
           </div>
         ) : (
           packages.map((pkg) => (
@@ -227,7 +204,7 @@ export function PackagePicker({
               className={`
                 py-3 px-4 transition-colors duration-150
                 hover:bg-surface-secondary/50
-                ${selectedIds.has(pkg.id) ? 'bg-brand-50/50 dark:bg-brand-900/10' : ''}
+                ${selectedIds.has(pkg.id) ? "bg-brand-50/50 dark:bg-brand-900/10" : ""}
               `}
             >
               <Checkbox
@@ -276,11 +253,7 @@ export function PackagePicker({
               >
                 {isAdding ? (
                   <span className="inline-flex items-center gap-1.5">
-                    <svg
-                      className="w-4 h-4 animate-spin"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                    >
+                    <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none">
                       <circle
                         className="opacity-25"
                         cx="12"
@@ -298,7 +271,7 @@ export function PackagePicker({
                     Adding...
                   </span>
                 ) : (
-                  'Add'
+                  "Add"
                 )}
               </Button>
             </div>
@@ -306,5 +279,5 @@ export function PackagePicker({
         </div>
       )}
     </Card>
-  )
+  );
 }
