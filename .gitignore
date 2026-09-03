@@ -13,6 +13,8 @@ bld/
 [Oo]bj/
 [Ll]og/
 [Ll]ogs/
+# `dotnet test --collect:"XPlat Code Coverage"` drops Cobertura reports here
+[Tt]est[Rr]esult*/
 
 # Visual Studio
 .vs/
