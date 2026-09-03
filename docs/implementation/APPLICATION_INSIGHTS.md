@@ -67,6 +67,7 @@ builder.Services.AddApplicationInsightsTelemetry();
 ```
 
 That's it. The SDK automatically:
+
 - Reads the connection string from `APPLICATIONINSIGHTS_CONNECTION_STRING`
 - Instruments all incoming HTTP requests
 - Tracks EF Core queries and outbound HTTP calls (GitHub, Groq, Stytch, Stripe)
@@ -138,7 +139,7 @@ Add the connection string as a GitHub Actions secret (`APPINSIGHTS_CONNECTION_ST
 - name: Set Application Insights connection string
   uses: azure/appservice-settings@v1
   with:
-    app-name: api-mypkgupdate-com   # or fn-patchnotes-sync
+    app-name: api-mypkgupdate-com # or fn-patchnotes-sync
     app-settings-json: |
       [
         {
@@ -207,6 +208,7 @@ az monitor metrics alert create \
 ```
 
 At minimum, consider alerts for:
+
 - API failure rate spike
 - Sync function failures (any execution returning error)
 - Response time degradation (p95 > threshold)

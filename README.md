@@ -2,29 +2,29 @@
 
 A GitHub release viewer for npm packages. Track release notes across your favorite packages in one place.
 
-*Forged in Gas Town*
+_Forged in Gas Town_
 
 ## Deployment
 
-| Environment | URL | Status |
-|-------------|-----|--------|
-| Frontend | https://myreleasenotes.ai | Live |
-| API | https://api.myreleasenotes.ai | Live |
-| Sync Function | fn-patchnotes-sync (Azure Functions) | Timer (every 6h) |
-| Email Functions | patchnotes-email (Azure Functions) | HTTP + Timer triggers |
+| Environment     | URL                                  | Status                |
+| --------------- | ------------------------------------ | --------------------- |
+| Frontend        | https://myreleasenotes.ai            | Live                  |
+| API             | https://api.myreleasenotes.ai        | Live                  |
+| Sync Function   | fn-patchnotes-sync (Azure Functions) | Timer (every 6h)      |
+| Email Functions | patchnotes-email (Azure Functions)   | HTTP + Timer triggers |
 
 ## Project Status
 
 **Stage:** Production (MVP)
 
-| Area | Status |
-|------|--------|
-| Architecture | ✅ .NET API + React SPA + Azure Functions |
-| Code Quality | ✅ Good |
-| CI/CD | ✅ GitHub Actions (build, test, deploy API + Function + frontend) |
-| Testing | ✅ 368 xUnit tests + 118 Vitest tests |
-| Authentication | ✅ Stytch B2C |
-| Sync | ✅ Concurrent pipeline (Channel-based producer-consumer) |
+| Area           | Status                                                            |
+| -------------- | ----------------------------------------------------------------- |
+| Architecture   | ✅ .NET API + React SPA + Azure Functions                         |
+| Code Quality   | ✅ Good                                                           |
+| CI/CD          | ✅ GitHub Actions (build, test, deploy API + Function + frontend) |
+| Testing        | ✅ 368 xUnit tests + 118 Vitest tests                             |
+| Authentication | ✅ Stytch B2C                                                     |
+| Sync           | ✅ Concurrent pipeline (Channel-based producer-consumer)          |
 
 ## Features
 
@@ -84,71 +84,71 @@ cp patchnotes-email/local.settings.json.example patchnotes-email/local.settings.
 
 ### API -- App Service (`api-myreleasenotes-ai`)
 
-| Setting | Description |
-|---------|-------------|
-| `ConnectionStrings__PatchNotes` | SQL Server connection string |
-| `GitHub__Token` | GitHub PAT for repository search and release fetching |
-| `Stytch__ProjectId` | Stytch project ID |
-| `Stytch__Secret` | Stytch secret key |
-| `Stytch__WebhookSecret` | Stytch webhook signing secret |
-| `Stripe__SecretKey` | Stripe secret key |
-| `Stripe__WebhookSecret` | Stripe webhook signing secret |
-| `SyncFunction__Url` | URL of the sync function (e.g. `https://fn-patchnotes-sync.azurewebsites.net/api/sync-new-packages`) |
-| `SyncFunction__Key` | Function-level auth key for the sync function |
-| `EmailFunction__Url` | URL of the test email function (e.g. `https://fn-patchnotes-email.azurewebsites.net/api/sendTestEmail`) |
-| `EmailFunction__Key` | Function-level auth key for the email function |
-| `APPLICATIONINSIGHTS_CONNECTION_STRING` | Application Insights connection string |
+| Setting                                 | Description                                                                                             |
+| --------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| `ConnectionStrings__PatchNotes`         | SQL Server connection string                                                                            |
+| `GitHub__Token`                         | GitHub PAT for repository search and release fetching                                                   |
+| `Stytch__ProjectId`                     | Stytch project ID                                                                                       |
+| `Stytch__Secret`                        | Stytch secret key                                                                                       |
+| `Stytch__WebhookSecret`                 | Stytch webhook signing secret                                                                           |
+| `Stripe__SecretKey`                     | Stripe secret key                                                                                       |
+| `Stripe__WebhookSecret`                 | Stripe webhook signing secret                                                                           |
+| `SyncFunction__Url`                     | URL of the sync function (e.g. `https://fn-patchnotes-sync.azurewebsites.net/api/sync-new-packages`)    |
+| `SyncFunction__Key`                     | Function-level auth key for the sync function                                                           |
+| `EmailFunction__Url`                    | URL of the test email function (e.g. `https://fn-patchnotes-email.azurewebsites.net/api/sendTestEmail`) |
+| `EmailFunction__Key`                    | Function-level auth key for the email function                                                          |
+| `APPLICATIONINSIGHTS_CONNECTION_STRING` | Application Insights connection string                                                                  |
 
 ### Sync Function -- Azure Functions (`fn-patchnotes-sync`)
 
-| Setting | Description |
-|---------|-------------|
-| `AzureWebJobsStorage` | Azure Storage connection string |
-| `FUNCTIONS_WORKER_RUNTIME` | `dotnet-isolated` |
-| `ConnectionStrings__PatchNotes` | SQL Server connection string |
-| `GitHub__Token` | GitHub PAT |
-| `AI__ApiKey` | AI provider API key |
-| `AI__BaseUrl` | AI provider endpoint |
-| `AI__Model` | Model name (e.g. `llama-3.3-70b-versatile`) |
-| `APPLICATIONINSIGHTS_CONNECTION_STRING` | Application Insights connection string |
+| Setting                                 | Description                                 |
+| --------------------------------------- | ------------------------------------------- |
+| `AzureWebJobsStorage`                   | Azure Storage connection string             |
+| `FUNCTIONS_WORKER_RUNTIME`              | `dotnet-isolated`                           |
+| `ConnectionStrings__PatchNotes`         | SQL Server connection string                |
+| `GitHub__Token`                         | GitHub PAT                                  |
+| `AI__ApiKey`                            | AI provider API key                         |
+| `AI__BaseUrl`                           | AI provider endpoint                        |
+| `AI__Model`                             | Model name (e.g. `llama-3.3-70b-versatile`) |
+| `APPLICATIONINSIGHTS_CONNECTION_STRING` | Application Insights connection string      |
 
 ### Email Function -- Azure Functions (`fn-patchnotes-email`)
 
-| Setting | Description |
-|---------|-------------|
-| `AzureWebJobsStorage` | Azure Storage connection string |
-| `FUNCTIONS_WORKER_RUNTIME` | `node` |
-| `RESEND_API_KEY` | Resend API key for email delivery |
-| `DATABASE_URL` | SQL Server connection string (ADO.NET format) |
-| `APP_BASE_URL` | Base URL for links in emails (default: `https://app.myreleasenotes.ai`) |
-| `APPLICATIONINSIGHTS_CONNECTION_STRING` | Application Insights connection string |
+| Setting                                 | Description                                                             |
+| --------------------------------------- | ----------------------------------------------------------------------- |
+| `AzureWebJobsStorage`                   | Azure Storage connection string                                         |
+| `FUNCTIONS_WORKER_RUNTIME`              | `node`                                                                  |
+| `RESEND_API_KEY`                        | Resend API key for email delivery                                       |
+| `DATABASE_URL`                          | SQL Server connection string (ADO.NET format)                           |
+| `APP_BASE_URL`                          | Base URL for links in emails (default: `https://app.myreleasenotes.ai`) |
+| `APPLICATIONINSIGHTS_CONNECTION_STRING` | Application Insights connection string                                  |
 
 ### Frontend -- Static Web Apps
 
 Build-time variables set in CI:
 
-| Setting | Description |
-|---------|-------------|
-| `VITE_API_URL` | API base URL (e.g. `https://api.myreleasenotes.ai`) -- GitHub Actions variable |
-| `VITE_STYTCH_PUBLIC_TOKEN` | Stytch public token -- GitHub Actions secret |
+| Setting                    | Description                                                                    |
+| -------------------------- | ------------------------------------------------------------------------------ |
+| `VITE_API_URL`             | API base URL (e.g. `https://api.myreleasenotes.ai`) -- GitHub Actions variable |
+| `VITE_STYTCH_PUBLIC_TOKEN` | Stytch public token -- GitHub Actions secret                                   |
 
 ### GitHub Actions
 
 **Secrets:**
 
-| Secret | Description |
-|--------|-------------|
-| `AZURE_CLIENT_ID` | Service principal client ID (OIDC login) |
-| `AZURE_TENANT_ID` | Azure AD tenant ID |
-| `AZURE_SUBSCRIPTION_ID` | Azure subscription ID |
-| `DATABASE_CONNECTION_STRING` | SQL Server connection string (for migrations) |
-| `AZURE_STATIC_WEB_APPS_API_TOKEN` | SWA deployment token |
-| `VITE_STYTCH_PUBLIC_TOKEN` | Stytch public token (frontend build) |
+| Secret                            | Description                                   |
+| --------------------------------- | --------------------------------------------- |
+| `AZURE_CLIENT_ID`                 | Service principal client ID (OIDC login)      |
+| `AZURE_TENANT_ID`                 | Azure AD tenant ID                            |
+| `AZURE_SUBSCRIPTION_ID`           | Azure subscription ID                         |
+| `DATABASE_CONNECTION_STRING`      | SQL Server connection string (for migrations) |
+| `AZURE_STATIC_WEB_APPS_API_TOKEN` | SWA deployment token                          |
+| `VITE_STYTCH_PUBLIC_TOKEN`        | Stytch public token (frontend build)          |
 
 **Variables:**
 
-| Variable | Description |
-|----------|-------------|
+| Variable       | Description                                         |
+| -------------- | --------------------------------------------------- |
 | `VITE_API_URL` | API base URL (e.g. `https://api.myreleasenotes.ai`) |
 
 ## Quick Start
@@ -275,6 +275,7 @@ PatchNotes/
 ## Tech Stack
 
 **Backend:**
+
 - .NET 10 / ASP.NET Core
 - Entity Framework Core (SQLite dev / SQL Server prod)
 - Azure Functions (isolated worker, timer trigger)
@@ -284,6 +285,7 @@ PatchNotes/
 - Stripe subscriptions
 
 **Frontend:**
+
 - React 19 + TypeScript
 - TanStack Router (type-safe file-based routing)
 - TanStack Query (data fetching)
@@ -292,10 +294,12 @@ PatchNotes/
 - Orval (OpenAPI client generation)
 
 **Email:**
+
 - Azure Functions (TypeScript)
 - Resend (email delivery)
 
 **Workspace:**
+
 - pnpm 10 workspace monorepo (`patchnotes-web`, `patchnotes-email`)
 
 ## Development
@@ -315,6 +319,7 @@ export ConnectionStrings__PatchNotes="Server=...;Database=...;User Id=...;Passwo
 ```
 
 This creates migrations in:
+
 - `PatchNotes.Data/Migrations/Sqlite/` - Local development
 - `PatchNotes.Data/Migrations/SqlServer/` - Production
 
@@ -325,11 +330,13 @@ For more details, see [PatchNotes.Data/README.md](PatchNotes.Data/README.md).
 ### Running Tests
 
 **Backend:**
+
 ```bash
 dotnet test PatchNotes.slnx
 ```
 
 **Frontend:**
+
 ```bash
 cd patchnotes-web
 pnpm test
@@ -338,6 +345,7 @@ pnpm test
 ### Code Quality
 
 The project uses GitHub Actions for CI. All PRs must pass:
+
 - `dotnet build` and `dotnet test`
 - `pnpm lint` and `pnpm format:check`
 - `pnpm build` (includes TypeScript type checking)
@@ -347,11 +355,13 @@ The project uses GitHub Actions for CI. All PRs must pass:
 ### Code Style
 
 **Backend (.NET):**
+
 - Follow standard C# conventions
 - Use async/await for I/O operations
 - Keep controllers thin, business logic in services
 
 **Frontend (TypeScript):**
+
 - Use TypeScript strict mode
 - Prefer TanStack Query for data fetching
 - Follow the existing component structure

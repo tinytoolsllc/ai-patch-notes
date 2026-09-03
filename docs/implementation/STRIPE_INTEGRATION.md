@@ -6,14 +6,14 @@ Stripe billing for PatchNotes Pro subscriptions.
 
 ## Overview
 
-| Component | Location | Status |
-|-----------|----------|--------|
-| Subscription Routes | `PatchNotes.Api/Routes/SubscriptionRoutes.cs` | Implemented |
-| Webhook Handler | `PatchNotes.Api/Webhooks/StripeWebhook.cs` | Implemented |
-| Subscription Store | `patchnotes-web/src/stores/subscriptionStore.ts` | Implemented |
-| Subscription API | `patchnotes-web/src/api/subscription.ts` | Implemented |
-| Pricing Page | `patchnotes-web/src/pages/Pricing.tsx` | Implemented |
-| User Model | `PatchNotes.Data/User.cs` | Implemented (Stripe fields) |
+| Component           | Location                                         | Status                      |
+| ------------------- | ------------------------------------------------ | --------------------------- |
+| Subscription Routes | `PatchNotes.Api/Routes/SubscriptionRoutes.cs`    | Implemented                 |
+| Webhook Handler     | `PatchNotes.Api/Webhooks/StripeWebhook.cs`       | Implemented                 |
+| Subscription Store  | `patchnotes-web/src/stores/subscriptionStore.ts` | Implemented                 |
+| Subscription API    | `patchnotes-web/src/api/subscription.ts`         | Implemented                 |
+| Pricing Page        | `patchnotes-web/src/pages/Pricing.tsx`           | Implemented                 |
+| User Model          | `PatchNotes.Data/User.cs`                        | Implemented (Stripe fields) |
 
 ### Stack
 
@@ -25,10 +25,10 @@ Stripe billing for PatchNotes Pro subscriptions.
 
 ### Stripe Resources
 
-| Resource | ID | Description |
-|----------|----|-------------|
-| Product | `prod_TvrQE65x9wzata` | PatchNotes Pro |
-| Price | `price_1SxzhHGHBIpfuFar4mCKzqVW` | $20/year recurring |
+| Resource | ID                               | Description        |
+| -------- | -------------------------------- | ------------------ |
+| Product  | `prod_TvrQE65x9wzata`            | PatchNotes Pro     |
+| Price    | `price_1SxzhHGHBIpfuFar4mCKzqVW` | $20/year recurring |
 
 ### Tiers
 
@@ -59,13 +59,13 @@ Stripe billing for PatchNotes Pro subscriptions.
 
 Registered at: `https://api-mypkgupdate-com.azurewebsites.net/webhooks/stripe`
 
-| Event | Handler |
-|-------|---------|
-| `checkout.session.completed` | Links Stripe customer to user, sets subscription status |
-| `customer.subscription.updated` | Syncs status and expiry changes |
-| `customer.subscription.deleted` | Marks as canceled, preserves access until period end |
-| `invoice.payment_failed` | Marks user as `past_due` |
-| `invoice.payment_succeeded` | Updates expiry on successful renewal |
+| Event                           | Handler                                                 |
+| ------------------------------- | ------------------------------------------------------- |
+| `checkout.session.completed`    | Links Stripe customer to user, sets subscription status |
+| `customer.subscription.updated` | Syncs status and expiry changes                         |
+| `customer.subscription.deleted` | Marks as canceled, preserves access until period end    |
+| `invoice.payment_failed`        | Marks user as `past_due`                                |
+| `invoice.payment_succeeded`     | Updates expiry on successful renewal                    |
 
 ### Safeguards
 
@@ -77,12 +77,15 @@ Registered at: `https://api-mypkgupdate-com.azurewebsites.net/webhooks/stripe`
 ### Recommended Events to Add
 
 **High priority:**
+
 - `invoice.payment_action_required` — Handle 3D Secure / SCA challenges
 
 **Medium priority:**
+
 - `charge.dispute.created` / `charge.dispute.updated` — Handle payment disputes
 
 **Low priority (if trials are added):**
+
 - `customer.subscription.trial_will_end` — Notify users before trial expires
 
 ---
@@ -91,11 +94,11 @@ Registered at: `https://api-mypkgupdate-com.azurewebsites.net/webhooks/stripe`
 
 App Service: `api-mypkgupdate-com` (resource group `MyPkgUpdate`)
 
-| Setting | Source | Description |
-|---------|--------|-------------|
-| `Stripe__SecretKey` | Azure App Settings | Stripe secret API key |
-| `Stripe__WebhookSecret` | Azure App Settings | Webhook signing secret |
-| `Stripe:PriceId` | `appsettings.json` | PatchNotes Pro price ID (not a secret) |
+| Setting                 | Source             | Description                            |
+| ----------------------- | ------------------ | -------------------------------------- |
+| `Stripe__SecretKey`     | Azure App Settings | Stripe secret API key                  |
+| `Stripe__WebhookSecret` | Azure App Settings | Webhook signing secret                 |
+| `Stripe:PriceId`        | `appsettings.json` | PatchNotes Pro price ID (not a secret) |
 
 See [ENV_VARIABLES.md](./ENV_VARIABLES.md) for the full configuration reference.
 

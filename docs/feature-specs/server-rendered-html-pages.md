@@ -1,6 +1,7 @@
 # Server-Rendered HTML Pages for SEO Routes
 
 ## Context
+
 Pages linked from sitemap.xml (`/packages/{owner}/{repo}`, `/releases/{id}`, `/packages/{owner}`) are slow because they go through the full SPA bootstrap. We serve pre-rendered HTML directly from the C# API for these routes.
 
 ## Architecture
@@ -13,6 +14,7 @@ A Cloudflare Worker intercepts requests to `/packages/*` and `/releases/*` on `w
 - **Has cookie (authenticated user)**: passes through to the SWA for the full SPA experience
 
 The Worker script lives in `cloudflare-worker/worker.js`. Worker Routes are configured in the Cloudflare dashboard:
+
 - `www.myreleasenotes.ai/packages/*`
 - `www.myreleasenotes.ai/releases/*`
 
@@ -35,6 +37,7 @@ The C# API serves server-rendered HTML at `/html/*`. These always return full HT
 ### HTML structure
 
 Each page includes:
+
 - `<head>`: charset, viewport, title, meta description, Open Graph tags, JSON-LD schema, canonical URL
 - `<script>`: dark mode detection from localStorage (matches `patchnotes-theme` Zustand store)
 - `<style>`: inline CSS with theme variables and component styles (matches the SPA's Tailwind theme)
@@ -52,6 +55,7 @@ Each page includes:
 ## Tests
 
 Integration tests in `HtmlPageTests.cs`:
+
 - Returns 200 with `text/html` content type for each page
 - HTML contains expected content (package name, release tag, summary text)
 - 404 for non-existent packages/releases
@@ -61,6 +65,7 @@ Integration tests in `HtmlPageTests.cs`:
 - Theme detection script is present
 
 ## Verification
+
 1. `dotnet test` - all tests pass
 2. `curl https://www.myreleasenotes.ai/packages/facebook/react` - returns full HTML (anonymous, via Worker)
 3. Browse with Stytch cookie - gets the SPA (Worker passes through to SWA)

@@ -96,14 +96,14 @@ No routes are lazy-loaded — all page components are statically imported in `sr
 
 ```tsx
 // routes/admin.tsx — before
-import { Admin } from '../pages/Admin'
-export const Route = createFileRoute('/admin')({ component: Admin })
+import { Admin } from "../pages/Admin";
+export const Route = createFileRoute("/admin")({ component: Admin });
 
 // routes/admin.tsx — after
-import { createFileRoute, createLazyFileRoute } from '@tanstack/react-router'
-export const Route = createLazyFileRoute('/admin')({
-  component: () => import('../pages/Admin').then(m => m.Admin),
-})
+import { createFileRoute, createLazyFileRoute } from "@tanstack/react-router";
+export const Route = createLazyFileRoute("/admin")({
+  component: () => import("../pages/Admin").then((m) => m.Admin),
+});
 ```
 
 **Candidates for lazy loading:** `/admin`, `/admin/emails`, `/releases/$id`, `/packages/$owner/$repo` (all carry heavy deps or are rarely the entry point).
@@ -202,6 +202,7 @@ This also sets proper `Cache-Control` headers for CDN/browser caching. Invalidat
 ### 3. Convert subscription check to TanStack Query
 
 The Zustand-based `checkSubscription` is a raw fetch with no caching, deduplication, or stale-while-revalidate. Converting it to a TanStack Query would:
+
 - Deduplicate simultaneous calls automatically
 - Cache the result with `staleTime` / `gcTime`
 - Enable background refetch on window focus
@@ -209,13 +210,13 @@ The Zustand-based `checkSubscription` is a raw fetch with no caching, deduplicat
 
 ```tsx
 export function useSubscriptionStatus() {
-  const { user } = useStytchUser()
+  const { user } = useStytchUser();
   return useQuery({
-    queryKey: ['/api/subscription/status'],
-    queryFn: () => api.get('/subscription/status'),
+    queryKey: ["/api/subscription/status"],
+    queryFn: () => api.get("/subscription/status"),
     enabled: !!user,
     staleTime: 5 * 60 * 1000,
-  })
+  });
 }
 ```
 

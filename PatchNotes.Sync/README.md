@@ -18,20 +18,20 @@ Concurrently syncs releases from GitHub and generates AI summaries for all track
 
 ### CLI Options
 
-| Flag | Description | Example |
-|------|-------------|---------|
-| `--init` | Seed package catalog from packages.json and sync all | `dotnet run -- --init` |
-| `--seed` | Seed database with sample data (local dev) | `dotnet run -- --seed` |
-| `-r <url>` | Sync a single GitHub repo | `dotnet run -- -r https://github.com/prettier/prettier` |
-| `-s <owner/repo>` | Generate summaries for a specific package | `dotnet run -- -s prettier/prettier` |
+| Flag              | Description                                          | Example                                                 |
+| ----------------- | ---------------------------------------------------- | ------------------------------------------------------- |
+| `--init`          | Seed package catalog from packages.json and sync all | `dotnet run -- --init`                                  |
+| `--seed`          | Seed database with sample data (local dev)           | `dotnet run -- --seed`                                  |
+| `-r <url>`        | Sync a single GitHub repo                            | `dotnet run -- -r https://github.com/prettier/prettier` |
+| `-s <owner/repo>` | Generate summaries for a specific package            | `dotnet run -- -s prettier/prettier`                    |
 
 ### Exit Codes
 
-| Code | Meaning |
-|------|---------|
-| 0 | Success - all packages synced |
-| 1 | Partial failure - some packages failed |
-| 2 | Fatal error - sync could not complete |
+| Code | Meaning                                |
+| ---- | -------------------------------------- |
+| 0    | Success - all packages synced          |
+| 1    | Partial failure - some packages failed |
+| 2    | Fatal error - sync could not complete  |
 
 ## Components
 

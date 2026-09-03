@@ -6,15 +6,15 @@ The timer triggers on `fn-patchnotes-sync` and `fn-patchnotes-email` (both on Fl
 
 ## Current State
 
-| Resource | SKU | Region |
-|----------|-----|--------|
-| `fn-patchnotes-sync` | Flex Consumption (FC1) | East US |
-| `fn-patchnotes-email` | Flex Consumption (FC1) | East US |
-| `api-myreleasenotes-ai` | B1 (`ASP-MyPkgUpdate-Linux`) | Central US |
-| `myfreesqldbserver-tiny-tools` (SQL Server) | — | Central US |
-| `stpatchnotessync` (Storage) | — | East US |
-| `mypkgupdatest` (Storage) | — | Central US |
-| `ai-patchnotes` (App Insights) | — | East US |
+| Resource                                    | SKU                          | Region     |
+| ------------------------------------------- | ---------------------------- | ---------- |
+| `fn-patchnotes-sync`                        | Flex Consumption (FC1)       | East US    |
+| `fn-patchnotes-email`                       | Flex Consumption (FC1)       | East US    |
+| `api-myreleasenotes-ai`                     | B1 (`ASP-MyPkgUpdate-Linux`) | Central US |
+| `myfreesqldbserver-tiny-tools` (SQL Server) | —                            | Central US |
+| `stpatchnotessync` (Storage)                | —                            | East US    |
+| `mypkgupdatest` (Storage)                   | —                            | Central US |
+| `ai-patchnotes` (App Insights)              | —                            | East US    |
 
 Key finding: The **database and API are both in Central US**. The functions in East US are the outliers.
 
@@ -23,12 +23,14 @@ Key finding: The **database and API are both in Central US**. The functions in E
 Recreate both function apps in Central US on the existing `ASP-MyPkgUpdate-Linux` B1 plan.
 
 **Pros:**
+
 - No additional cost — reuses the existing B1 plan (~$13/month already being paid)
 - Co-locates functions with the database and API (lower latency)
 - B1 supports Always On — timer triggers fire reliably
 - Simplifies the infrastructure (everything in one region, one plan)
 
 **Cons:**
+
 - Functions move away from `stpatchnotessync` storage (East US) — minor latency for timer lease blobs; can switch to `mypkgupdatest` (Central US) to avoid this
 - App Insights is in East US — works fine cross-region, no impact
 - B1 has limited resources (1 core, 1.75 GB RAM) — now shared between API + both functions
@@ -129,6 +131,7 @@ az appservice plan delete --name ASP-MyPkgUpdate-f43e --resource-group MyPkgUpda
 ```
 
 Optionally delete the East US storage account if no longer needed:
+
 ```bash
 # Only if nothing else uses it
 az storage account delete --name stpatchnotessync --resource-group MyPkgUpdate --yes

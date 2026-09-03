@@ -1,7 +1,6 @@
 import { randomFillSync } from "crypto";
 
-const urlAlphabet =
-  "useandom-26T198340PX75pxJACKVERYMINDBUSHWOLF_GQZbfghjklqvwyzrict";
+const urlAlphabet = "useandom-26T198340PX75pxJACKVERYMINDBUSHWOLF_GQZbfghjklqvwyzrict";
 
 const POOL_SIZE_MULTIPLIER = 128;
 let pool: Buffer;

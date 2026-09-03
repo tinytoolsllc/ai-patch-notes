@@ -1,17 +1,22 @@
 {
   "private": true,
   "scripts": {
+    "format": "oxfmt",
+    "format:check": "oxfmt --check",
     "verify": "node scripts/verify.mjs"
   },
+  "devDependencies": {
+    "oxfmt": "^0.66.0"
+  },
   "devEngines": {
+    "packageManager": {
+      "name": "pnpm",
+      "version": "10.28.0"
+    },
     "runtime": {
       "name": "node",
       "version": ">=22",
       "onFail": "error"
-    },
-    "packageManager": {
-      "name": "pnpm",
-      "version": "10.28.0"
     }
   },
   "pnpm": {

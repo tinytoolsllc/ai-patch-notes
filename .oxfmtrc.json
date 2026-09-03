@@ -1,0 +1,9 @@
+{
+  "ignorePatterns": [
+    ".claude/",
+    "pnpm-*.yaml",
+    "patchnotes-web/openapi.json",
+    "patchnotes-web/src/routeTree.gen.ts",
+    "patchnotes-web/src/api/generated/"
+  ]
+}

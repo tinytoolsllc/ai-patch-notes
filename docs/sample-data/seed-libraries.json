@@ -1,291 +1,2107 @@
 {
   "react-spa": [
-    { "id": "react", "nameClean": "React", "github_full_name": "facebook/react", "github_url": "https://github.com/facebook/react", "description": "The library for web and native user interfaces.", "homepage": "https://react.dev", "npm": "react" },
-    { "id": "create_react_app", "nameClean": "Create React App", "github_full_name": "facebook/create-react-app", "github_url": "https://github.com/facebook/create-react-app", "description": "Set up a modern web app by running one command.", "homepage": "https://create-react-app.dev", "npm": "create-react-app" },
-    { "id": "create_vite", "nameClean": "create-vite", "github_full_name": "vitejs/vite", "github_url": "https://github.com/vitejs/vite", "description": "Next generation frontend tooling. It's fast!", "homepage": "https://vite.dev", "npm": "create-vite" },
+    {
+      "id": "react",
+      "nameClean": "React",
+      "github_full_name": "facebook/react",
+      "github_url": "https://github.com/facebook/react",
+      "description": "The library for web and native user interfaces.",
+      "homepage": "https://react.dev",
+      "npm": "react"
+    },
+    {
+      "id": "create_react_app",
+      "nameClean": "Create React App",
+      "github_full_name": "facebook/create-react-app",
+      "github_url": "https://github.com/facebook/create-react-app",
+      "description": "Set up a modern web app by running one command.",
+      "homepage": "https://create-react-app.dev",
+      "npm": "create-react-app"
+    },
+    {
+      "id": "create_vite",
+      "nameClean": "create-vite",
+      "github_full_name": "vitejs/vite",
+      "github_url": "https://github.com/vitejs/vite",
+      "description": "Next generation frontend tooling. It's fast!",
+      "homepage": "https://vite.dev",
+      "npm": "create-vite"
+    },
 
-    { "id": "zustand", "nameClean": "Zustand", "github_full_name": "pmndrs/zustand", "github_url": "https://github.com/pmndrs/zustand", "description": "Bear necessities for state management in React", "homepage": "https://zustand-demo.pmnd.rs", "npm": "zustand" },
-    { "id": "redux", "nameClean": "Redux", "github_full_name": "reduxjs/redux", "github_url": "https://github.com/reduxjs/redux", "description": "A JS library for predictable global state management", "homepage": "https://redux.js.org", "npm": "redux" },
-    { "id": "redux_toolkit", "nameClean": "Redux Toolkit", "github_full_name": "reduxjs/redux-toolkit", "github_url": "https://github.com/reduxjs/redux-toolkit", "description": "The official, opinionated, batteries-included toolset for efficient Redux development", "homepage": "https://redux-toolkit.js.org", "npm": "@reduxjs/toolkit" },
-    { "id": "jotai", "nameClean": "Jotai", "github_full_name": "pmndrs/jotai", "github_url": "https://github.com/pmndrs/jotai", "description": "Primitive and flexible state management for React", "homepage": "https://jotai.org", "npm": "jotai" },
-    { "id": "mobx", "nameClean": "MobX", "github_full_name": "mobxjs/mobx", "github_url": "https://github.com/mobxjs/mobx", "description": "Simple, scalable state management.", "homepage": "http://mobx.js.org", "npm": "mobx" },
-    { "id": "xstate", "nameClean": "XState", "github_full_name": "statelyai/xstate", "github_url": "https://github.com/statelyai/xstate", "description": "Actor-based state management & orchestration for complex app logic.", "homepage": "https://stately.ai/docs", "npm": "xstate" },
-    { "id": "recoil", "nameClean": "Recoil", "github_full_name": "facebookexperimental/Recoil", "github_url": "https://github.com/facebookexperimental/Recoil", "description": "Recoil is an experimental state management library for React apps.", "homepage": "https://recoiljs.org", "npm": "recoil" },
-    { "id": "effector", "nameClean": "Effector", "github_full_name": "effector/effector", "github_url": "https://github.com/effector/effector", "description": "Business logic with ease", "homepage": "https://effector.dev", "npm": "effector" },
+    {
+      "id": "zustand",
+      "nameClean": "Zustand",
+      "github_full_name": "pmndrs/zustand",
+      "github_url": "https://github.com/pmndrs/zustand",
+      "description": "Bear necessities for state management in React",
+      "homepage": "https://zustand-demo.pmnd.rs",
+      "npm": "zustand"
+    },
+    {
+      "id": "redux",
+      "nameClean": "Redux",
+      "github_full_name": "reduxjs/redux",
+      "github_url": "https://github.com/reduxjs/redux",
+      "description": "A JS library for predictable global state management",
+      "homepage": "https://redux.js.org",
+      "npm": "redux"
+    },
+    {
+      "id": "redux_toolkit",
+      "nameClean": "Redux Toolkit",
+      "github_full_name": "reduxjs/redux-toolkit",
+      "github_url": "https://github.com/reduxjs/redux-toolkit",
+      "description": "The official, opinionated, batteries-included toolset for efficient Redux development",
+      "homepage": "https://redux-toolkit.js.org",
+      "npm": "@reduxjs/toolkit"
+    },
+    {
+      "id": "jotai",
+      "nameClean": "Jotai",
+      "github_full_name": "pmndrs/jotai",
+      "github_url": "https://github.com/pmndrs/jotai",
+      "description": "Primitive and flexible state management for React",
+      "homepage": "https://jotai.org",
+      "npm": "jotai"
+    },
+    {
+      "id": "mobx",
+      "nameClean": "MobX",
+      "github_full_name": "mobxjs/mobx",
+      "github_url": "https://github.com/mobxjs/mobx",
+      "description": "Simple, scalable state management.",
+      "homepage": "http://mobx.js.org",
+      "npm": "mobx"
+    },
+    {
+      "id": "xstate",
+      "nameClean": "XState",
+      "github_full_name": "statelyai/xstate",
+      "github_url": "https://github.com/statelyai/xstate",
+      "description": "Actor-based state management & orchestration for complex app logic.",
+      "homepage": "https://stately.ai/docs",
+      "npm": "xstate"
+    },
+    {
+      "id": "recoil",
+      "nameClean": "Recoil",
+      "github_full_name": "facebookexperimental/Recoil",
+      "github_url": "https://github.com/facebookexperimental/Recoil",
+      "description": "Recoil is an experimental state management library for React apps.",
+      "homepage": "https://recoiljs.org",
+      "npm": "recoil"
+    },
+    {
+      "id": "effector",
+      "nameClean": "Effector",
+      "github_full_name": "effector/effector",
+      "github_url": "https://github.com/effector/effector",
+      "description": "Business logic with ease",
+      "homepage": "https://effector.dev",
+      "npm": "effector"
+    },
 
-    { "id": "tanstack_query", "nameClean": "TanStack Query", "github_full_name": "TanStack/query", "github_url": "https://github.com/TanStack/query", "description": "Powerful asynchronous state management, server-state utilities and data fetching for the web.", "homepage": "https://tanstack.com/query", "npm": "@tanstack/react-query" },
-    { "id": "swr", "nameClean": "SWR", "github_full_name": "vercel/swr", "github_url": "https://github.com/vercel/swr", "description": "React Hooks for Data Fetching", "homepage": "https://swr.vercel.app", "npm": "swr" },
-    { "id": "apollo_client", "nameClean": "Apollo Client", "github_full_name": "apollographql/apollo-client", "github_url": "https://github.com/apollographql/apollo-client", "description": "The industry-leading GraphQL client for TypeScript, JavaScript, React, Vue, Angular, and more.", "homepage": "https://apollographql.com/client", "npm": "@apollo/client" },
-    { "id": "relay", "nameClean": "Relay", "github_full_name": "facebook/relay", "github_url": "https://github.com/facebook/relay", "description": "Relay is a JavaScript framework for building data-driven React applications.", "homepage": "https://relay.dev", "npm": "react-relay" },
-    { "id": "rtk_query", "nameClean": "RTK Query", "github_full_name": "reduxjs/redux-toolkit", "github_url": "https://github.com/reduxjs/redux-toolkit", "description": "The official, opinionated, batteries-included toolset for efficient Redux development", "homepage": "https://redux-toolkit.js.org", "npm": "@reduxjs/toolkit" },
-    { "id": "axios", "nameClean": "Axios", "github_full_name": "axios/axios", "github_url": "https://github.com/axios/axios", "description": "Promise based HTTP client for the browser and node.js", "homepage": "https://axios-http.com", "npm": "axios" },
+    {
+      "id": "tanstack_query",
+      "nameClean": "TanStack Query",
+      "github_full_name": "TanStack/query",
+      "github_url": "https://github.com/TanStack/query",
+      "description": "Powerful asynchronous state management, server-state utilities and data fetching for the web.",
+      "homepage": "https://tanstack.com/query",
+      "npm": "@tanstack/react-query"
+    },
+    {
+      "id": "swr",
+      "nameClean": "SWR",
+      "github_full_name": "vercel/swr",
+      "github_url": "https://github.com/vercel/swr",
+      "description": "React Hooks for Data Fetching",
+      "homepage": "https://swr.vercel.app",
+      "npm": "swr"
+    },
+    {
+      "id": "apollo_client",
+      "nameClean": "Apollo Client",
+      "github_full_name": "apollographql/apollo-client",
+      "github_url": "https://github.com/apollographql/apollo-client",
+      "description": "The industry-leading GraphQL client for TypeScript, JavaScript, React, Vue, Angular, and more.",
+      "homepage": "https://apollographql.com/client",
+      "npm": "@apollo/client"
+    },
+    {
+      "id": "relay",
+      "nameClean": "Relay",
+      "github_full_name": "facebook/relay",
+      "github_url": "https://github.com/facebook/relay",
+      "description": "Relay is a JavaScript framework for building data-driven React applications.",
+      "homepage": "https://relay.dev",
+      "npm": "react-relay"
+    },
+    {
+      "id": "rtk_query",
+      "nameClean": "RTK Query",
+      "github_full_name": "reduxjs/redux-toolkit",
+      "github_url": "https://github.com/reduxjs/redux-toolkit",
+      "description": "The official, opinionated, batteries-included toolset for efficient Redux development",
+      "homepage": "https://redux-toolkit.js.org",
+      "npm": "@reduxjs/toolkit"
+    },
+    {
+      "id": "axios",
+      "nameClean": "Axios",
+      "github_full_name": "axios/axios",
+      "github_url": "https://github.com/axios/axios",
+      "description": "Promise based HTTP client for the browser and node.js",
+      "homepage": "https://axios-http.com",
+      "npm": "axios"
+    },
 
-    { "id": "react_router", "nameClean": "React Router", "github_full_name": "remix-run/react-router", "github_url": "https://github.com/remix-run/react-router", "description": "Declarative routing for React", "homepage": "https://reactrouter.com", "npm": "react-router" },
-    { "id": "react_hook_form", "nameClean": "React Hook Form", "github_full_name": "react-hook-form/react-hook-form", "github_url": "https://github.com/react-hook-form/react-hook-form", "description": "React Hooks for form state management and validation (Web + React Native)", "homepage": "https://react-hook-form.com", "npm": "react-hook-form" },
-    { "id": "formik", "nameClean": "Formik", "github_full_name": "jaredpalmer/formik", "github_url": "https://github.com/jaredpalmer/formik", "description": "Build forms in React, without the tears", "homepage": "https://formik.org", "npm": "formik" },
+    {
+      "id": "react_router",
+      "nameClean": "React Router",
+      "github_full_name": "remix-run/react-router",
+      "github_url": "https://github.com/remix-run/react-router",
+      "description": "Declarative routing for React",
+      "homepage": "https://reactrouter.com",
+      "npm": "react-router"
+    },
+    {
+      "id": "react_hook_form",
+      "nameClean": "React Hook Form",
+      "github_full_name": "react-hook-form/react-hook-form",
+      "github_url": "https://github.com/react-hook-form/react-hook-form",
+      "description": "React Hooks for form state management and validation (Web + React Native)",
+      "homepage": "https://react-hook-form.com",
+      "npm": "react-hook-form"
+    },
+    {
+      "id": "formik",
+      "nameClean": "Formik",
+      "github_full_name": "jaredpalmer/formik",
+      "github_url": "https://github.com/jaredpalmer/formik",
+      "description": "Build forms in React, without the tears",
+      "homepage": "https://formik.org",
+      "npm": "formik"
+    },
 
-    { "id": "shadcn_ui", "nameClean": "shadcn/ui", "github_full_name": "shadcn-ui/ui", "github_url": "https://github.com/shadcn-ui/ui", "description": "A set of beautifully-designed, accessible components and a code distribution platform.", "homepage": "https://ui.shadcn.com", "npm": null },
-    { "id": "mui", "nameClean": "MUI", "github_full_name": "mui/material-ui", "github_url": "https://github.com/mui/material-ui", "description": "Material UI: Comprehensive React component library that implements Google's Material Design. Free forever.", "homepage": "https://mui.com/material-ui/", "npm": null },
-    { "id": "ant_design", "nameClean": "Ant Design", "github_full_name": "ant-design/ant-design", "github_url": "https://github.com/ant-design/ant-design", "description": "An enterprise-class UI design language and React UI library", "homepage": "https://ant.design", "npm": null },
-    { "id": "radix", "nameClean": "Radix", "github_full_name": "radix-ui/primitives", "github_url": "https://github.com/radix-ui/primitives", "description": "Radix Primitives is an open-source UI component library for building high-quality, accessible design systems and web apps.", "homepage": "https://radix-ui.com/primitives", "npm": "@radix-ui" },
-    { "id": "headless_ui", "nameClean": "Headless UI", "github_full_name": "tailwindlabs/headlessui", "github_url": "https://github.com/tailwindlabs/headlessui", "description": "Completely unstyled, fully accessible UI components, designed to integrate beautifully with Tailwind CSS.", "homepage": "https://headlessui.com", "npm": "@headlessui/react" },
-    { "id": "chakra_ui", "nameClean": "Chakra UI", "github_full_name": "chakra-ui/chakra-ui", "github_url": "https://github.com/chakra-ui/chakra-ui", "description": "Chakra UI is a component system for building SaaS products with speed", "homepage": "https://chakra-ui.com", "npm": null },
-    { "id": "mantine", "nameClean": "Mantine", "github_full_name": "mantinedev/mantine", "github_url": "https://github.com/mantinedev/mantine", "description": "A fully featured React components library", "homepage": "https://mantine.dev", "npm": null },
-    { "id": "react_aria", "nameClean": "React Aria", "github_full_name": "adobe/react-spectrum", "github_url": "https://github.com/adobe/react-spectrum", "description": "A collection of libraries and tools that help you build adaptive, accessible, and robust user experiences.", "homepage": "https://react-spectrum.adobe.com", "npm": null },
-    { "id": "react_bootstrap", "nameClean": "React Bootstrap", "github_full_name": "react-bootstrap/react-bootstrap", "github_url": "https://github.com/react-bootstrap/react-bootstrap", "description": "Bootstrap components built with React", "homepage": "https://react-bootstrap.github.io", "npm": null },
-    { "id": "next_ui", "nameClean": "HeroUI (previously NextUI)", "github_full_name": "heroui-inc/heroui", "github_url": "https://github.com/heroui-inc/heroui", "description": "Beautiful, fast and modern React UI library. (Previously NextUI)", "homepage": "https://heroui.com", "npm": "@heroui/react" },
-    { "id": "magic_ui", "nameClean": "Magic UI", "github_full_name": "magicuidesign/magicui", "github_url": "https://github.com/magicuidesign/magicui", "description": "UI Library for Design Engineers. Animated components and effects you can copy and paste into your apps.", "homepage": "https://magicui.design", "npm": null },
-    { "id": "storybook", "nameClean": "Storybook", "github_full_name": "storybookjs/storybook", "github_url": "https://github.com/storybookjs/storybook", "description": "Storybook is the industry standard workshop for building, documenting, and testing UI components in isolation", "homepage": "https://storybook.js.org", "npm": "storybook" },
+    {
+      "id": "shadcn_ui",
+      "nameClean": "shadcn/ui",
+      "github_full_name": "shadcn-ui/ui",
+      "github_url": "https://github.com/shadcn-ui/ui",
+      "description": "A set of beautifully-designed, accessible components and a code distribution platform.",
+      "homepage": "https://ui.shadcn.com",
+      "npm": null
+    },
+    {
+      "id": "mui",
+      "nameClean": "MUI",
+      "github_full_name": "mui/material-ui",
+      "github_url": "https://github.com/mui/material-ui",
+      "description": "Material UI: Comprehensive React component library that implements Google's Material Design. Free forever.",
+      "homepage": "https://mui.com/material-ui/",
+      "npm": null
+    },
+    {
+      "id": "ant_design",
+      "nameClean": "Ant Design",
+      "github_full_name": "ant-design/ant-design",
+      "github_url": "https://github.com/ant-design/ant-design",
+      "description": "An enterprise-class UI design language and React UI library",
+      "homepage": "https://ant.design",
+      "npm": null
+    },
+    {
+      "id": "radix",
+      "nameClean": "Radix",
+      "github_full_name": "radix-ui/primitives",
+      "github_url": "https://github.com/radix-ui/primitives",
+      "description": "Radix Primitives is an open-source UI component library for building high-quality, accessible design systems and web apps.",
+      "homepage": "https://radix-ui.com/primitives",
+      "npm": "@radix-ui"
+    },
+    {
+      "id": "headless_ui",
+      "nameClean": "Headless UI",
+      "github_full_name": "tailwindlabs/headlessui",
+      "github_url": "https://github.com/tailwindlabs/headlessui",
+      "description": "Completely unstyled, fully accessible UI components, designed to integrate beautifully with Tailwind CSS.",
+      "homepage": "https://headlessui.com",
+      "npm": "@headlessui/react"
+    },
+    {
+      "id": "chakra_ui",
+      "nameClean": "Chakra UI",
+      "github_full_name": "chakra-ui/chakra-ui",
+      "github_url": "https://github.com/chakra-ui/chakra-ui",
+      "description": "Chakra UI is a component system for building SaaS products with speed",
+      "homepage": "https://chakra-ui.com",
+      "npm": null
+    },
+    {
+      "id": "mantine",
+      "nameClean": "Mantine",
+      "github_full_name": "mantinedev/mantine",
+      "github_url": "https://github.com/mantinedev/mantine",
+      "description": "A fully featured React components library",
+      "homepage": "https://mantine.dev",
+      "npm": null
+    },
+    {
+      "id": "react_aria",
+      "nameClean": "React Aria",
+      "github_full_name": "adobe/react-spectrum",
+      "github_url": "https://github.com/adobe/react-spectrum",
+      "description": "A collection of libraries and tools that help you build adaptive, accessible, and robust user experiences.",
+      "homepage": "https://react-spectrum.adobe.com",
+      "npm": null
+    },
+    {
+      "id": "react_bootstrap",
+      "nameClean": "React Bootstrap",
+      "github_full_name": "react-bootstrap/react-bootstrap",
+      "github_url": "https://github.com/react-bootstrap/react-bootstrap",
+      "description": "Bootstrap components built with React",
+      "homepage": "https://react-bootstrap.github.io",
+      "npm": null
+    },
+    {
+      "id": "next_ui",
+      "nameClean": "HeroUI (previously NextUI)",
+      "github_full_name": "heroui-inc/heroui",
+      "github_url": "https://github.com/heroui-inc/heroui",
+      "description": "Beautiful, fast and modern React UI library. (Previously NextUI)",
+      "homepage": "https://heroui.com",
+      "npm": "@heroui/react"
+    },
+    {
+      "id": "magic_ui",
+      "nameClean": "Magic UI",
+      "github_full_name": "magicuidesign/magicui",
+      "github_url": "https://github.com/magicuidesign/magicui",
+      "description": "UI Library for Design Engineers. Animated components and effects you can copy and paste into your apps.",
+      "homepage": "https://magicui.design",
+      "npm": null
+    },
+    {
+      "id": "storybook",
+      "nameClean": "Storybook",
+      "github_full_name": "storybookjs/storybook",
+      "github_url": "https://github.com/storybookjs/storybook",
+      "description": "Storybook is the industry standard workshop for building, documenting, and testing UI components in isolation",
+      "homepage": "https://storybook.js.org",
+      "npm": "storybook"
+    },
 
-    { "id": "framer_motion", "nameClean": "Framer Motion", "github_full_name": "motiondivision/motion", "github_url": "https://github.com/motiondivision/motion", "description": "A modern animation library for React and JavaScript", "homepage": "https://motion.dev", "npm": "framer-motion" },
-    { "id": "gsap", "nameClean": "GSAP", "github_full_name": "greensock/GSAP", "github_url": "https://github.com/greensock/GSAP", "description": "GSAP (GreenSock Animation Platform), a JavaScript animation library for the modern web", "homepage": "https://gsap.com", "npm": "gsap" },
+    {
+      "id": "framer_motion",
+      "nameClean": "Framer Motion",
+      "github_full_name": "motiondivision/motion",
+      "github_url": "https://github.com/motiondivision/motion",
+      "description": "A modern animation library for React and JavaScript",
+      "homepage": "https://motion.dev",
+      "npm": "framer-motion"
+    },
+    {
+      "id": "gsap",
+      "nameClean": "GSAP",
+      "github_full_name": "greensock/GSAP",
+      "github_url": "https://github.com/greensock/GSAP",
+      "description": "GSAP (GreenSock Animation Platform), a JavaScript animation library for the modern web",
+      "homepage": "https://gsap.com",
+      "npm": "gsap"
+    },
 
-    { "id": "d3", "nameClean": "D3.js", "github_full_name": "d3/d3", "github_url": "https://github.com/d3/d3", "description": "Bring data to life with SVG, Canvas and HTML.", "homepage": "https://d3js.org", "npm": "d3" },
-    { "id": "three", "nameClean": "Three.js", "github_full_name": "mrdoob/three.js", "github_url": "https://github.com/mrdoob/three.js", "description": "JavaScript 3D Library.", "homepage": "https://threejs.org", "npm": "three" },
-    { "id": "chartjs", "nameClean": "Chart.js", "github_full_name": "chartjs/Chart.js", "github_url": "https://github.com/chartjs/Chart.js", "description": "Simple HTML5 Charts using the <canvas> tag", "homepage": "https://www.chartjs.org", "npm": "chart.js" },
+    {
+      "id": "d3",
+      "nameClean": "D3.js",
+      "github_full_name": "d3/d3",
+      "github_url": "https://github.com/d3/d3",
+      "description": "Bring data to life with SVG, Canvas and HTML.",
+      "homepage": "https://d3js.org",
+      "npm": "d3"
+    },
+    {
+      "id": "three",
+      "nameClean": "Three.js",
+      "github_full_name": "mrdoob/three.js",
+      "github_url": "https://github.com/mrdoob/three.js",
+      "description": "JavaScript 3D Library.",
+      "homepage": "https://threejs.org",
+      "npm": "three"
+    },
+    {
+      "id": "chartjs",
+      "nameClean": "Chart.js",
+      "github_full_name": "chartjs/Chart.js",
+      "github_url": "https://github.com/chartjs/Chart.js",
+      "description": "Simple HTML5 Charts using the <canvas> tag",
+      "homepage": "https://www.chartjs.org",
+      "npm": "chart.js"
+    },
 
-    { "id": "vite", "nameClean": "Vite", "github_full_name": "vitejs/vite", "github_url": "https://github.com/vitejs/vite", "description": "Next generation frontend tooling. It's fast!", "homepage": "https://vite.dev", "npm": null },
-    { "id": "webpack", "nameClean": "webpack", "github_full_name": "webpack/webpack", "github_url": "https://github.com/webpack/webpack", "description": "A bundler for javascript and friends. Packs many modules into a few bundled assets.", "homepage": "https://webpack.js.org", "npm": "webpack" },
-    { "id": "tsc", "nameClean": "tsc CLI", "github_full_name": "microsoft/TypeScript", "github_url": "https://github.com/microsoft/TypeScript", "description": "TypeScript is a superset of JavaScript that compiles to clean JavaScript output.", "homepage": "https://www.typescriptlang.org", "npm": "typescript" },
-    { "id": "swc", "nameClean": "SWC", "github_full_name": "swc-project/swc", "github_url": "https://github.com/swc-project/swc", "description": "Rust-based platform for the Web", "homepage": "https://swc.rs", "npm": null },
-    { "id": "rspack", "nameClean": "Rspack", "github_full_name": "web-infra-dev/rspack", "github_url": "https://github.com/web-infra-dev/rspack", "description": "The fast Rust-based JavaScript bundler with webpack-compatible API", "homepage": "https://rspack.rs", "npm": null },
-    { "id": "rolldown", "nameClean": "Rolldown", "github_full_name": "rolldown/rolldown", "github_url": "https://github.com/rolldown/rolldown", "description": "Fast Rust bundler for JavaScript/TypeScript with Rollup-compatible API.", "homepage": "https://rolldown.rs", "npm": null },
+    {
+      "id": "vite",
+      "nameClean": "Vite",
+      "github_full_name": "vitejs/vite",
+      "github_url": "https://github.com/vitejs/vite",
+      "description": "Next generation frontend tooling. It's fast!",
+      "homepage": "https://vite.dev",
+      "npm": null
+    },
+    {
+      "id": "webpack",
+      "nameClean": "webpack",
+      "github_full_name": "webpack/webpack",
+      "github_url": "https://github.com/webpack/webpack",
+      "description": "A bundler for javascript and friends. Packs many modules into a few bundled assets.",
+      "homepage": "https://webpack.js.org",
+      "npm": "webpack"
+    },
+    {
+      "id": "tsc",
+      "nameClean": "tsc CLI",
+      "github_full_name": "microsoft/TypeScript",
+      "github_url": "https://github.com/microsoft/TypeScript",
+      "description": "TypeScript is a superset of JavaScript that compiles to clean JavaScript output.",
+      "homepage": "https://www.typescriptlang.org",
+      "npm": "typescript"
+    },
+    {
+      "id": "swc",
+      "nameClean": "SWC",
+      "github_full_name": "swc-project/swc",
+      "github_url": "https://github.com/swc-project/swc",
+      "description": "Rust-based platform for the Web",
+      "homepage": "https://swc.rs",
+      "npm": null
+    },
+    {
+      "id": "rspack",
+      "nameClean": "Rspack",
+      "github_full_name": "web-infra-dev/rspack",
+      "github_url": "https://github.com/web-infra-dev/rspack",
+      "description": "The fast Rust-based JavaScript bundler with webpack-compatible API",
+      "homepage": "https://rspack.rs",
+      "npm": null
+    },
+    {
+      "id": "rolldown",
+      "nameClean": "Rolldown",
+      "github_full_name": "rolldown/rolldown",
+      "github_url": "https://github.com/rolldown/rolldown",
+      "description": "Fast Rust bundler for JavaScript/TypeScript with Rollup-compatible API.",
+      "homepage": "https://rolldown.rs",
+      "npm": null
+    },
 
-    { "id": "vitest", "nameClean": "Vitest", "github_full_name": "vitest-dev/vitest", "github_url": "https://github.com/vitest-dev/vitest", "description": "Next generation testing framework powered by Vite.", "homepage": "https://vitest.dev", "npm": "vitest" },
-    { "id": "jest", "nameClean": "Jest", "github_full_name": "jestjs/jest", "github_url": "https://github.com/jestjs/jest", "description": "Delightful JavaScript Testing.", "homepage": "https://jestjs.io", "npm": "jest" },
-    { "id": "playwright", "nameClean": "Playwright", "github_full_name": "microsoft/playwright", "github_url": "https://github.com/microsoft/playwright", "description": "Playwright is a framework for Web Testing and Automation. It allows testing Chromium, Firefox and WebKit with a single API.", "homepage": "https://playwright.dev", "npm": "playwright" },
-    { "id": "cypress", "nameClean": "Cypress", "github_full_name": "cypress-io/cypress", "github_url": "https://github.com/cypress-io/cypress", "description": "Fast, easy and reliable testing for anything that runs in a browser.", "homepage": "https://cypress.io", "npm": "cypress" },
-    { "id": "testing_library", "nameClean": "Testing Library", "github_full_name": "testing-library/react-testing-library", "github_url": "https://github.com/testing-library/react-testing-library", "description": "Simple and complete React DOM testing utilities that encourage good testing practices.", "homepage": "https://testing-library.com/react", "npm": "@testing-library/react" },
-    { "id": "mock_service_worker", "nameClean": "Mock Service Worker", "github_full_name": "mswjs/msw", "github_url": "https://github.com/mswjs/msw", "description": "Industry standard API mocking for JavaScript.", "homepage": "https://mswjs.io", "npm": "msw" },
+    {
+      "id": "vitest",
+      "nameClean": "Vitest",
+      "github_full_name": "vitest-dev/vitest",
+      "github_url": "https://github.com/vitest-dev/vitest",
+      "description": "Next generation testing framework powered by Vite.",
+      "homepage": "https://vitest.dev",
+      "npm": "vitest"
+    },
+    {
+      "id": "jest",
+      "nameClean": "Jest",
+      "github_full_name": "jestjs/jest",
+      "github_url": "https://github.com/jestjs/jest",
+      "description": "Delightful JavaScript Testing.",
+      "homepage": "https://jestjs.io",
+      "npm": "jest"
+    },
+    {
+      "id": "playwright",
+      "nameClean": "Playwright",
+      "github_full_name": "microsoft/playwright",
+      "github_url": "https://github.com/microsoft/playwright",
+      "description": "Playwright is a framework for Web Testing and Automation. It allows testing Chromium, Firefox and WebKit with a single API.",
+      "homepage": "https://playwright.dev",
+      "npm": "playwright"
+    },
+    {
+      "id": "cypress",
+      "nameClean": "Cypress",
+      "github_full_name": "cypress-io/cypress",
+      "github_url": "https://github.com/cypress-io/cypress",
+      "description": "Fast, easy and reliable testing for anything that runs in a browser.",
+      "homepage": "https://cypress.io",
+      "npm": "cypress"
+    },
+    {
+      "id": "testing_library",
+      "nameClean": "Testing Library",
+      "github_full_name": "testing-library/react-testing-library",
+      "github_url": "https://github.com/testing-library/react-testing-library",
+      "description": "Simple and complete React DOM testing utilities that encourage good testing practices.",
+      "homepage": "https://testing-library.com/react",
+      "npm": "@testing-library/react"
+    },
+    {
+      "id": "mock_service_worker",
+      "nameClean": "Mock Service Worker",
+      "github_full_name": "mswjs/msw",
+      "github_url": "https://github.com/mswjs/msw",
+      "description": "Industry standard API mocking for JavaScript.",
+      "homepage": "https://mswjs.io",
+      "npm": "msw"
+    },
 
-    { "id": "eslint", "nameClean": "ESLint", "github_full_name": "eslint/eslint", "github_url": "https://github.com/eslint/eslint", "description": "Find and fix problems in your JavaScript code.", "homepage": "https://eslint.org", "npm": "eslint" },
-    { "id": "prettier", "nameClean": "Prettier", "github_full_name": "prettier/prettier", "github_url": "https://github.com/prettier/prettier", "description": "Prettier is an opinionated code formatter.", "homepage": "https://prettier.io", "npm": "prettier" },
-    { "id": "nx", "nameClean": "Nx", "github_full_name": "nrwl/nx", "github_url": "https://github.com/nrwl/nx", "description": "The Monorepo Platform that amplifies both developers and AI agents.", "homepage": "https://nx.dev", "npm": "nx" },
-    { "id": "lerna", "nameClean": "Lerna", "github_full_name": "lerna/lerna", "github_url": "https://github.com/lerna/lerna", "description": "Lerna is a fast, modern build system for managing and publishing multiple JavaScript/TypeScript packages from the same repository.", "homepage": "https://lerna.js.org", "npm": "lerna" },
+    {
+      "id": "eslint",
+      "nameClean": "ESLint",
+      "github_full_name": "eslint/eslint",
+      "github_url": "https://github.com/eslint/eslint",
+      "description": "Find and fix problems in your JavaScript code.",
+      "homepage": "https://eslint.org",
+      "npm": "eslint"
+    },
+    {
+      "id": "prettier",
+      "nameClean": "Prettier",
+      "github_full_name": "prettier/prettier",
+      "github_url": "https://github.com/prettier/prettier",
+      "description": "Prettier is an opinionated code formatter.",
+      "homepage": "https://prettier.io",
+      "npm": "prettier"
+    },
+    {
+      "id": "nx",
+      "nameClean": "Nx",
+      "github_full_name": "nrwl/nx",
+      "github_url": "https://github.com/nrwl/nx",
+      "description": "The Monorepo Platform that amplifies both developers and AI agents.",
+      "homepage": "https://nx.dev",
+      "npm": "nx"
+    },
+    {
+      "id": "lerna",
+      "nameClean": "Lerna",
+      "github_full_name": "lerna/lerna",
+      "github_url": "https://github.com/lerna/lerna",
+      "description": "Lerna is a fast, modern build system for managing and publishing multiple JavaScript/TypeScript packages from the same repository.",
+      "homepage": "https://lerna.js.org",
+      "npm": "lerna"
+    },
 
-    { "id": "tailwindcss", "nameClean": "Tailwind CSS", "github_full_name": "tailwindlabs/tailwindcss", "github_url": "https://github.com/tailwindlabs/tailwindcss", "description": "A utility-first CSS framework for rapid UI development.", "homepage": "https://tailwindcss.com", "npm": "tailwindcss" },
-    { "id": "postcss", "nameClean": "PostCSS", "github_full_name": "postcss/postcss", "github_url": "https://github.com/postcss/postcss", "description": "Transforming styles with JS plugins", "homepage": "https://postcss.org", "npm": "postcss" },
-    { "id": "sass", "nameClean": "Sass", "github_full_name": "sass/dart-sass", "github_url": "https://github.com/sass/dart-sass", "description": "The reference implementation of Sass, written in Dart.", "homepage": "https://sass-lang.com/dart-sass", "npm": "sass" },
+    {
+      "id": "tailwindcss",
+      "nameClean": "Tailwind CSS",
+      "github_full_name": "tailwindlabs/tailwindcss",
+      "github_url": "https://github.com/tailwindlabs/tailwindcss",
+      "description": "A utility-first CSS framework for rapid UI development.",
+      "homepage": "https://tailwindcss.com",
+      "npm": "tailwindcss"
+    },
+    {
+      "id": "postcss",
+      "nameClean": "PostCSS",
+      "github_full_name": "postcss/postcss",
+      "github_url": "https://github.com/postcss/postcss",
+      "description": "Transforming styles with JS plugins",
+      "homepage": "https://postcss.org",
+      "npm": "postcss"
+    },
+    {
+      "id": "sass",
+      "nameClean": "Sass",
+      "github_full_name": "sass/dart-sass",
+      "github_url": "https://github.com/sass/dart-sass",
+      "description": "The reference implementation of Sass, written in Dart.",
+      "homepage": "https://sass-lang.com/dart-sass",
+      "npm": "sass"
+    },
 
-    { "id": "zod", "nameClean": "Zod", "github_full_name": "colinhacks/zod", "github_url": "https://github.com/colinhacks/zod", "description": "TypeScript-first schema validation with static type inference", "homepage": "https://zod.dev", "npm": "zod" },
-    { "id": "yup", "nameClean": "Yup", "github_full_name": "jquense/yup", "github_url": "https://github.com/jquense/yup", "description": "Dead simple Object schema validation", "homepage": null, "npm": "yup" },
-    { "id": "valibot", "nameClean": "Valibot", "github_full_name": "fabian-hiller/valibot", "github_url": "https://github.com/fabian-hiller/valibot", "description": "The modular and type safe schema library for validating structural data", "homepage": "https://valibot.dev", "npm": "valibot" },
+    {
+      "id": "zod",
+      "nameClean": "Zod",
+      "github_full_name": "colinhacks/zod",
+      "github_url": "https://github.com/colinhacks/zod",
+      "description": "TypeScript-first schema validation with static type inference",
+      "homepage": "https://zod.dev",
+      "npm": "zod"
+    },
+    {
+      "id": "yup",
+      "nameClean": "Yup",
+      "github_full_name": "jquense/yup",
+      "github_url": "https://github.com/jquense/yup",
+      "description": "Dead simple Object schema validation",
+      "homepage": null,
+      "npm": "yup"
+    },
+    {
+      "id": "valibot",
+      "nameClean": "Valibot",
+      "github_full_name": "fabian-hiller/valibot",
+      "github_url": "https://github.com/fabian-hiller/valibot",
+      "description": "The modular and type safe schema library for validating structural data",
+      "homepage": "https://valibot.dev",
+      "npm": "valibot"
+    },
 
-    { "id": "lodash", "nameClean": "Lodash", "github_full_name": "lodash/lodash", "github_url": "https://github.com/lodash/lodash", "description": "A modern JavaScript utility library delivering modularity, performance, & extras.", "homepage": "https://lodash.com", "npm": "lodash" },
-    { "id": "date_fns", "nameClean": "date-fns", "github_full_name": "date-fns/date-fns", "github_url": "https://github.com/date-fns/date-fns", "description": "Modern JavaScript date utility library", "homepage": "https://date-fns.org", "npm": "date-fns" },
-    { "id": "dayjs", "nameClean": "Day.js", "github_full_name": "iamkun/dayjs", "github_url": "https://github.com/iamkun/dayjs", "description": "Day.js 2kB immutable date-time library alternative to Moment.js with the same modern API", "homepage": "https://day.js.org", "npm": "dayjs" },
+    {
+      "id": "lodash",
+      "nameClean": "Lodash",
+      "github_full_name": "lodash/lodash",
+      "github_url": "https://github.com/lodash/lodash",
+      "description": "A modern JavaScript utility library delivering modularity, performance, & extras.",
+      "homepage": "https://lodash.com",
+      "npm": "lodash"
+    },
+    {
+      "id": "date_fns",
+      "nameClean": "date-fns",
+      "github_full_name": "date-fns/date-fns",
+      "github_url": "https://github.com/date-fns/date-fns",
+      "description": "Modern JavaScript date utility library",
+      "homepage": "https://date-fns.org",
+      "npm": "date-fns"
+    },
+    {
+      "id": "dayjs",
+      "nameClean": "Day.js",
+      "github_full_name": "iamkun/dayjs",
+      "github_url": "https://github.com/iamkun/dayjs",
+      "description": "Day.js 2kB immutable date-time library alternative to Moment.js with the same modern API",
+      "homepage": "https://day.js.org",
+      "npm": "dayjs"
+    },
 
-    { "id": "pnpm", "nameClean": "pnpm", "github_full_name": "pnpm/pnpm", "github_url": "https://github.com/pnpm/pnpm", "description": "Fast, disk space efficient package manager", "homepage": "https://pnpm.io", "npm": null }
+    {
+      "id": "pnpm",
+      "nameClean": "pnpm",
+      "github_full_name": "pnpm/pnpm",
+      "github_url": "https://github.com/pnpm/pnpm",
+      "description": "Fast, disk space efficient package manager",
+      "homepage": "https://pnpm.io",
+      "npm": null
+    }
   ],
 
   "react-fullstack": [
-    { "id": "nextjs", "nameClean": "Next.js", "github_full_name": "vercel/next.js", "github_url": "https://github.com/vercel/next.js", "description": "The React Framework", "homepage": "https://nextjs.org", "npm": "next" },
-    { "id": "remix", "nameClean": "Remix", "github_full_name": "remix-run/remix", "github_url": "https://github.com/remix-run/remix", "description": "Build Better Websites. Create modern, resilient user experiences with web fundamentals.", "homepage": "https://remix.run", "npm": "create-remix" },
-    { "id": "gatsby", "nameClean": "Gatsby", "github_full_name": "gatsbyjs/gatsby", "github_url": "https://github.com/gatsbyjs/gatsby", "description": "The best React-based framework with performance, scalability and security built in.", "homepage": "https://www.gatsbyjs.com", "npm": "gatsby" },
-    { "id": "tanstack_start", "nameClean": "TanStack Start", "github_full_name": "TanStack/router", "github_url": "https://github.com/TanStack/router", "description": "A client-first, server-capable, fully type-safe router and full-stack framework for the web.", "homepage": "https://tanstack.com/router", "npm": "@tanstack/react-start" },
-    { "id": "waku", "nameClean": "Waku", "github_full_name": "wakujs/waku", "github_url": "https://github.com/wakujs/waku", "description": "The minimal React framework", "homepage": "https://waku.gg", "npm": "waku" },
+    {
+      "id": "nextjs",
+      "nameClean": "Next.js",
+      "github_full_name": "vercel/next.js",
+      "github_url": "https://github.com/vercel/next.js",
+      "description": "The React Framework",
+      "homepage": "https://nextjs.org",
+      "npm": "next"
+    },
+    {
+      "id": "remix",
+      "nameClean": "Remix",
+      "github_full_name": "remix-run/remix",
+      "github_url": "https://github.com/remix-run/remix",
+      "description": "Build Better Websites. Create modern, resilient user experiences with web fundamentals.",
+      "homepage": "https://remix.run",
+      "npm": "create-remix"
+    },
+    {
+      "id": "gatsby",
+      "nameClean": "Gatsby",
+      "github_full_name": "gatsbyjs/gatsby",
+      "github_url": "https://github.com/gatsbyjs/gatsby",
+      "description": "The best React-based framework with performance, scalability and security built in.",
+      "homepage": "https://www.gatsbyjs.com",
+      "npm": "gatsby"
+    },
+    {
+      "id": "tanstack_start",
+      "nameClean": "TanStack Start",
+      "github_full_name": "TanStack/router",
+      "github_url": "https://github.com/TanStack/router",
+      "description": "A client-first, server-capable, fully type-safe router and full-stack framework for the web.",
+      "homepage": "https://tanstack.com/router",
+      "npm": "@tanstack/react-start"
+    },
+    {
+      "id": "waku",
+      "nameClean": "Waku",
+      "github_full_name": "wakujs/waku",
+      "github_url": "https://github.com/wakujs/waku",
+      "description": "The minimal React framework",
+      "homepage": "https://waku.gg",
+      "npm": "waku"
+    },
 
-    { "id": "trpc", "nameClean": "tRPC", "github_full_name": "trpc/trpc", "github_url": "https://github.com/trpc/trpc", "description": "Move Fast and Break Nothing. End-to-end typesafe APIs made easy.", "homepage": "https://tRPC.io", "npm": null },
-    { "id": "auth_js", "nameClean": "Auth.js", "github_full_name": "nextauthjs/next-auth", "github_url": "https://github.com/nextauthjs/next-auth", "description": "Authentication for the Web.", "homepage": "https://authjs.dev", "npm": "next-auth" },
+    {
+      "id": "trpc",
+      "nameClean": "tRPC",
+      "github_full_name": "trpc/trpc",
+      "github_url": "https://github.com/trpc/trpc",
+      "description": "Move Fast and Break Nothing. End-to-end typesafe APIs made easy.",
+      "homepage": "https://tRPC.io",
+      "npm": null
+    },
+    {
+      "id": "auth_js",
+      "nameClean": "Auth.js",
+      "github_full_name": "nextauthjs/next-auth",
+      "github_url": "https://github.com/nextauthjs/next-auth",
+      "description": "Authentication for the Web.",
+      "homepage": "https://authjs.dev",
+      "npm": "next-auth"
+    },
 
-    { "id": "prisma", "nameClean": "Prisma", "github_full_name": "prisma/prisma", "github_url": "https://github.com/prisma/prisma", "description": "Next-generation ORM for Node.js & TypeScript", "homepage": "https://www.prisma.io", "npm": "prisma" },
-    { "id": "drizzle_orm", "nameClean": "Drizzle ORM", "github_full_name": "drizzle-team/drizzle-orm", "github_url": "https://github.com/drizzle-team/drizzle-orm", "description": "Headless TypeScript ORM with a head", "homepage": "https://orm.drizzle.team", "npm": "drizzle-orm" },
+    {
+      "id": "prisma",
+      "nameClean": "Prisma",
+      "github_full_name": "prisma/prisma",
+      "github_url": "https://github.com/prisma/prisma",
+      "description": "Next-generation ORM for Node.js & TypeScript",
+      "homepage": "https://www.prisma.io",
+      "npm": "prisma"
+    },
+    {
+      "id": "drizzle_orm",
+      "nameClean": "Drizzle ORM",
+      "github_full_name": "drizzle-team/drizzle-orm",
+      "github_url": "https://github.com/drizzle-team/drizzle-orm",
+      "description": "Headless TypeScript ORM with a head",
+      "homepage": "https://orm.drizzle.team",
+      "npm": "drizzle-orm"
+    },
 
-    { "id": "turbopack", "nameClean": "Turbopack", "github_full_name": "vercel/turborepo", "github_url": "https://github.com/vercel/turborepo", "description": "Build system optimized for JavaScript and TypeScript, written in Rust", "homepage": "https://turborepo.dev", "npm": null },
-    { "id": "tsc", "nameClean": "tsc CLI", "github_full_name": "microsoft/TypeScript", "github_url": "https://github.com/microsoft/TypeScript", "description": "TypeScript is a superset of JavaScript that compiles to clean JavaScript output.", "homepage": "https://www.typescriptlang.org", "npm": "typescript" },
-    { "id": "swc", "nameClean": "SWC", "github_full_name": "swc-project/swc", "github_url": "https://github.com/swc-project/swc", "description": "Rust-based platform for the Web", "homepage": "https://swc.rs", "npm": null },
+    {
+      "id": "turbopack",
+      "nameClean": "Turbopack",
+      "github_full_name": "vercel/turborepo",
+      "github_url": "https://github.com/vercel/turborepo",
+      "description": "Build system optimized for JavaScript and TypeScript, written in Rust",
+      "homepage": "https://turborepo.dev",
+      "npm": null
+    },
+    {
+      "id": "tsc",
+      "nameClean": "tsc CLI",
+      "github_full_name": "microsoft/TypeScript",
+      "github_url": "https://github.com/microsoft/TypeScript",
+      "description": "TypeScript is a superset of JavaScript that compiles to clean JavaScript output.",
+      "homepage": "https://www.typescriptlang.org",
+      "npm": "typescript"
+    },
+    {
+      "id": "swc",
+      "nameClean": "SWC",
+      "github_full_name": "swc-project/swc",
+      "github_url": "https://github.com/swc-project/swc",
+      "description": "Rust-based platform for the Web",
+      "homepage": "https://swc.rs",
+      "npm": null
+    },
 
-    { "id": "vitest", "nameClean": "Vitest", "github_full_name": "vitest-dev/vitest", "github_url": "https://github.com/vitest-dev/vitest", "description": "Next generation testing framework powered by Vite.", "homepage": "https://vitest.dev", "npm": "vitest" },
-    { "id": "jest", "nameClean": "Jest", "github_full_name": "jestjs/jest", "github_url": "https://github.com/jestjs/jest", "description": "Delightful JavaScript Testing.", "homepage": "https://jestjs.io", "npm": "jest" },
-    { "id": "playwright", "nameClean": "Playwright", "github_full_name": "microsoft/playwright", "github_url": "https://github.com/microsoft/playwright", "description": "Playwright is a framework for Web Testing and Automation. It allows testing Chromium, Firefox and WebKit with a single API.", "homepage": "https://playwright.dev", "npm": "playwright" },
-    { "id": "cypress", "nameClean": "Cypress", "github_full_name": "cypress-io/cypress", "github_url": "https://github.com/cypress-io/cypress", "description": "Fast, easy and reliable testing for anything that runs in a browser.", "homepage": "https://cypress.io", "npm": "cypress" },
-    { "id": "testing_library", "nameClean": "Testing Library", "github_full_name": "testing-library/react-testing-library", "github_url": "https://github.com/testing-library/react-testing-library", "description": "Simple and complete React DOM testing utilities that encourage good testing practices.", "homepage": "https://testing-library.com/react", "npm": "@testing-library/react" },
-    { "id": "mock_service_worker", "nameClean": "Mock Service Worker", "github_full_name": "mswjs/msw", "github_url": "https://github.com/mswjs/msw", "description": "Industry standard API mocking for JavaScript.", "homepage": "https://mswjs.io", "npm": "msw" },
+    {
+      "id": "vitest",
+      "nameClean": "Vitest",
+      "github_full_name": "vitest-dev/vitest",
+      "github_url": "https://github.com/vitest-dev/vitest",
+      "description": "Next generation testing framework powered by Vite.",
+      "homepage": "https://vitest.dev",
+      "npm": "vitest"
+    },
+    {
+      "id": "jest",
+      "nameClean": "Jest",
+      "github_full_name": "jestjs/jest",
+      "github_url": "https://github.com/jestjs/jest",
+      "description": "Delightful JavaScript Testing.",
+      "homepage": "https://jestjs.io",
+      "npm": "jest"
+    },
+    {
+      "id": "playwright",
+      "nameClean": "Playwright",
+      "github_full_name": "microsoft/playwright",
+      "github_url": "https://github.com/microsoft/playwright",
+      "description": "Playwright is a framework for Web Testing and Automation. It allows testing Chromium, Firefox and WebKit with a single API.",
+      "homepage": "https://playwright.dev",
+      "npm": "playwright"
+    },
+    {
+      "id": "cypress",
+      "nameClean": "Cypress",
+      "github_full_name": "cypress-io/cypress",
+      "github_url": "https://github.com/cypress-io/cypress",
+      "description": "Fast, easy and reliable testing for anything that runs in a browser.",
+      "homepage": "https://cypress.io",
+      "npm": "cypress"
+    },
+    {
+      "id": "testing_library",
+      "nameClean": "Testing Library",
+      "github_full_name": "testing-library/react-testing-library",
+      "github_url": "https://github.com/testing-library/react-testing-library",
+      "description": "Simple and complete React DOM testing utilities that encourage good testing practices.",
+      "homepage": "https://testing-library.com/react",
+      "npm": "@testing-library/react"
+    },
+    {
+      "id": "mock_service_worker",
+      "nameClean": "Mock Service Worker",
+      "github_full_name": "mswjs/msw",
+      "github_url": "https://github.com/mswjs/msw",
+      "description": "Industry standard API mocking for JavaScript.",
+      "homepage": "https://mswjs.io",
+      "npm": "msw"
+    },
 
-    { "id": "eslint", "nameClean": "ESLint", "github_full_name": "eslint/eslint", "github_url": "https://github.com/eslint/eslint", "description": "Find and fix problems in your JavaScript code.", "homepage": "https://eslint.org", "npm": "eslint" },
-    { "id": "prettier", "nameClean": "Prettier", "github_full_name": "prettier/prettier", "github_url": "https://github.com/prettier/prettier", "description": "Prettier is an opinionated code formatter.", "homepage": "https://prettier.io", "npm": "prettier" },
-    { "id": "tailwindcss", "nameClean": "Tailwind CSS", "github_full_name": "tailwindlabs/tailwindcss", "github_url": "https://github.com/tailwindlabs/tailwindcss", "description": "A utility-first CSS framework for rapid UI development.", "homepage": "https://tailwindcss.com", "npm": "tailwindcss" },
-    { "id": "zod", "nameClean": "Zod", "github_full_name": "colinhacks/zod", "github_url": "https://github.com/colinhacks/zod", "description": "TypeScript-first schema validation with static type inference", "homepage": "https://zod.dev", "npm": "zod" },
-    { "id": "date_fns", "nameClean": "date-fns", "github_full_name": "date-fns/date-fns", "github_url": "https://github.com/date-fns/date-fns", "description": "Modern JavaScript date utility library", "homepage": "https://date-fns.org", "npm": "date-fns" },
-    { "id": "pnpm", "nameClean": "pnpm", "github_full_name": "pnpm/pnpm", "github_url": "https://github.com/pnpm/pnpm", "description": "Fast, disk space efficient package manager", "homepage": "https://pnpm.io", "npm": null },
+    {
+      "id": "eslint",
+      "nameClean": "ESLint",
+      "github_full_name": "eslint/eslint",
+      "github_url": "https://github.com/eslint/eslint",
+      "description": "Find and fix problems in your JavaScript code.",
+      "homepage": "https://eslint.org",
+      "npm": "eslint"
+    },
+    {
+      "id": "prettier",
+      "nameClean": "Prettier",
+      "github_full_name": "prettier/prettier",
+      "github_url": "https://github.com/prettier/prettier",
+      "description": "Prettier is an opinionated code formatter.",
+      "homepage": "https://prettier.io",
+      "npm": "prettier"
+    },
+    {
+      "id": "tailwindcss",
+      "nameClean": "Tailwind CSS",
+      "github_full_name": "tailwindlabs/tailwindcss",
+      "github_url": "https://github.com/tailwindlabs/tailwindcss",
+      "description": "A utility-first CSS framework for rapid UI development.",
+      "homepage": "https://tailwindcss.com",
+      "npm": "tailwindcss"
+    },
+    {
+      "id": "zod",
+      "nameClean": "Zod",
+      "github_full_name": "colinhacks/zod",
+      "github_url": "https://github.com/colinhacks/zod",
+      "description": "TypeScript-first schema validation with static type inference",
+      "homepage": "https://zod.dev",
+      "npm": "zod"
+    },
+    {
+      "id": "date_fns",
+      "nameClean": "date-fns",
+      "github_full_name": "date-fns/date-fns",
+      "github_url": "https://github.com/date-fns/date-fns",
+      "description": "Modern JavaScript date utility library",
+      "homepage": "https://date-fns.org",
+      "npm": "date-fns"
+    },
+    {
+      "id": "pnpm",
+      "nameClean": "pnpm",
+      "github_full_name": "pnpm/pnpm",
+      "github_url": "https://github.com/pnpm/pnpm",
+      "description": "Fast, disk space efficient package manager",
+      "homepage": "https://pnpm.io",
+      "npm": null
+    },
 
-    { "id": "docker", "nameClean": "Docker (Moby)", "github_full_name": "moby/moby", "github_url": "https://github.com/moby/moby", "description": "The Moby Project - a collaborative project for the container ecosystem to assemble container-based systems", "homepage": "https://mobyproject.org", "npm": null },
-    { "id": "opentelemetry", "nameClean": "OpenTelemetry Specification", "github_full_name": "open-telemetry/opentelemetry-specification", "github_url": "https://github.com/open-telemetry/opentelemetry-specification", "description": "Specifications for OpenTelemetry", "homepage": "https://opentelemetry.io", "npm": null }
+    {
+      "id": "docker",
+      "nameClean": "Docker (Moby)",
+      "github_full_name": "moby/moby",
+      "github_url": "https://github.com/moby/moby",
+      "description": "The Moby Project - a collaborative project for the container ecosystem to assemble container-based systems",
+      "homepage": "https://mobyproject.org",
+      "npm": null
+    },
+    {
+      "id": "opentelemetry",
+      "nameClean": "OpenTelemetry Specification",
+      "github_full_name": "open-telemetry/opentelemetry-specification",
+      "github_url": "https://github.com/open-telemetry/opentelemetry-specification",
+      "description": "Specifications for OpenTelemetry",
+      "homepage": "https://opentelemetry.io",
+      "npm": null
+    }
   ],
 
   "vue": [
-    { "id": "vuejs", "nameClean": "Vue.js", "github_full_name": "vuejs/core", "github_url": "https://github.com/vuejs/core", "description": "Vue.js is a progressive, incrementally-adoptable JavaScript framework for building UI on the web.", "homepage": "https://vuejs.org", "npm": "vue" },
-    { "id": "nuxt", "nameClean": "Nuxt", "github_full_name": "nuxt/nuxt", "github_url": "https://github.com/nuxt/nuxt", "description": "The Full-Stack Vue Framework.", "homepage": "https://nuxt.com", "npm": "nuxt" },
-    { "id": "quasar", "nameClean": "Quasar", "github_full_name": "quasarframework/quasar", "github_url": "https://github.com/quasarframework/quasar", "description": "Quasar Framework - Build high-performance VueJS user interfaces in record time", "homepage": "https://quasar.dev", "npm": null },
+    {
+      "id": "vuejs",
+      "nameClean": "Vue.js",
+      "github_full_name": "vuejs/core",
+      "github_url": "https://github.com/vuejs/core",
+      "description": "Vue.js is a progressive, incrementally-adoptable JavaScript framework for building UI on the web.",
+      "homepage": "https://vuejs.org",
+      "npm": "vue"
+    },
+    {
+      "id": "nuxt",
+      "nameClean": "Nuxt",
+      "github_full_name": "nuxt/nuxt",
+      "github_url": "https://github.com/nuxt/nuxt",
+      "description": "The Full-Stack Vue Framework.",
+      "homepage": "https://nuxt.com",
+      "npm": "nuxt"
+    },
+    {
+      "id": "quasar",
+      "nameClean": "Quasar",
+      "github_full_name": "quasarframework/quasar",
+      "github_url": "https://github.com/quasarframework/quasar",
+      "description": "Quasar Framework - Build high-performance VueJS user interfaces in record time",
+      "homepage": "https://quasar.dev",
+      "npm": null
+    },
 
-    { "id": "vite", "nameClean": "Vite", "github_full_name": "vitejs/vite", "github_url": "https://github.com/vitejs/vite", "description": "Next generation frontend tooling. It's fast!", "homepage": "https://vite.dev", "npm": null },
-    { "id": "tsc", "nameClean": "tsc CLI", "github_full_name": "microsoft/TypeScript", "github_url": "https://github.com/microsoft/TypeScript", "description": "TypeScript is a superset of JavaScript that compiles to clean JavaScript output.", "homepage": "https://www.typescriptlang.org", "npm": "typescript" },
-    { "id": "vitest", "nameClean": "Vitest", "github_full_name": "vitest-dev/vitest", "github_url": "https://github.com/vitest-dev/vitest", "description": "Next generation testing framework powered by Vite.", "homepage": "https://vitest.dev", "npm": "vitest" },
-    { "id": "jest", "nameClean": "Jest", "github_full_name": "jestjs/jest", "github_url": "https://github.com/jestjs/jest", "description": "Delightful JavaScript Testing.", "homepage": "https://jestjs.io", "npm": "jest" },
-    { "id": "playwright", "nameClean": "Playwright", "github_full_name": "microsoft/playwright", "github_url": "https://github.com/microsoft/playwright", "description": "Playwright is a framework for Web Testing and Automation. It allows testing Chromium, Firefox and WebKit with a single API.", "homepage": "https://playwright.dev", "npm": "playwright" },
-    { "id": "cypress", "nameClean": "Cypress", "github_full_name": "cypress-io/cypress", "github_url": "https://github.com/cypress-io/cypress", "description": "Fast, easy and reliable testing for anything that runs in a browser.", "homepage": "https://cypress.io", "npm": "cypress" },
-    { "id": "eslint", "nameClean": "ESLint", "github_full_name": "eslint/eslint", "github_url": "https://github.com/eslint/eslint", "description": "Find and fix problems in your JavaScript code.", "homepage": "https://eslint.org", "npm": "eslint" },
-    { "id": "prettier", "nameClean": "Prettier", "github_full_name": "prettier/prettier", "github_url": "https://github.com/prettier/prettier", "description": "Prettier is an opinionated code formatter.", "homepage": "https://prettier.io", "npm": "prettier" },
-    { "id": "tailwindcss", "nameClean": "Tailwind CSS", "github_full_name": "tailwindlabs/tailwindcss", "github_url": "https://github.com/tailwindlabs/tailwindcss", "description": "A utility-first CSS framework for rapid UI development.", "homepage": "https://tailwindcss.com", "npm": "tailwindcss" },
-    { "id": "zod", "nameClean": "Zod", "github_full_name": "colinhacks/zod", "github_url": "https://github.com/colinhacks/zod", "description": "TypeScript-first schema validation with static type inference", "homepage": "https://zod.dev", "npm": "zod" },
-    { "id": "lodash", "nameClean": "Lodash", "github_full_name": "lodash/lodash", "github_url": "https://github.com/lodash/lodash", "description": "A modern JavaScript utility library delivering modularity, performance, & extras.", "homepage": "https://lodash.com", "npm": "lodash" },
-    { "id": "date_fns", "nameClean": "date-fns", "github_full_name": "date-fns/date-fns", "github_url": "https://github.com/date-fns/date-fns", "description": "Modern JavaScript date utility library", "homepage": "https://date-fns.org", "npm": "date-fns" },
-    { "id": "dayjs", "nameClean": "Day.js", "github_full_name": "iamkun/dayjs", "github_url": "https://github.com/iamkun/dayjs", "description": "Day.js 2kB immutable date-time library alternative to Moment.js with the same modern API", "homepage": "https://day.js.org", "npm": "dayjs" },
-    { "id": "pnpm", "nameClean": "pnpm", "github_full_name": "pnpm/pnpm", "github_url": "https://github.com/pnpm/pnpm", "description": "Fast, disk space efficient package manager", "homepage": "https://pnpm.io", "npm": null }
+    {
+      "id": "vite",
+      "nameClean": "Vite",
+      "github_full_name": "vitejs/vite",
+      "github_url": "https://github.com/vitejs/vite",
+      "description": "Next generation frontend tooling. It's fast!",
+      "homepage": "https://vite.dev",
+      "npm": null
+    },
+    {
+      "id": "tsc",
+      "nameClean": "tsc CLI",
+      "github_full_name": "microsoft/TypeScript",
+      "github_url": "https://github.com/microsoft/TypeScript",
+      "description": "TypeScript is a superset of JavaScript that compiles to clean JavaScript output.",
+      "homepage": "https://www.typescriptlang.org",
+      "npm": "typescript"
+    },
+    {
+      "id": "vitest",
+      "nameClean": "Vitest",
+      "github_full_name": "vitest-dev/vitest",
+      "github_url": "https://github.com/vitest-dev/vitest",
+      "description": "Next generation testing framework powered by Vite.",
+      "homepage": "https://vitest.dev",
+      "npm": "vitest"
+    },
+    {
+      "id": "jest",
+      "nameClean": "Jest",
+      "github_full_name": "jestjs/jest",
+      "github_url": "https://github.com/jestjs/jest",
+      "description": "Delightful JavaScript Testing.",
+      "homepage": "https://jestjs.io",
+      "npm": "jest"
+    },
+    {
+      "id": "playwright",
+      "nameClean": "Playwright",
+      "github_full_name": "microsoft/playwright",
+      "github_url": "https://github.com/microsoft/playwright",
+      "description": "Playwright is a framework for Web Testing and Automation. It allows testing Chromium, Firefox and WebKit with a single API.",
+      "homepage": "https://playwright.dev",
+      "npm": "playwright"
+    },
+    {
+      "id": "cypress",
+      "nameClean": "Cypress",
+      "github_full_name": "cypress-io/cypress",
+      "github_url": "https://github.com/cypress-io/cypress",
+      "description": "Fast, easy and reliable testing for anything that runs in a browser.",
+      "homepage": "https://cypress.io",
+      "npm": "cypress"
+    },
+    {
+      "id": "eslint",
+      "nameClean": "ESLint",
+      "github_full_name": "eslint/eslint",
+      "github_url": "https://github.com/eslint/eslint",
+      "description": "Find and fix problems in your JavaScript code.",
+      "homepage": "https://eslint.org",
+      "npm": "eslint"
+    },
+    {
+      "id": "prettier",
+      "nameClean": "Prettier",
+      "github_full_name": "prettier/prettier",
+      "github_url": "https://github.com/prettier/prettier",
+      "description": "Prettier is an opinionated code formatter.",
+      "homepage": "https://prettier.io",
+      "npm": "prettier"
+    },
+    {
+      "id": "tailwindcss",
+      "nameClean": "Tailwind CSS",
+      "github_full_name": "tailwindlabs/tailwindcss",
+      "github_url": "https://github.com/tailwindlabs/tailwindcss",
+      "description": "A utility-first CSS framework for rapid UI development.",
+      "homepage": "https://tailwindcss.com",
+      "npm": "tailwindcss"
+    },
+    {
+      "id": "zod",
+      "nameClean": "Zod",
+      "github_full_name": "colinhacks/zod",
+      "github_url": "https://github.com/colinhacks/zod",
+      "description": "TypeScript-first schema validation with static type inference",
+      "homepage": "https://zod.dev",
+      "npm": "zod"
+    },
+    {
+      "id": "lodash",
+      "nameClean": "Lodash",
+      "github_full_name": "lodash/lodash",
+      "github_url": "https://github.com/lodash/lodash",
+      "description": "A modern JavaScript utility library delivering modularity, performance, & extras.",
+      "homepage": "https://lodash.com",
+      "npm": "lodash"
+    },
+    {
+      "id": "date_fns",
+      "nameClean": "date-fns",
+      "github_full_name": "date-fns/date-fns",
+      "github_url": "https://github.com/date-fns/date-fns",
+      "description": "Modern JavaScript date utility library",
+      "homepage": "https://date-fns.org",
+      "npm": "date-fns"
+    },
+    {
+      "id": "dayjs",
+      "nameClean": "Day.js",
+      "github_full_name": "iamkun/dayjs",
+      "github_url": "https://github.com/iamkun/dayjs",
+      "description": "Day.js 2kB immutable date-time library alternative to Moment.js with the same modern API",
+      "homepage": "https://day.js.org",
+      "npm": "dayjs"
+    },
+    {
+      "id": "pnpm",
+      "nameClean": "pnpm",
+      "github_full_name": "pnpm/pnpm",
+      "github_url": "https://github.com/pnpm/pnpm",
+      "description": "Fast, disk space efficient package manager",
+      "homepage": "https://pnpm.io",
+      "npm": null
+    }
   ],
 
   "svelte": [
-    { "id": "svelte", "nameClean": "Svelte", "github_full_name": "sveltejs/svelte", "github_url": "https://github.com/sveltejs/svelte", "description": "web development for the rest of us", "homepage": "https://svelte.dev", "npm": null },
-    { "id": "sveltekit", "nameClean": "SvelteKit", "github_full_name": "sveltejs/kit", "github_url": "https://github.com/sveltejs/kit", "description": "web development, streamlined", "homepage": "https://svelte.dev/docs/kit", "npm": "@sveltejs/kit" },
+    {
+      "id": "svelte",
+      "nameClean": "Svelte",
+      "github_full_name": "sveltejs/svelte",
+      "github_url": "https://github.com/sveltejs/svelte",
+      "description": "web development for the rest of us",
+      "homepage": "https://svelte.dev",
+      "npm": null
+    },
+    {
+      "id": "sveltekit",
+      "nameClean": "SvelteKit",
+      "github_full_name": "sveltejs/kit",
+      "github_url": "https://github.com/sveltejs/kit",
+      "description": "web development, streamlined",
+      "homepage": "https://svelte.dev/docs/kit",
+      "npm": "@sveltejs/kit"
+    },
 
-    { "id": "vite", "nameClean": "Vite", "github_full_name": "vitejs/vite", "github_url": "https://github.com/vitejs/vite", "description": "Next generation frontend tooling. It's fast!", "homepage": "https://vite.dev", "npm": null },
-    { "id": "tsc", "nameClean": "tsc CLI", "github_full_name": "microsoft/TypeScript", "github_url": "https://github.com/microsoft/TypeScript", "description": "TypeScript is a superset of JavaScript that compiles to clean JavaScript output.", "homepage": "https://www.typescriptlang.org", "npm": "typescript" },
-    { "id": "vitest", "nameClean": "Vitest", "github_full_name": "vitest-dev/vitest", "github_url": "https://github.com/vitest-dev/vitest", "description": "Next generation testing framework powered by Vite.", "homepage": "https://vitest.dev", "npm": "vitest" },
-    { "id": "playwright", "nameClean": "Playwright", "github_full_name": "microsoft/playwright", "github_url": "https://github.com/microsoft/playwright", "description": "Playwright is a framework for Web Testing and Automation. It allows testing Chromium, Firefox and WebKit with a single API.", "homepage": "https://playwright.dev", "npm": "playwright" },
-    { "id": "eslint", "nameClean": "ESLint", "github_full_name": "eslint/eslint", "github_url": "https://github.com/eslint/eslint", "description": "Find and fix problems in your JavaScript code.", "homepage": "https://eslint.org", "npm": "eslint" },
-    { "id": "prettier", "nameClean": "Prettier", "github_full_name": "prettier/prettier", "github_url": "https://github.com/prettier/prettier", "description": "Prettier is an opinionated code formatter.", "homepage": "https://prettier.io", "npm": "prettier" },
-    { "id": "tailwindcss", "nameClean": "Tailwind CSS", "github_full_name": "tailwindlabs/tailwindcss", "github_url": "https://github.com/tailwindlabs/tailwindcss", "description": "A utility-first CSS framework for rapid UI development.", "homepage": "https://tailwindcss.com", "npm": "tailwindcss" }
+    {
+      "id": "vite",
+      "nameClean": "Vite",
+      "github_full_name": "vitejs/vite",
+      "github_url": "https://github.com/vitejs/vite",
+      "description": "Next generation frontend tooling. It's fast!",
+      "homepage": "https://vite.dev",
+      "npm": null
+    },
+    {
+      "id": "tsc",
+      "nameClean": "tsc CLI",
+      "github_full_name": "microsoft/TypeScript",
+      "github_url": "https://github.com/microsoft/TypeScript",
+      "description": "TypeScript is a superset of JavaScript that compiles to clean JavaScript output.",
+      "homepage": "https://www.typescriptlang.org",
+      "npm": "typescript"
+    },
+    {
+      "id": "vitest",
+      "nameClean": "Vitest",
+      "github_full_name": "vitest-dev/vitest",
+      "github_url": "https://github.com/vitest-dev/vitest",
+      "description": "Next generation testing framework powered by Vite.",
+      "homepage": "https://vitest.dev",
+      "npm": "vitest"
+    },
+    {
+      "id": "playwright",
+      "nameClean": "Playwright",
+      "github_full_name": "microsoft/playwright",
+      "github_url": "https://github.com/microsoft/playwright",
+      "description": "Playwright is a framework for Web Testing and Automation. It allows testing Chromium, Firefox and WebKit with a single API.",
+      "homepage": "https://playwright.dev",
+      "npm": "playwright"
+    },
+    {
+      "id": "eslint",
+      "nameClean": "ESLint",
+      "github_full_name": "eslint/eslint",
+      "github_url": "https://github.com/eslint/eslint",
+      "description": "Find and fix problems in your JavaScript code.",
+      "homepage": "https://eslint.org",
+      "npm": "eslint"
+    },
+    {
+      "id": "prettier",
+      "nameClean": "Prettier",
+      "github_full_name": "prettier/prettier",
+      "github_url": "https://github.com/prettier/prettier",
+      "description": "Prettier is an opinionated code formatter.",
+      "homepage": "https://prettier.io",
+      "npm": "prettier"
+    },
+    {
+      "id": "tailwindcss",
+      "nameClean": "Tailwind CSS",
+      "github_full_name": "tailwindlabs/tailwindcss",
+      "github_url": "https://github.com/tailwindlabs/tailwindcss",
+      "description": "A utility-first CSS framework for rapid UI development.",
+      "homepage": "https://tailwindcss.com",
+      "npm": "tailwindcss"
+    }
   ],
 
   "angular": [
-    { "id": "angular", "nameClean": "Angular", "github_full_name": "angular/angular", "github_url": "https://github.com/angular/angular", "description": "Deliver web apps with confidence", "homepage": "https://angular.dev", "npm": "@angular/core" },
-    { "id": "analog", "nameClean": "Analog", "github_full_name": "analogjs/analog", "github_url": "https://github.com/analogjs/analog", "description": "The fullstack meta-framework for Angular. Powered by Vite and Nitro", "homepage": "https://analogjs.org", "npm": null },
+    {
+      "id": "angular",
+      "nameClean": "Angular",
+      "github_full_name": "angular/angular",
+      "github_url": "https://github.com/angular/angular",
+      "description": "Deliver web apps with confidence",
+      "homepage": "https://angular.dev",
+      "npm": "@angular/core"
+    },
+    {
+      "id": "analog",
+      "nameClean": "Analog",
+      "github_full_name": "analogjs/analog",
+      "github_url": "https://github.com/analogjs/analog",
+      "description": "The fullstack meta-framework for Angular. Powered by Vite and Nitro",
+      "homepage": "https://analogjs.org",
+      "npm": null
+    },
 
-    { "id": "webpack", "nameClean": "webpack", "github_full_name": "webpack/webpack", "github_url": "https://github.com/webpack/webpack", "description": "A bundler for javascript and friends. Packs many modules into a few bundled assets.", "homepage": "https://webpack.js.org", "npm": "webpack" },
-    { "id": "tsc", "nameClean": "tsc CLI", "github_full_name": "microsoft/TypeScript", "github_url": "https://github.com/microsoft/TypeScript", "description": "TypeScript is a superset of JavaScript that compiles to clean JavaScript output.", "homepage": "https://www.typescriptlang.org", "npm": "typescript" },
-    { "id": "jest", "nameClean": "Jest", "github_full_name": "jestjs/jest", "github_url": "https://github.com/jestjs/jest", "description": "Delightful JavaScript Testing.", "homepage": "https://jestjs.io", "npm": "jest" },
-    { "id": "playwright", "nameClean": "Playwright", "github_full_name": "microsoft/playwright", "github_url": "https://github.com/microsoft/playwright", "description": "Playwright is a framework for Web Testing and Automation. It allows testing Chromium, Firefox and WebKit with a single API.", "homepage": "https://playwright.dev", "npm": "playwright" },
-    { "id": "cypress", "nameClean": "Cypress", "github_full_name": "cypress-io/cypress", "github_url": "https://github.com/cypress-io/cypress", "description": "Fast, easy and reliable testing for anything that runs in a browser.", "homepage": "https://cypress.io", "npm": "cypress" },
-    { "id": "eslint", "nameClean": "ESLint", "github_full_name": "eslint/eslint", "github_url": "https://github.com/eslint/eslint", "description": "Find and fix problems in your JavaScript code.", "homepage": "https://eslint.org", "npm": "eslint" },
-    { "id": "prettier", "nameClean": "Prettier", "github_full_name": "prettier/prettier", "github_url": "https://github.com/prettier/prettier", "description": "Prettier is an opinionated code formatter.", "homepage": "https://prettier.io", "npm": "prettier" },
-    { "id": "tailwindcss", "nameClean": "Tailwind CSS", "github_full_name": "tailwindlabs/tailwindcss", "github_url": "https://github.com/tailwindlabs/tailwindcss", "description": "A utility-first CSS framework for rapid UI development.", "homepage": "https://tailwindcss.com", "npm": "tailwindcss" },
-    { "id": "sass", "nameClean": "Sass", "github_full_name": "sass/dart-sass", "github_url": "https://github.com/sass/dart-sass", "description": "The reference implementation of Sass, written in Dart.", "homepage": "https://sass-lang.com/dart-sass", "npm": "sass" },
-    { "id": "nx", "nameClean": "Nx", "github_full_name": "nrwl/nx", "github_url": "https://github.com/nrwl/nx", "description": "The Monorepo Platform that amplifies both developers and AI agents.", "homepage": "https://nx.dev", "npm": "nx" }
+    {
+      "id": "webpack",
+      "nameClean": "webpack",
+      "github_full_name": "webpack/webpack",
+      "github_url": "https://github.com/webpack/webpack",
+      "description": "A bundler for javascript and friends. Packs many modules into a few bundled assets.",
+      "homepage": "https://webpack.js.org",
+      "npm": "webpack"
+    },
+    {
+      "id": "tsc",
+      "nameClean": "tsc CLI",
+      "github_full_name": "microsoft/TypeScript",
+      "github_url": "https://github.com/microsoft/TypeScript",
+      "description": "TypeScript is a superset of JavaScript that compiles to clean JavaScript output.",
+      "homepage": "https://www.typescriptlang.org",
+      "npm": "typescript"
+    },
+    {
+      "id": "jest",
+      "nameClean": "Jest",
+      "github_full_name": "jestjs/jest",
+      "github_url": "https://github.com/jestjs/jest",
+      "description": "Delightful JavaScript Testing.",
+      "homepage": "https://jestjs.io",
+      "npm": "jest"
+    },
+    {
+      "id": "playwright",
+      "nameClean": "Playwright",
+      "github_full_name": "microsoft/playwright",
+      "github_url": "https://github.com/microsoft/playwright",
+      "description": "Playwright is a framework for Web Testing and Automation. It allows testing Chromium, Firefox and WebKit with a single API.",
+      "homepage": "https://playwright.dev",
+      "npm": "playwright"
+    },
+    {
+      "id": "cypress",
+      "nameClean": "Cypress",
+      "github_full_name": "cypress-io/cypress",
+      "github_url": "https://github.com/cypress-io/cypress",
+      "description": "Fast, easy and reliable testing for anything that runs in a browser.",
+      "homepage": "https://cypress.io",
+      "npm": "cypress"
+    },
+    {
+      "id": "eslint",
+      "nameClean": "ESLint",
+      "github_full_name": "eslint/eslint",
+      "github_url": "https://github.com/eslint/eslint",
+      "description": "Find and fix problems in your JavaScript code.",
+      "homepage": "https://eslint.org",
+      "npm": "eslint"
+    },
+    {
+      "id": "prettier",
+      "nameClean": "Prettier",
+      "github_full_name": "prettier/prettier",
+      "github_url": "https://github.com/prettier/prettier",
+      "description": "Prettier is an opinionated code formatter.",
+      "homepage": "https://prettier.io",
+      "npm": "prettier"
+    },
+    {
+      "id": "tailwindcss",
+      "nameClean": "Tailwind CSS",
+      "github_full_name": "tailwindlabs/tailwindcss",
+      "github_url": "https://github.com/tailwindlabs/tailwindcss",
+      "description": "A utility-first CSS framework for rapid UI development.",
+      "homepage": "https://tailwindcss.com",
+      "npm": "tailwindcss"
+    },
+    {
+      "id": "sass",
+      "nameClean": "Sass",
+      "github_full_name": "sass/dart-sass",
+      "github_url": "https://github.com/sass/dart-sass",
+      "description": "The reference implementation of Sass, written in Dart.",
+      "homepage": "https://sass-lang.com/dart-sass",
+      "npm": "sass"
+    },
+    {
+      "id": "nx",
+      "nameClean": "Nx",
+      "github_full_name": "nrwl/nx",
+      "github_url": "https://github.com/nrwl/nx",
+      "description": "The Monorepo Platform that amplifies both developers and AI agents.",
+      "homepage": "https://nx.dev",
+      "npm": "nx"
+    }
   ],
 
   "alt-frontend": [
-    { "id": "preact", "nameClean": "Preact", "github_full_name": "preactjs/preact", "github_url": "https://github.com/preactjs/preact", "description": "Fast 3kB React alternative with the same modern API. Components & Virtual DOM.", "homepage": "https://preactjs.com", "npm": "preact" },
-    { "id": "solid", "nameClean": "Solid", "github_full_name": "solidjs/solid", "github_url": "https://github.com/solidjs/solid", "description": "A declarative, efficient, and flexible JavaScript library for building user interfaces.", "homepage": "https://solidjs.com", "npm": "solid-js" },
-    { "id": "solidstart", "nameClean": "SolidStart", "github_full_name": "solidjs/solid-start", "github_url": "https://github.com/solidjs/solid-start", "description": "SolidStart, the Solid app framework", "homepage": "https://start.solidjs.com", "npm": null },
-    { "id": "alpinejs", "nameClean": "Alpine.js", "github_full_name": "alpinejs/alpine", "github_url": "https://github.com/alpinejs/alpine", "description": "A rugged, minimal framework for composing JavaScript behavior in your markup.", "homepage": "https://alpinejs.dev", "npm": "alpinejs" },
-    { "id": "litelement", "nameClean": "Lit", "github_full_name": "lit/lit", "github_url": "https://github.com/lit/lit", "description": "Lit is a simple library for building fast, lightweight web components.", "homepage": "https://lit.dev", "npm": "lit" },
-    { "id": "qwik", "nameClean": "Qwik", "github_full_name": "QwikDev/qwik", "github_url": "https://github.com/QwikDev/qwik", "description": "Instant-loading web apps, without effort", "homepage": "https://qwik.dev", "npm": null },
-    { "id": "stencil", "nameClean": "Stencil", "github_full_name": "stenciljs/core", "github_url": "https://github.com/stenciljs/core", "description": "A toolchain for building scalable, enterprise-ready component systems on top of TypeScript and Web Component standards.", "homepage": "https://stenciljs.com", "npm": null },
-    { "id": "htmx", "nameClean": "HTMX", "github_full_name": "bigskysoftware/htmx", "github_url": "https://github.com/bigskysoftware/htmx", "description": "high power tools for HTML", "homepage": "https://htmx.org", "npm": null },
-    { "id": "astro", "nameClean": "Astro", "github_full_name": "withastro/astro", "github_url": "https://github.com/withastro/astro", "description": "The web framework for content-driven websites.", "homepage": "https://astro.build", "npm": "astro" },
-    { "id": "fresh", "nameClean": "Deno Fresh", "github_full_name": "denoland/fresh", "github_url": "https://github.com/denoland/fresh", "description": "The next-gen web framework.", "homepage": "https://fresh.deno.dev", "npm": null },
-    { "id": "docusaurus", "nameClean": "Docusaurus", "github_full_name": "facebook/docusaurus", "github_url": "https://github.com/facebook/docusaurus", "description": "Easy to maintain open source documentation websites.", "homepage": "https://docusaurus.io", "npm": null },
+    {
+      "id": "preact",
+      "nameClean": "Preact",
+      "github_full_name": "preactjs/preact",
+      "github_url": "https://github.com/preactjs/preact",
+      "description": "Fast 3kB React alternative with the same modern API. Components & Virtual DOM.",
+      "homepage": "https://preactjs.com",
+      "npm": "preact"
+    },
+    {
+      "id": "solid",
+      "nameClean": "Solid",
+      "github_full_name": "solidjs/solid",
+      "github_url": "https://github.com/solidjs/solid",
+      "description": "A declarative, efficient, and flexible JavaScript library for building user interfaces.",
+      "homepage": "https://solidjs.com",
+      "npm": "solid-js"
+    },
+    {
+      "id": "solidstart",
+      "nameClean": "SolidStart",
+      "github_full_name": "solidjs/solid-start",
+      "github_url": "https://github.com/solidjs/solid-start",
+      "description": "SolidStart, the Solid app framework",
+      "homepage": "https://start.solidjs.com",
+      "npm": null
+    },
+    {
+      "id": "alpinejs",
+      "nameClean": "Alpine.js",
+      "github_full_name": "alpinejs/alpine",
+      "github_url": "https://github.com/alpinejs/alpine",
+      "description": "A rugged, minimal framework for composing JavaScript behavior in your markup.",
+      "homepage": "https://alpinejs.dev",
+      "npm": "alpinejs"
+    },
+    {
+      "id": "litelement",
+      "nameClean": "Lit",
+      "github_full_name": "lit/lit",
+      "github_url": "https://github.com/lit/lit",
+      "description": "Lit is a simple library for building fast, lightweight web components.",
+      "homepage": "https://lit.dev",
+      "npm": "lit"
+    },
+    {
+      "id": "qwik",
+      "nameClean": "Qwik",
+      "github_full_name": "QwikDev/qwik",
+      "github_url": "https://github.com/QwikDev/qwik",
+      "description": "Instant-loading web apps, without effort",
+      "homepage": "https://qwik.dev",
+      "npm": null
+    },
+    {
+      "id": "stencil",
+      "nameClean": "Stencil",
+      "github_full_name": "stenciljs/core",
+      "github_url": "https://github.com/stenciljs/core",
+      "description": "A toolchain for building scalable, enterprise-ready component systems on top of TypeScript and Web Component standards.",
+      "homepage": "https://stenciljs.com",
+      "npm": null
+    },
+    {
+      "id": "htmx",
+      "nameClean": "HTMX",
+      "github_full_name": "bigskysoftware/htmx",
+      "github_url": "https://github.com/bigskysoftware/htmx",
+      "description": "high power tools for HTML",
+      "homepage": "https://htmx.org",
+      "npm": null
+    },
+    {
+      "id": "astro",
+      "nameClean": "Astro",
+      "github_full_name": "withastro/astro",
+      "github_url": "https://github.com/withastro/astro",
+      "description": "The web framework for content-driven websites.",
+      "homepage": "https://astro.build",
+      "npm": "astro"
+    },
+    {
+      "id": "fresh",
+      "nameClean": "Deno Fresh",
+      "github_full_name": "denoland/fresh",
+      "github_url": "https://github.com/denoland/fresh",
+      "description": "The next-gen web framework.",
+      "homepage": "https://fresh.deno.dev",
+      "npm": null
+    },
+    {
+      "id": "docusaurus",
+      "nameClean": "Docusaurus",
+      "github_full_name": "facebook/docusaurus",
+      "github_url": "https://github.com/facebook/docusaurus",
+      "description": "Easy to maintain open source documentation websites.",
+      "homepage": "https://docusaurus.io",
+      "npm": null
+    },
 
-    { "id": "vite", "nameClean": "Vite", "github_full_name": "vitejs/vite", "github_url": "https://github.com/vitejs/vite", "description": "Next generation frontend tooling. It's fast!", "homepage": "https://vite.dev", "npm": null },
-    { "id": "esbuild", "nameClean": "esbuild", "github_full_name": "evanw/esbuild", "github_url": "https://github.com/evanw/esbuild", "description": "An extremely fast bundler for the web", "homepage": "https://esbuild.github.io", "npm": "esbuild" },
-    { "id": "parcel", "nameClean": "Parcel", "github_full_name": "parcel-bundler/parcel", "github_url": "https://github.com/parcel-bundler/parcel", "description": "The zero configuration build tool for the web.", "homepage": "https://parceljs.org", "npm": "parcel-bundler" },
-    { "id": "tsc", "nameClean": "tsc CLI", "github_full_name": "microsoft/TypeScript", "github_url": "https://github.com/microsoft/TypeScript", "description": "TypeScript is a superset of JavaScript that compiles to clean JavaScript output.", "homepage": "https://www.typescriptlang.org", "npm": "typescript" },
-    { "id": "vitest", "nameClean": "Vitest", "github_full_name": "vitest-dev/vitest", "github_url": "https://github.com/vitest-dev/vitest", "description": "Next generation testing framework powered by Vite.", "homepage": "https://vitest.dev", "npm": "vitest" },
-    { "id": "playwright", "nameClean": "Playwright", "github_full_name": "microsoft/playwright", "github_url": "https://github.com/microsoft/playwright", "description": "Playwright is a framework for Web Testing and Automation. It allows testing Chromium, Firefox and WebKit with a single API.", "homepage": "https://playwright.dev", "npm": "playwright" },
-    { "id": "eslint", "nameClean": "ESLint", "github_full_name": "eslint/eslint", "github_url": "https://github.com/eslint/eslint", "description": "Find and fix problems in your JavaScript code.", "homepage": "https://eslint.org", "npm": "eslint" },
-    { "id": "prettier", "nameClean": "Prettier", "github_full_name": "prettier/prettier", "github_url": "https://github.com/prettier/prettier", "description": "Prettier is an opinionated code formatter.", "homepage": "https://prettier.io", "npm": "prettier" },
-    { "id": "tailwindcss", "nameClean": "Tailwind CSS", "github_full_name": "tailwindlabs/tailwindcss", "github_url": "https://github.com/tailwindlabs/tailwindcss", "description": "A utility-first CSS framework for rapid UI development.", "homepage": "https://tailwindcss.com", "npm": "tailwindcss" },
-    { "id": "deno", "nameClean": "Deno", "github_full_name": "denoland/deno", "github_url": "https://github.com/denoland/deno", "description": "A modern runtime for JavaScript and TypeScript.", "homepage": "https://deno.com", "npm": null },
-    { "id": "bun", "nameClean": "Bun", "github_full_name": "oven-sh/bun", "github_url": "https://github.com/oven-sh/bun", "description": "Incredibly fast JavaScript runtime, bundler, test runner, and package manager -- all in one", "homepage": "https://bun.com", "npm": null }
+    {
+      "id": "vite",
+      "nameClean": "Vite",
+      "github_full_name": "vitejs/vite",
+      "github_url": "https://github.com/vitejs/vite",
+      "description": "Next generation frontend tooling. It's fast!",
+      "homepage": "https://vite.dev",
+      "npm": null
+    },
+    {
+      "id": "esbuild",
+      "nameClean": "esbuild",
+      "github_full_name": "evanw/esbuild",
+      "github_url": "https://github.com/evanw/esbuild",
+      "description": "An extremely fast bundler for the web",
+      "homepage": "https://esbuild.github.io",
+      "npm": "esbuild"
+    },
+    {
+      "id": "parcel",
+      "nameClean": "Parcel",
+      "github_full_name": "parcel-bundler/parcel",
+      "github_url": "https://github.com/parcel-bundler/parcel",
+      "description": "The zero configuration build tool for the web.",
+      "homepage": "https://parceljs.org",
+      "npm": "parcel-bundler"
+    },
+    {
+      "id": "tsc",
+      "nameClean": "tsc CLI",
+      "github_full_name": "microsoft/TypeScript",
+      "github_url": "https://github.com/microsoft/TypeScript",
+      "description": "TypeScript is a superset of JavaScript that compiles to clean JavaScript output.",
+      "homepage": "https://www.typescriptlang.org",
+      "npm": "typescript"
+    },
+    {
+      "id": "vitest",
+      "nameClean": "Vitest",
+      "github_full_name": "vitest-dev/vitest",
+      "github_url": "https://github.com/vitest-dev/vitest",
+      "description": "Next generation testing framework powered by Vite.",
+      "homepage": "https://vitest.dev",
+      "npm": "vitest"
+    },
+    {
+      "id": "playwright",
+      "nameClean": "Playwright",
+      "github_full_name": "microsoft/playwright",
+      "github_url": "https://github.com/microsoft/playwright",
+      "description": "Playwright is a framework for Web Testing and Automation. It allows testing Chromium, Firefox and WebKit with a single API.",
+      "homepage": "https://playwright.dev",
+      "npm": "playwright"
+    },
+    {
+      "id": "eslint",
+      "nameClean": "ESLint",
+      "github_full_name": "eslint/eslint",
+      "github_url": "https://github.com/eslint/eslint",
+      "description": "Find and fix problems in your JavaScript code.",
+      "homepage": "https://eslint.org",
+      "npm": "eslint"
+    },
+    {
+      "id": "prettier",
+      "nameClean": "Prettier",
+      "github_full_name": "prettier/prettier",
+      "github_url": "https://github.com/prettier/prettier",
+      "description": "Prettier is an opinionated code formatter.",
+      "homepage": "https://prettier.io",
+      "npm": "prettier"
+    },
+    {
+      "id": "tailwindcss",
+      "nameClean": "Tailwind CSS",
+      "github_full_name": "tailwindlabs/tailwindcss",
+      "github_url": "https://github.com/tailwindlabs/tailwindcss",
+      "description": "A utility-first CSS framework for rapid UI development.",
+      "homepage": "https://tailwindcss.com",
+      "npm": "tailwindcss"
+    },
+    {
+      "id": "deno",
+      "nameClean": "Deno",
+      "github_full_name": "denoland/deno",
+      "github_url": "https://github.com/denoland/deno",
+      "description": "A modern runtime for JavaScript and TypeScript.",
+      "homepage": "https://deno.com",
+      "npm": null
+    },
+    {
+      "id": "bun",
+      "nameClean": "Bun",
+      "github_full_name": "oven-sh/bun",
+      "github_url": "https://github.com/oven-sh/bun",
+      "description": "Incredibly fast JavaScript runtime, bundler, test runner, and package manager -- all in one",
+      "homepage": "https://bun.com",
+      "npm": null
+    }
   ],
 
   "mobile": [
-    { "id": "react_native", "nameClean": "React Native", "github_full_name": "facebook/react-native", "github_url": "https://github.com/facebook/react-native", "description": "A framework for building native applications using React", "homepage": "https://reactnative.dev", "npm": "react-native" },
-    { "id": "expo", "nameClean": "Expo", "github_full_name": "expo/expo", "github_url": "https://github.com/expo/expo", "description": "An open-source framework for making universal native apps with React. Expo runs on Android, iOS, and the web.", "homepage": "https://docs.expo.dev", "npm": "expo" },
+    {
+      "id": "react_native",
+      "nameClean": "React Native",
+      "github_full_name": "facebook/react-native",
+      "github_url": "https://github.com/facebook/react-native",
+      "description": "A framework for building native applications using React",
+      "homepage": "https://reactnative.dev",
+      "npm": "react-native"
+    },
+    {
+      "id": "expo",
+      "nameClean": "Expo",
+      "github_full_name": "expo/expo",
+      "github_url": "https://github.com/expo/expo",
+      "description": "An open-source framework for making universal native apps with React. Expo runs on Android, iOS, and the web.",
+      "homepage": "https://docs.expo.dev",
+      "npm": "expo"
+    },
 
-    { "id": "tsc", "nameClean": "tsc CLI", "github_full_name": "microsoft/TypeScript", "github_url": "https://github.com/microsoft/TypeScript", "description": "TypeScript is a superset of JavaScript that compiles to clean JavaScript output.", "homepage": "https://www.typescriptlang.org", "npm": "typescript" },
-    { "id": "jest", "nameClean": "Jest", "github_full_name": "jestjs/jest", "github_url": "https://github.com/jestjs/jest", "description": "Delightful JavaScript Testing.", "homepage": "https://jestjs.io", "npm": "jest" },
-    { "id": "testing_library", "nameClean": "Testing Library", "github_full_name": "testing-library/react-testing-library", "github_url": "https://github.com/testing-library/react-testing-library", "description": "Simple and complete React DOM testing utilities that encourage good testing practices.", "homepage": "https://testing-library.com/react", "npm": "@testing-library/react" },
-    { "id": "eslint", "nameClean": "ESLint", "github_full_name": "eslint/eslint", "github_url": "https://github.com/eslint/eslint", "description": "Find and fix problems in your JavaScript code.", "homepage": "https://eslint.org", "npm": "eslint" },
-    { "id": "prettier", "nameClean": "Prettier", "github_full_name": "prettier/prettier", "github_url": "https://github.com/prettier/prettier", "description": "Prettier is an opinionated code formatter.", "homepage": "https://prettier.io", "npm": "prettier" }
+    {
+      "id": "tsc",
+      "nameClean": "tsc CLI",
+      "github_full_name": "microsoft/TypeScript",
+      "github_url": "https://github.com/microsoft/TypeScript",
+      "description": "TypeScript is a superset of JavaScript that compiles to clean JavaScript output.",
+      "homepage": "https://www.typescriptlang.org",
+      "npm": "typescript"
+    },
+    {
+      "id": "jest",
+      "nameClean": "Jest",
+      "github_full_name": "jestjs/jest",
+      "github_url": "https://github.com/jestjs/jest",
+      "description": "Delightful JavaScript Testing.",
+      "homepage": "https://jestjs.io",
+      "npm": "jest"
+    },
+    {
+      "id": "testing_library",
+      "nameClean": "Testing Library",
+      "github_full_name": "testing-library/react-testing-library",
+      "github_url": "https://github.com/testing-library/react-testing-library",
+      "description": "Simple and complete React DOM testing utilities that encourage good testing practices.",
+      "homepage": "https://testing-library.com/react",
+      "npm": "@testing-library/react"
+    },
+    {
+      "id": "eslint",
+      "nameClean": "ESLint",
+      "github_full_name": "eslint/eslint",
+      "github_url": "https://github.com/eslint/eslint",
+      "description": "Find and fix problems in your JavaScript code.",
+      "homepage": "https://eslint.org",
+      "npm": "eslint"
+    },
+    {
+      "id": "prettier",
+      "nameClean": "Prettier",
+      "github_full_name": "prettier/prettier",
+      "github_url": "https://github.com/prettier/prettier",
+      "description": "Prettier is an opinionated code formatter.",
+      "homepage": "https://prettier.io",
+      "npm": "prettier"
+    }
   ],
 
   "node-api": [
-    { "id": "express", "nameClean": "Express", "github_full_name": "expressjs/express", "github_url": "https://github.com/expressjs/express", "description": "Fast, unopinionated, minimalist web framework for node.", "homepage": "https://expressjs.com", "npm": "express" },
-    { "id": "nest", "nameClean": "NestJS", "github_full_name": "nestjs/nest", "github_url": "https://github.com/nestjs/nest", "description": "A progressive Node.js framework for building efficient, scalable, and enterprise-grade server-side applications with TypeScript/JavaScript", "homepage": "https://nestjs.com", "npm": "@nestjs/core" },
-    { "id": "fastify", "nameClean": "Fastify", "github_full_name": "fastify/fastify", "github_url": "https://github.com/fastify/fastify", "description": "Fast and low overhead web framework, for Node.js", "homepage": "https://www.fastify.dev", "npm": "fastify" },
-    { "id": "hono", "nameClean": "Hono", "github_full_name": "honojs/hono", "github_url": "https://github.com/honojs/hono", "description": "Web framework built on Web Standards", "homepage": "https://hono.dev", "npm": null },
-    { "id": "koa", "nameClean": "Koa", "github_full_name": "koajs/koa", "github_url": "https://github.com/koajs/koa", "description": "Expressive middleware for node.js using ES2017 async functions", "homepage": "https://koajs.com", "npm": "koa" },
-    { "id": "elysia", "nameClean": "ElysiaJS", "github_full_name": "elysiajs/elysia", "github_url": "https://github.com/elysiajs/elysia", "description": "Ergonomic Framework for Humans", "homepage": "https://elysiajs.com", "npm": null },
-    { "id": "hapi", "nameClean": "Hapi", "github_full_name": "hapijs/hapi", "github_url": "https://github.com/hapijs/hapi", "description": "The Simple, Secure Framework Developers Trust", "homepage": "https://hapi.dev", "npm": "@hapi/hapi" },
-    { "id": "adonis", "nameClean": "Adonis", "github_full_name": "adonisjs/core", "github_url": "https://github.com/adonisjs/core", "description": "AdonisJS is a TypeScript-first web framework for building web apps and API servers.", "homepage": "https://adonisjs.com", "npm": "adonis-framework" },
-    { "id": "nitro", "nameClean": "Nitro", "github_full_name": "nitrojs/nitro", "github_url": "https://github.com/nitrojs/nitro", "description": "Next Generation Server Toolkit. Create web servers with everything you need and deploy them wherever you prefer.", "homepage": "https://v3.nitro.build", "npm": null },
-    { "id": "strapi", "nameClean": "Strapi", "github_full_name": "strapi/strapi", "github_url": "https://github.com/strapi/strapi", "description": "Strapi is the leading open-source headless CMS. It's 100% JavaScript/TypeScript, fully customizable, and developer-first.", "homepage": "https://strapi.io", "npm": "strapi" },
-    { "id": "directus", "nameClean": "Directus", "github_full_name": "directus/directus", "github_url": "https://github.com/directus/directus", "description": "The flexible backend for all your projects. Turn your DB into a headless CMS, admin panels, or apps with a custom UI, instant APIs, auth & more.", "homepage": "https://directus.io", "npm": null },
-    { "id": "socketio", "nameClean": "Socket.io", "github_full_name": "socketio/socket.io", "github_url": "https://github.com/socketio/socket.io", "description": "Realtime application framework (Node.JS server)", "homepage": "https://socket.io", "npm": "socket.io" },
+    {
+      "id": "express",
+      "nameClean": "Express",
+      "github_full_name": "expressjs/express",
+      "github_url": "https://github.com/expressjs/express",
+      "description": "Fast, unopinionated, minimalist web framework for node.",
+      "homepage": "https://expressjs.com",
+      "npm": "express"
+    },
+    {
+      "id": "nest",
+      "nameClean": "NestJS",
+      "github_full_name": "nestjs/nest",
+      "github_url": "https://github.com/nestjs/nest",
+      "description": "A progressive Node.js framework for building efficient, scalable, and enterprise-grade server-side applications with TypeScript/JavaScript",
+      "homepage": "https://nestjs.com",
+      "npm": "@nestjs/core"
+    },
+    {
+      "id": "fastify",
+      "nameClean": "Fastify",
+      "github_full_name": "fastify/fastify",
+      "github_url": "https://github.com/fastify/fastify",
+      "description": "Fast and low overhead web framework, for Node.js",
+      "homepage": "https://www.fastify.dev",
+      "npm": "fastify"
+    },
+    {
+      "id": "hono",
+      "nameClean": "Hono",
+      "github_full_name": "honojs/hono",
+      "github_url": "https://github.com/honojs/hono",
+      "description": "Web framework built on Web Standards",
+      "homepage": "https://hono.dev",
+      "npm": null
+    },
+    {
+      "id": "koa",
+      "nameClean": "Koa",
+      "github_full_name": "koajs/koa",
+      "github_url": "https://github.com/koajs/koa",
+      "description": "Expressive middleware for node.js using ES2017 async functions",
+      "homepage": "https://koajs.com",
+      "npm": "koa"
+    },
+    {
+      "id": "elysia",
+      "nameClean": "ElysiaJS",
+      "github_full_name": "elysiajs/elysia",
+      "github_url": "https://github.com/elysiajs/elysia",
+      "description": "Ergonomic Framework for Humans",
+      "homepage": "https://elysiajs.com",
+      "npm": null
+    },
+    {
+      "id": "hapi",
+      "nameClean": "Hapi",
+      "github_full_name": "hapijs/hapi",
+      "github_url": "https://github.com/hapijs/hapi",
+      "description": "The Simple, Secure Framework Developers Trust",
+      "homepage": "https://hapi.dev",
+      "npm": "@hapi/hapi"
+    },
+    {
+      "id": "adonis",
+      "nameClean": "Adonis",
+      "github_full_name": "adonisjs/core",
+      "github_url": "https://github.com/adonisjs/core",
+      "description": "AdonisJS is a TypeScript-first web framework for building web apps and API servers.",
+      "homepage": "https://adonisjs.com",
+      "npm": "adonis-framework"
+    },
+    {
+      "id": "nitro",
+      "nameClean": "Nitro",
+      "github_full_name": "nitrojs/nitro",
+      "github_url": "https://github.com/nitrojs/nitro",
+      "description": "Next Generation Server Toolkit. Create web servers with everything you need and deploy them wherever you prefer.",
+      "homepage": "https://v3.nitro.build",
+      "npm": null
+    },
+    {
+      "id": "strapi",
+      "nameClean": "Strapi",
+      "github_full_name": "strapi/strapi",
+      "github_url": "https://github.com/strapi/strapi",
+      "description": "Strapi is the leading open-source headless CMS. It's 100% JavaScript/TypeScript, fully customizable, and developer-first.",
+      "homepage": "https://strapi.io",
+      "npm": "strapi"
+    },
+    {
+      "id": "directus",
+      "nameClean": "Directus",
+      "github_full_name": "directus/directus",
+      "github_url": "https://github.com/directus/directus",
+      "description": "The flexible backend for all your projects. Turn your DB into a headless CMS, admin panels, or apps with a custom UI, instant APIs, auth & more.",
+      "homepage": "https://directus.io",
+      "npm": null
+    },
+    {
+      "id": "socketio",
+      "nameClean": "Socket.io",
+      "github_full_name": "socketio/socket.io",
+      "github_url": "https://github.com/socketio/socket.io",
+      "description": "Realtime application framework (Node.JS server)",
+      "homepage": "https://socket.io",
+      "npm": "socket.io"
+    },
 
-    { "id": "typeorm", "nameClean": "TypeORM", "github_full_name": "typeorm/typeorm", "github_url": "https://github.com/typeorm/typeorm", "description": "ORM for TypeScript and JavaScript.", "homepage": "http://typeorm.io", "npm": "typeorm" },
-    { "id": "mongoose", "nameClean": "Mongoose", "github_full_name": "Automattic/mongoose", "github_url": "https://github.com/Automattic/mongoose", "description": "MongoDB object modeling designed to work in an asynchronous environment.", "homepage": "https://mongoosejs.com", "npm": "mongoose" },
-    { "id": "sequelize", "nameClean": "Sequelize", "github_full_name": "sequelize/sequelize", "github_url": "https://github.com/sequelize/sequelize", "description": "Feature-rich ORM for modern Node.js and TypeScript.", "homepage": "https://sequelize.org", "npm": "sequelize" },
-    { "id": "knex", "nameClean": "Knex", "github_full_name": "knex/knex", "github_url": "https://github.com/knex/knex", "description": "A query builder for PostgreSQL, MySQL, CockroachDB, SQL Server, SQLite3 and Oracle.", "homepage": "https://knexjs.org", "npm": "knex" },
-    { "id": "redis", "nameClean": "Redis", "github_full_name": "redis/redis", "github_url": "https://github.com/redis/redis", "description": "Redis is an in-memory database that persists on disk.", "homepage": "https://redis.io", "npm": null },
+    {
+      "id": "typeorm",
+      "nameClean": "TypeORM",
+      "github_full_name": "typeorm/typeorm",
+      "github_url": "https://github.com/typeorm/typeorm",
+      "description": "ORM for TypeScript and JavaScript.",
+      "homepage": "http://typeorm.io",
+      "npm": "typeorm"
+    },
+    {
+      "id": "mongoose",
+      "nameClean": "Mongoose",
+      "github_full_name": "Automattic/mongoose",
+      "github_url": "https://github.com/Automattic/mongoose",
+      "description": "MongoDB object modeling designed to work in an asynchronous environment.",
+      "homepage": "https://mongoosejs.com",
+      "npm": "mongoose"
+    },
+    {
+      "id": "sequelize",
+      "nameClean": "Sequelize",
+      "github_full_name": "sequelize/sequelize",
+      "github_url": "https://github.com/sequelize/sequelize",
+      "description": "Feature-rich ORM for modern Node.js and TypeScript.",
+      "homepage": "https://sequelize.org",
+      "npm": "sequelize"
+    },
+    {
+      "id": "knex",
+      "nameClean": "Knex",
+      "github_full_name": "knex/knex",
+      "github_url": "https://github.com/knex/knex",
+      "description": "A query builder for PostgreSQL, MySQL, CockroachDB, SQL Server, SQLite3 and Oracle.",
+      "homepage": "https://knexjs.org",
+      "npm": "knex"
+    },
+    {
+      "id": "redis",
+      "nameClean": "Redis",
+      "github_full_name": "redis/redis",
+      "github_url": "https://github.com/redis/redis",
+      "description": "Redis is an in-memory database that persists on disk.",
+      "homepage": "https://redis.io",
+      "npm": null
+    },
 
-    { "id": "esbuild", "nameClean": "esbuild", "github_full_name": "evanw/esbuild", "github_url": "https://github.com/evanw/esbuild", "description": "An extremely fast bundler for the web", "homepage": "https://esbuild.github.io", "npm": "esbuild" },
-    { "id": "rollup", "nameClean": "Rollup", "github_full_name": "rollup/rollup", "github_url": "https://github.com/rollup/rollup", "description": "Next-generation ES module bundler", "homepage": "https://rollupjs.org", "npm": "rollup" },
-    { "id": "tsup", "nameClean": "tsup", "github_full_name": "egoist/tsup", "github_url": "https://github.com/egoist/tsup", "description": "The simplest and fastest way to bundle your TypeScript libraries.", "homepage": "https://tsup.egoist.dev", "npm": "tsup" },
-    { "id": "tsc", "nameClean": "tsc CLI", "github_full_name": "microsoft/TypeScript", "github_url": "https://github.com/microsoft/TypeScript", "description": "TypeScript is a superset of JavaScript that compiles to clean JavaScript output.", "homepage": "https://www.typescriptlang.org", "npm": "typescript" },
+    {
+      "id": "esbuild",
+      "nameClean": "esbuild",
+      "github_full_name": "evanw/esbuild",
+      "github_url": "https://github.com/evanw/esbuild",
+      "description": "An extremely fast bundler for the web",
+      "homepage": "https://esbuild.github.io",
+      "npm": "esbuild"
+    },
+    {
+      "id": "rollup",
+      "nameClean": "Rollup",
+      "github_full_name": "rollup/rollup",
+      "github_url": "https://github.com/rollup/rollup",
+      "description": "Next-generation ES module bundler",
+      "homepage": "https://rollupjs.org",
+      "npm": "rollup"
+    },
+    {
+      "id": "tsup",
+      "nameClean": "tsup",
+      "github_full_name": "egoist/tsup",
+      "github_url": "https://github.com/egoist/tsup",
+      "description": "The simplest and fastest way to bundle your TypeScript libraries.",
+      "homepage": "https://tsup.egoist.dev",
+      "npm": "tsup"
+    },
+    {
+      "id": "tsc",
+      "nameClean": "tsc CLI",
+      "github_full_name": "microsoft/TypeScript",
+      "github_url": "https://github.com/microsoft/TypeScript",
+      "description": "TypeScript is a superset of JavaScript that compiles to clean JavaScript output.",
+      "homepage": "https://www.typescriptlang.org",
+      "npm": "typescript"
+    },
 
-    { "id": "vitest", "nameClean": "Vitest", "github_full_name": "vitest-dev/vitest", "github_url": "https://github.com/vitest-dev/vitest", "description": "Next generation testing framework powered by Vite.", "homepage": "https://vitest.dev", "npm": "vitest" },
-    { "id": "jest", "nameClean": "Jest", "github_full_name": "jestjs/jest", "github_url": "https://github.com/jestjs/jest", "description": "Delightful JavaScript Testing.", "homepage": "https://jestjs.io", "npm": "jest" },
-    { "id": "mocha", "nameClean": "Mocha", "github_full_name": "mochajs/mocha", "github_url": "https://github.com/mochajs/mocha", "description": "Classic, reliable, trusted test framework for Node.js and the browser", "homepage": "https://mochajs.org", "npm": "mocha" },
-    { "id": "playwright", "nameClean": "Playwright", "github_full_name": "microsoft/playwright", "github_url": "https://github.com/microsoft/playwright", "description": "Playwright is a framework for Web Testing and Automation. It allows testing Chromium, Firefox and WebKit with a single API.", "homepage": "https://playwright.dev", "npm": "playwright" },
-    { "id": "puppeteer", "nameClean": "Puppeteer", "github_full_name": "puppeteer/puppeteer", "github_url": "https://github.com/puppeteer/puppeteer", "description": "JavaScript API for Chrome and Firefox", "homepage": "https://pptr.dev", "npm": "puppeteer" },
-    { "id": "webdriverio", "nameClean": "WebdriverIO", "github_full_name": "webdriverio/webdriverio", "github_url": "https://github.com/webdriverio/webdriverio", "description": "Next-gen browser and mobile automation test framework for Node.js", "homepage": "http://webdriver.io", "npm": "webdriverio" },
-    { "id": "selenium", "nameClean": "Selenium", "github_full_name": "SeleniumHQ/selenium", "github_url": "https://github.com/SeleniumHQ/selenium", "description": "A browser automation framework and ecosystem.", "homepage": "https://selenium.dev", "npm": null },
-    { "id": "testcafe", "nameClean": "TestCafe", "github_full_name": "DevExpress/testcafe", "github_url": "https://github.com/DevExpress/testcafe", "description": "A Node.js tool to automate end-to-end web testing.", "homepage": "https://testcafe.io", "npm": "testcafe" },
-    { "id": "mock_service_worker", "nameClean": "Mock Service Worker", "github_full_name": "mswjs/msw", "github_url": "https://github.com/mswjs/msw", "description": "Industry standard API mocking for JavaScript.", "homepage": "https://mswjs.io", "npm": "msw" },
-    { "id": "node_test_runner", "nameClean": "Node Test Runner", "github_full_name": "nodejs/node", "github_url": "https://github.com/nodejs/node", "description": "Node.js JavaScript runtime", "homepage": "https://nodejs.org", "npm": null },
-    { "id": "bun_test", "nameClean": "bun test", "github_full_name": "oven-sh/bun", "github_url": "https://github.com/oven-sh/bun", "description": "Incredibly fast JavaScript runtime, bundler, test runner, and package manager -- all in one", "homepage": "https://bun.com", "npm": null },
+    {
+      "id": "vitest",
+      "nameClean": "Vitest",
+      "github_full_name": "vitest-dev/vitest",
+      "github_url": "https://github.com/vitest-dev/vitest",
+      "description": "Next generation testing framework powered by Vite.",
+      "homepage": "https://vitest.dev",
+      "npm": "vitest"
+    },
+    {
+      "id": "jest",
+      "nameClean": "Jest",
+      "github_full_name": "jestjs/jest",
+      "github_url": "https://github.com/jestjs/jest",
+      "description": "Delightful JavaScript Testing.",
+      "homepage": "https://jestjs.io",
+      "npm": "jest"
+    },
+    {
+      "id": "mocha",
+      "nameClean": "Mocha",
+      "github_full_name": "mochajs/mocha",
+      "github_url": "https://github.com/mochajs/mocha",
+      "description": "Classic, reliable, trusted test framework for Node.js and the browser",
+      "homepage": "https://mochajs.org",
+      "npm": "mocha"
+    },
+    {
+      "id": "playwright",
+      "nameClean": "Playwright",
+      "github_full_name": "microsoft/playwright",
+      "github_url": "https://github.com/microsoft/playwright",
+      "description": "Playwright is a framework for Web Testing and Automation. It allows testing Chromium, Firefox and WebKit with a single API.",
+      "homepage": "https://playwright.dev",
+      "npm": "playwright"
+    },
+    {
+      "id": "puppeteer",
+      "nameClean": "Puppeteer",
+      "github_full_name": "puppeteer/puppeteer",
+      "github_url": "https://github.com/puppeteer/puppeteer",
+      "description": "JavaScript API for Chrome and Firefox",
+      "homepage": "https://pptr.dev",
+      "npm": "puppeteer"
+    },
+    {
+      "id": "webdriverio",
+      "nameClean": "WebdriverIO",
+      "github_full_name": "webdriverio/webdriverio",
+      "github_url": "https://github.com/webdriverio/webdriverio",
+      "description": "Next-gen browser and mobile automation test framework for Node.js",
+      "homepage": "http://webdriver.io",
+      "npm": "webdriverio"
+    },
+    {
+      "id": "selenium",
+      "nameClean": "Selenium",
+      "github_full_name": "SeleniumHQ/selenium",
+      "github_url": "https://github.com/SeleniumHQ/selenium",
+      "description": "A browser automation framework and ecosystem.",
+      "homepage": "https://selenium.dev",
+      "npm": null
+    },
+    {
+      "id": "testcafe",
+      "nameClean": "TestCafe",
+      "github_full_name": "DevExpress/testcafe",
+      "github_url": "https://github.com/DevExpress/testcafe",
+      "description": "A Node.js tool to automate end-to-end web testing.",
+      "homepage": "https://testcafe.io",
+      "npm": "testcafe"
+    },
+    {
+      "id": "mock_service_worker",
+      "nameClean": "Mock Service Worker",
+      "github_full_name": "mswjs/msw",
+      "github_url": "https://github.com/mswjs/msw",
+      "description": "Industry standard API mocking for JavaScript.",
+      "homepage": "https://mswjs.io",
+      "npm": "msw"
+    },
+    {
+      "id": "node_test_runner",
+      "nameClean": "Node Test Runner",
+      "github_full_name": "nodejs/node",
+      "github_url": "https://github.com/nodejs/node",
+      "description": "Node.js JavaScript runtime",
+      "homepage": "https://nodejs.org",
+      "npm": null
+    },
+    {
+      "id": "bun_test",
+      "nameClean": "bun test",
+      "github_full_name": "oven-sh/bun",
+      "github_url": "https://github.com/oven-sh/bun",
+      "description": "Incredibly fast JavaScript runtime, bundler, test runner, and package manager -- all in one",
+      "homepage": "https://bun.com",
+      "npm": null
+    },
 
-    { "id": "eslint", "nameClean": "ESLint", "github_full_name": "eslint/eslint", "github_url": "https://github.com/eslint/eslint", "description": "Find and fix problems in your JavaScript code.", "homepage": "https://eslint.org", "npm": "eslint" },
-    { "id": "prettier", "nameClean": "Prettier", "github_full_name": "prettier/prettier", "github_url": "https://github.com/prettier/prettier", "description": "Prettier is an opinionated code formatter.", "homepage": "https://prettier.io", "npm": "prettier" },
-    { "id": "nx", "nameClean": "Nx", "github_full_name": "nrwl/nx", "github_url": "https://github.com/nrwl/nx", "description": "The Monorepo Platform that amplifies both developers and AI agents.", "homepage": "https://nx.dev", "npm": "nx" },
-    { "id": "lerna", "nameClean": "Lerna", "github_full_name": "lerna/lerna", "github_url": "https://github.com/lerna/lerna", "description": "Lerna is a fast, modern build system for managing and publishing multiple JavaScript/TypeScript packages from the same repository.", "homepage": "https://lerna.js.org", "npm": "lerna" },
+    {
+      "id": "eslint",
+      "nameClean": "ESLint",
+      "github_full_name": "eslint/eslint",
+      "github_url": "https://github.com/eslint/eslint",
+      "description": "Find and fix problems in your JavaScript code.",
+      "homepage": "https://eslint.org",
+      "npm": "eslint"
+    },
+    {
+      "id": "prettier",
+      "nameClean": "Prettier",
+      "github_full_name": "prettier/prettier",
+      "github_url": "https://github.com/prettier/prettier",
+      "description": "Prettier is an opinionated code formatter.",
+      "homepage": "https://prettier.io",
+      "npm": "prettier"
+    },
+    {
+      "id": "nx",
+      "nameClean": "Nx",
+      "github_full_name": "nrwl/nx",
+      "github_url": "https://github.com/nrwl/nx",
+      "description": "The Monorepo Platform that amplifies both developers and AI agents.",
+      "homepage": "https://nx.dev",
+      "npm": "nx"
+    },
+    {
+      "id": "lerna",
+      "nameClean": "Lerna",
+      "github_full_name": "lerna/lerna",
+      "github_url": "https://github.com/lerna/lerna",
+      "description": "Lerna is a fast, modern build system for managing and publishing multiple JavaScript/TypeScript packages from the same repository.",
+      "homepage": "https://lerna.js.org",
+      "npm": "lerna"
+    },
 
-    { "id": "zod", "nameClean": "Zod", "github_full_name": "colinhacks/zod", "github_url": "https://github.com/colinhacks/zod", "description": "TypeScript-first schema validation with static type inference", "homepage": "https://zod.dev", "npm": "zod" },
-    { "id": "yup", "nameClean": "Yup", "github_full_name": "jquense/yup", "github_url": "https://github.com/jquense/yup", "description": "Dead simple Object schema validation", "homepage": null, "npm": "yup" },
-    { "id": "valibot", "nameClean": "Valibot", "github_full_name": "fabian-hiller/valibot", "github_url": "https://github.com/fabian-hiller/valibot", "description": "The modular and type safe schema library for validating structural data", "homepage": "https://valibot.dev", "npm": "valibot" },
+    {
+      "id": "zod",
+      "nameClean": "Zod",
+      "github_full_name": "colinhacks/zod",
+      "github_url": "https://github.com/colinhacks/zod",
+      "description": "TypeScript-first schema validation with static type inference",
+      "homepage": "https://zod.dev",
+      "npm": "zod"
+    },
+    {
+      "id": "yup",
+      "nameClean": "Yup",
+      "github_full_name": "jquense/yup",
+      "github_url": "https://github.com/jquense/yup",
+      "description": "Dead simple Object schema validation",
+      "homepage": null,
+      "npm": "yup"
+    },
+    {
+      "id": "valibot",
+      "nameClean": "Valibot",
+      "github_full_name": "fabian-hiller/valibot",
+      "github_url": "https://github.com/fabian-hiller/valibot",
+      "description": "The modular and type safe schema library for validating structural data",
+      "homepage": "https://valibot.dev",
+      "npm": "valibot"
+    },
 
-    { "id": "lodash", "nameClean": "Lodash", "github_full_name": "lodash/lodash", "github_url": "https://github.com/lodash/lodash", "description": "A modern JavaScript utility library delivering modularity, performance, & extras.", "homepage": "https://lodash.com", "npm": "lodash" },
-    { "id": "date_fns", "nameClean": "date-fns", "github_full_name": "date-fns/date-fns", "github_url": "https://github.com/date-fns/date-fns", "description": "Modern JavaScript date utility library", "homepage": "https://date-fns.org", "npm": "date-fns" },
-    { "id": "dayjs", "nameClean": "Day.js", "github_full_name": "iamkun/dayjs", "github_url": "https://github.com/iamkun/dayjs", "description": "Day.js 2kB immutable date-time library alternative to Moment.js with the same modern API", "homepage": "https://day.js.org", "npm": "dayjs" },
+    {
+      "id": "lodash",
+      "nameClean": "Lodash",
+      "github_full_name": "lodash/lodash",
+      "github_url": "https://github.com/lodash/lodash",
+      "description": "A modern JavaScript utility library delivering modularity, performance, & extras.",
+      "homepage": "https://lodash.com",
+      "npm": "lodash"
+    },
+    {
+      "id": "date_fns",
+      "nameClean": "date-fns",
+      "github_full_name": "date-fns/date-fns",
+      "github_url": "https://github.com/date-fns/date-fns",
+      "description": "Modern JavaScript date utility library",
+      "homepage": "https://date-fns.org",
+      "npm": "date-fns"
+    },
+    {
+      "id": "dayjs",
+      "nameClean": "Day.js",
+      "github_full_name": "iamkun/dayjs",
+      "github_url": "https://github.com/iamkun/dayjs",
+      "description": "Day.js 2kB immutable date-time library alternative to Moment.js with the same modern API",
+      "homepage": "https://day.js.org",
+      "npm": "dayjs"
+    },
 
-    { "id": "pnpm", "nameClean": "pnpm", "github_full_name": "pnpm/pnpm", "github_url": "https://github.com/pnpm/pnpm", "description": "Fast, disk space efficient package manager", "homepage": "https://pnpm.io", "npm": null },
-    { "id": "bun", "nameClean": "Bun", "github_full_name": "oven-sh/bun", "github_url": "https://github.com/oven-sh/bun", "description": "Incredibly fast JavaScript runtime, bundler, test runner, and package manager -- all in one", "homepage": "https://bun.com", "npm": null },
-    { "id": "deno", "nameClean": "Deno", "github_full_name": "denoland/deno", "github_url": "https://github.com/denoland/deno", "description": "A modern runtime for JavaScript and TypeScript.", "homepage": "https://deno.com", "npm": null },
+    {
+      "id": "pnpm",
+      "nameClean": "pnpm",
+      "github_full_name": "pnpm/pnpm",
+      "github_url": "https://github.com/pnpm/pnpm",
+      "description": "Fast, disk space efficient package manager",
+      "homepage": "https://pnpm.io",
+      "npm": null
+    },
+    {
+      "id": "bun",
+      "nameClean": "Bun",
+      "github_full_name": "oven-sh/bun",
+      "github_url": "https://github.com/oven-sh/bun",
+      "description": "Incredibly fast JavaScript runtime, bundler, test runner, and package manager -- all in one",
+      "homepage": "https://bun.com",
+      "npm": null
+    },
+    {
+      "id": "deno",
+      "nameClean": "Deno",
+      "github_full_name": "denoland/deno",
+      "github_url": "https://github.com/denoland/deno",
+      "description": "A modern runtime for JavaScript and TypeScript.",
+      "homepage": "https://deno.com",
+      "npm": null
+    },
 
-    { "id": "docker", "nameClean": "Docker (Moby)", "github_full_name": "moby/moby", "github_url": "https://github.com/moby/moby", "description": "The Moby Project - a collaborative project for the container ecosystem to assemble container-based systems", "homepage": "https://mobyproject.org", "npm": null },
-    { "id": "kubernetes", "nameClean": "Kubernetes", "github_full_name": "kubernetes/kubernetes", "github_url": "https://github.com/kubernetes/kubernetes", "description": "Production-Grade Container Scheduling and Management", "homepage": "https://kubernetes.io", "npm": null },
-    { "id": "terraform", "nameClean": "Terraform", "github_full_name": "hashicorp/terraform", "github_url": "https://github.com/hashicorp/terraform", "description": "Terraform enables you to safely and predictably create, change, and improve infrastructure.", "homepage": "https://www.terraform.io", "npm": null },
-    { "id": "github_actions_runner", "nameClean": "GitHub Actions Runner", "github_full_name": "actions/runner", "github_url": "https://github.com/actions/runner", "description": "The Runner for GitHub Actions", "homepage": "https://github.com/features/actions", "npm": null },
-    { "id": "opentelemetry", "nameClean": "OpenTelemetry Specification", "github_full_name": "open-telemetry/opentelemetry-specification", "github_url": "https://github.com/open-telemetry/opentelemetry-specification", "description": "Specifications for OpenTelemetry", "homepage": "https://opentelemetry.io", "npm": null },
-    { "id": "prometheus", "nameClean": "Prometheus", "github_full_name": "prometheus/prometheus", "github_url": "https://github.com/prometheus/prometheus", "description": "The Prometheus monitoring system and time series database.", "homepage": "https://prometheus.io", "npm": null },
-    { "id": "grafana", "nameClean": "Grafana", "github_full_name": "grafana/grafana", "github_url": "https://github.com/grafana/grafana", "description": "The open and composable observability and data visualization platform.", "homepage": "https://grafana.com", "npm": null }
+    {
+      "id": "docker",
+      "nameClean": "Docker (Moby)",
+      "github_full_name": "moby/moby",
+      "github_url": "https://github.com/moby/moby",
+      "description": "The Moby Project - a collaborative project for the container ecosystem to assemble container-based systems",
+      "homepage": "https://mobyproject.org",
+      "npm": null
+    },
+    {
+      "id": "kubernetes",
+      "nameClean": "Kubernetes",
+      "github_full_name": "kubernetes/kubernetes",
+      "github_url": "https://github.com/kubernetes/kubernetes",
+      "description": "Production-Grade Container Scheduling and Management",
+      "homepage": "https://kubernetes.io",
+      "npm": null
+    },
+    {
+      "id": "terraform",
+      "nameClean": "Terraform",
+      "github_full_name": "hashicorp/terraform",
+      "github_url": "https://github.com/hashicorp/terraform",
+      "description": "Terraform enables you to safely and predictably create, change, and improve infrastructure.",
+      "homepage": "https://www.terraform.io",
+      "npm": null
+    },
+    {
+      "id": "github_actions_runner",
+      "nameClean": "GitHub Actions Runner",
+      "github_full_name": "actions/runner",
+      "github_url": "https://github.com/actions/runner",
+      "description": "The Runner for GitHub Actions",
+      "homepage": "https://github.com/features/actions",
+      "npm": null
+    },
+    {
+      "id": "opentelemetry",
+      "nameClean": "OpenTelemetry Specification",
+      "github_full_name": "open-telemetry/opentelemetry-specification",
+      "github_url": "https://github.com/open-telemetry/opentelemetry-specification",
+      "description": "Specifications for OpenTelemetry",
+      "homepage": "https://opentelemetry.io",
+      "npm": null
+    },
+    {
+      "id": "prometheus",
+      "nameClean": "Prometheus",
+      "github_full_name": "prometheus/prometheus",
+      "github_url": "https://github.com/prometheus/prometheus",
+      "description": "The Prometheus monitoring system and time series database.",
+      "homepage": "https://prometheus.io",
+      "npm": null
+    },
+    {
+      "id": "grafana",
+      "nameClean": "Grafana",
+      "github_full_name": "grafana/grafana",
+      "github_url": "https://github.com/grafana/grafana",
+      "description": "The open and composable observability and data visualization platform.",
+      "homepage": "https://grafana.com",
+      "npm": null
+    }
   ],
 
   "ai-engineer": [
-    { "id": "vercel_ai", "nameClean": "Vercel AI SDK", "github_full_name": "vercel/ai", "github_url": "https://github.com/vercel/ai", "description": "The AI Toolkit for TypeScript. From the creators of Next.js, the AI SDK is a free open-source library for building AI-powered applications and agents", "homepage": "https://ai-sdk.dev", "npm": "ai" },
-    { "id": "langchainjs", "nameClean": "LangChain.js", "github_full_name": "langchain-ai/langchainjs", "github_url": "https://github.com/langchain-ai/langchainjs", "description": "Build context-aware reasoning applications", "homepage": "https://docs.langchain.com/oss/javascript/langchain/", "npm": "langchain" },
-    { "id": "openai", "nameClean": "OpenAI Node SDK", "github_full_name": "openai/openai-node", "github_url": "https://github.com/openai/openai-node", "description": "Official JavaScript / TypeScript library for the OpenAI API", "homepage": "https://www.npmjs.com/package/openai", "npm": "openai" },
-    { "id": "anthropic", "nameClean": "Anthropic SDK", "github_full_name": "anthropics/anthropic-sdk-typescript", "github_url": "https://github.com/anthropics/anthropic-sdk-typescript", "description": "Access to Anthropic's safety-first language model APIs in TypeScript", "homepage": "https://www.npmjs.com/package/@anthropic-ai/sdk", "npm": "@anthropic-ai/sdk" },
-    { "id": "transformers_js", "nameClean": "Transformers.js", "github_full_name": "huggingface/transformers.js", "github_url": "https://github.com/huggingface/transformers.js", "description": "State-of-the-art Machine Learning for the web. Run Transformers directly in your browser, with no need for a server!", "homepage": "https://huggingface.co/docs/transformers.js", "npm": "@huggingface/transformers" },
+    {
+      "id": "vercel_ai",
+      "nameClean": "Vercel AI SDK",
+      "github_full_name": "vercel/ai",
+      "github_url": "https://github.com/vercel/ai",
+      "description": "The AI Toolkit for TypeScript. From the creators of Next.js, the AI SDK is a free open-source library for building AI-powered applications and agents",
+      "homepage": "https://ai-sdk.dev",
+      "npm": "ai"
+    },
+    {
+      "id": "langchainjs",
+      "nameClean": "LangChain.js",
+      "github_full_name": "langchain-ai/langchainjs",
+      "github_url": "https://github.com/langchain-ai/langchainjs",
+      "description": "Build context-aware reasoning applications",
+      "homepage": "https://docs.langchain.com/oss/javascript/langchain/",
+      "npm": "langchain"
+    },
+    {
+      "id": "openai",
+      "nameClean": "OpenAI Node SDK",
+      "github_full_name": "openai/openai-node",
+      "github_url": "https://github.com/openai/openai-node",
+      "description": "Official JavaScript / TypeScript library for the OpenAI API",
+      "homepage": "https://www.npmjs.com/package/openai",
+      "npm": "openai"
+    },
+    {
+      "id": "anthropic",
+      "nameClean": "Anthropic SDK",
+      "github_full_name": "anthropics/anthropic-sdk-typescript",
+      "github_url": "https://github.com/anthropics/anthropic-sdk-typescript",
+      "description": "Access to Anthropic's safety-first language model APIs in TypeScript",
+      "homepage": "https://www.npmjs.com/package/@anthropic-ai/sdk",
+      "npm": "@anthropic-ai/sdk"
+    },
+    {
+      "id": "transformers_js",
+      "nameClean": "Transformers.js",
+      "github_full_name": "huggingface/transformers.js",
+      "github_url": "https://github.com/huggingface/transformers.js",
+      "description": "State-of-the-art Machine Learning for the web. Run Transformers directly in your browser, with no need for a server!",
+      "homepage": "https://huggingface.co/docs/transformers.js",
+      "npm": "@huggingface/transformers"
+    },
 
-    { "id": "tsc", "nameClean": "tsc CLI", "github_full_name": "microsoft/TypeScript", "github_url": "https://github.com/microsoft/TypeScript", "description": "TypeScript is a superset of JavaScript that compiles to clean JavaScript output.", "homepage": "https://www.typescriptlang.org", "npm": "typescript" },
-    { "id": "zod", "nameClean": "Zod", "github_full_name": "colinhacks/zod", "github_url": "https://github.com/colinhacks/zod", "description": "TypeScript-first schema validation with static type inference", "homepage": "https://zod.dev", "npm": "zod" },
-    { "id": "vitest", "nameClean": "Vitest", "github_full_name": "vitest-dev/vitest", "github_url": "https://github.com/vitest-dev/vitest", "description": "Next generation testing framework powered by Vite.", "homepage": "https://vitest.dev", "npm": "vitest" },
-    { "id": "jest", "nameClean": "Jest", "github_full_name": "jestjs/jest", "github_url": "https://github.com/jestjs/jest", "description": "Delightful JavaScript Testing.", "homepage": "https://jestjs.io", "npm": "jest" },
-    { "id": "eslint", "nameClean": "ESLint", "github_full_name": "eslint/eslint", "github_url": "https://github.com/eslint/eslint", "description": "Find and fix problems in your JavaScript code.", "homepage": "https://eslint.org", "npm": "eslint" },
-    { "id": "prettier", "nameClean": "Prettier", "github_full_name": "prettier/prettier", "github_url": "https://github.com/prettier/prettier", "description": "Prettier is an opinionated code formatter.", "homepage": "https://prettier.io", "npm": "prettier" },
-    { "id": "bun", "nameClean": "Bun", "github_full_name": "oven-sh/bun", "github_url": "https://github.com/oven-sh/bun", "description": "Incredibly fast JavaScript runtime, bundler, test runner, and package manager -- all in one", "homepage": "https://bun.com", "npm": null },
-    { "id": "deno", "nameClean": "Deno", "github_full_name": "denoland/deno", "github_url": "https://github.com/denoland/deno", "description": "A modern runtime for JavaScript and TypeScript.", "homepage": "https://deno.com", "npm": null }
+    {
+      "id": "tsc",
+      "nameClean": "tsc CLI",
+      "github_full_name": "microsoft/TypeScript",
+      "github_url": "https://github.com/microsoft/TypeScript",
+      "description": "TypeScript is a superset of JavaScript that compiles to clean JavaScript output.",
+      "homepage": "https://www.typescriptlang.org",
+      "npm": "typescript"
+    },
+    {
+      "id": "zod",
+      "nameClean": "Zod",
+      "github_full_name": "colinhacks/zod",
+      "github_url": "https://github.com/colinhacks/zod",
+      "description": "TypeScript-first schema validation with static type inference",
+      "homepage": "https://zod.dev",
+      "npm": "zod"
+    },
+    {
+      "id": "vitest",
+      "nameClean": "Vitest",
+      "github_full_name": "vitest-dev/vitest",
+      "github_url": "https://github.com/vitest-dev/vitest",
+      "description": "Next generation testing framework powered by Vite.",
+      "homepage": "https://vitest.dev",
+      "npm": "vitest"
+    },
+    {
+      "id": "jest",
+      "nameClean": "Jest",
+      "github_full_name": "jestjs/jest",
+      "github_url": "https://github.com/jestjs/jest",
+      "description": "Delightful JavaScript Testing.",
+      "homepage": "https://jestjs.io",
+      "npm": "jest"
+    },
+    {
+      "id": "eslint",
+      "nameClean": "ESLint",
+      "github_full_name": "eslint/eslint",
+      "github_url": "https://github.com/eslint/eslint",
+      "description": "Find and fix problems in your JavaScript code.",
+      "homepage": "https://eslint.org",
+      "npm": "eslint"
+    },
+    {
+      "id": "prettier",
+      "nameClean": "Prettier",
+      "github_full_name": "prettier/prettier",
+      "github_url": "https://github.com/prettier/prettier",
+      "description": "Prettier is an opinionated code formatter.",
+      "homepage": "https://prettier.io",
+      "npm": "prettier"
+    },
+    {
+      "id": "bun",
+      "nameClean": "Bun",
+      "github_full_name": "oven-sh/bun",
+      "github_url": "https://github.com/oven-sh/bun",
+      "description": "Incredibly fast JavaScript runtime, bundler, test runner, and package manager -- all in one",
+      "homepage": "https://bun.com",
+      "npm": null
+    },
+    {
+      "id": "deno",
+      "nameClean": "Deno",
+      "github_full_name": "denoland/deno",
+      "github_url": "https://github.com/denoland/deno",
+      "description": "A modern runtime for JavaScript and TypeScript.",
+      "homepage": "https://deno.com",
+      "npm": null
+    }
   ],
 
   "curated": [
-    { "id": "dotnet_runtime", "nameClean": ".NET Runtime", "github_full_name": "dotnet/runtime", "github_url": "https://github.com/dotnet/runtime", "description": ".NET is a cross-platform runtime for cloud, mobile, desktop, and IoT apps.", "homepage": "https://dot.net", "npm": null },
-    { "id": "aspnetcore", "nameClean": "ASP.NET Core", "github_full_name": "dotnet/aspnetcore", "github_url": "https://github.com/dotnet/aspnetcore", "description": "ASP.NET Core is a cross-platform .NET framework for building modern cloud-based web applications.", "homepage": "https://asp.net", "npm": null },
-    { "id": "fastapi", "nameClean": "FastAPI", "github_full_name": "fastapi/fastapi", "github_url": "https://github.com/fastapi/fastapi", "description": "FastAPI framework, high performance, easy to learn, fast to code, ready for production", "homepage": "https://fastapi.tiangolo.com", "npm": null },
-    { "id": "efcore", "nameClean": "Entity Framework Core", "github_full_name": "dotnet/efcore", "github_url": "https://github.com/dotnet/efcore", "description": "EF Core is a modern object-database mapper for .NET. It supports LINQ queries, change tracking, updates, and schema migrations.", "homepage": "https://learn.microsoft.com/ef/", "npm": null },
-    { "id": "beads", "nameClean": "Beads", "github_full_name": "steveyegge/beads", "github_url": "https://github.com/steveyegge/beads", "description": "Beads issue tracker", "homepage": null, "npm": null },
-    { "id": "gastown", "nameClean": "Gas Town", "github_full_name": "steveyegge/gastown", "github_url": "https://github.com/steveyegge/gastown", "description": "Gas Town development tools", "homepage": null, "npm": "@gastown/gt" }
+    {
+      "id": "dotnet_runtime",
+      "nameClean": ".NET Runtime",
+      "github_full_name": "dotnet/runtime",
+      "github_url": "https://github.com/dotnet/runtime",
+      "description": ".NET is a cross-platform runtime for cloud, mobile, desktop, and IoT apps.",
+      "homepage": "https://dot.net",
+      "npm": null
+    },
+    {
+      "id": "aspnetcore",
+      "nameClean": "ASP.NET Core",
+      "github_full_name": "dotnet/aspnetcore",
+      "github_url": "https://github.com/dotnet/aspnetcore",
+      "description": "ASP.NET Core is a cross-platform .NET framework for building modern cloud-based web applications.",
+      "homepage": "https://asp.net",
+      "npm": null
+    },
+    {
+      "id": "fastapi",
+      "nameClean": "FastAPI",
+      "github_full_name": "fastapi/fastapi",
+      "github_url": "https://github.com/fastapi/fastapi",
+      "description": "FastAPI framework, high performance, easy to learn, fast to code, ready for production",
+      "homepage": "https://fastapi.tiangolo.com",
+      "npm": null
+    },
+    {
+      "id": "efcore",
+      "nameClean": "Entity Framework Core",
+      "github_full_name": "dotnet/efcore",
+      "github_url": "https://github.com/dotnet/efcore",
+      "description": "EF Core is a modern object-database mapper for .NET. It supports LINQ queries, change tracking, updates, and schema migrations.",
+      "homepage": "https://learn.microsoft.com/ef/",
+      "npm": null
+    },
+    {
+      "id": "beads",
+      "nameClean": "Beads",
+      "github_full_name": "steveyegge/beads",
+      "github_url": "https://github.com/steveyegge/beads",
+      "description": "Beads issue tracker",
+      "homepage": null,
+      "npm": null
+    },
+    {
+      "id": "gastown",
+      "nameClean": "Gas Town",
+      "github_full_name": "steveyegge/gastown",
+      "github_url": "https://github.com/steveyegge/gastown",
+      "description": "Gas Town development tools",
+      "homepage": null,
+      "npm": "@gastown/gt"
+    }
   ]
 }

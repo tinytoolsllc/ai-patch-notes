@@ -14,7 +14,7 @@
 
 ## Open PRs (Ready to Merge)
 
-- [x] **PR #32** - Split API routes into separate files *(Merged)*
+- [x] **PR #32** - Split API routes into separate files _(Merged)_
 - [ ] **PR #33** - Clean up Data project structure
 - [ ] **PR #34** - Split Sync project into separate files
 

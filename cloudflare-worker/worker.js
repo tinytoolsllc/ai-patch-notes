@@ -14,25 +14,21 @@
  */
 export default {
   async fetch(request) {
-    const url = new URL(request.url)
+    const url = new URL(request.url);
 
-    if (
-      url.pathname.startsWith('/packages/') ||
-      url.pathname.startsWith('/releases/')
-    ) {
+    if (url.pathname.startsWith("/packages/") || url.pathname.startsWith("/releases/")) {
       // Authenticated users get the SPA
-      const cookie = request.headers.get('cookie') || ''
-      if (cookie.includes('stytch_session')) {
-        return fetch(request)
+      const cookie = request.headers.get("cookie") || "";
+      if (cookie.includes("stytch_session")) {
+        return fetch(request);
       }
 
       // Anonymous users and bots get server-rendered HTML from the API
-      const apiUrl =
-        'https://api.myreleasenotes.ai/html' + url.pathname + url.search
-      return fetch(apiUrl, { headers: request.headers })
+      const apiUrl = "https://api.myreleasenotes.ai/html" + url.pathname + url.search;
+      return fetch(apiUrl, { headers: request.headers });
     }
 
     // All other routes pass through to the default origin (SWA)
-    return fetch(request)
+    return fetch(request);
   },
-}
+};

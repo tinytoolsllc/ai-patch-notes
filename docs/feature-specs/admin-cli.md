@@ -68,10 +68,10 @@ Two scopes:
 
 Scope-to-endpoint mapping:
 
-| Scope | Endpoints |
-|---|---|
-| `admin:read` | `GET /api/admin/packages/health`, `GET /api/admin/users`, `GET /api/admin/users/{id}`, `GET /api/admin/releases`, `GET /api/admin/summaries`, `GET /api/admin/digest-emails`, `GET /api/admin/webhook-events`, `GET /api/admin/email-templates`, `GET /api/admin/email-templates/{id}` |
-| `admin:write` | All POST/PATCH/PUT/DELETE under `/api/admin/*` (reset-sync, disable-sync, trigger-sync, reset-summaries, reset-releases, summaries/regenerate-all, sync/trigger-all, watchlist-template CRUD, email-template update/test) |
+| Scope         | Endpoints                                                                                                                                                                                                                                                                              |
+| ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `admin:read`  | `GET /api/admin/packages/health`, `GET /api/admin/users`, `GET /api/admin/users/{id}`, `GET /api/admin/releases`, `GET /api/admin/summaries`, `GET /api/admin/digest-emails`, `GET /api/admin/webhook-events`, `GET /api/admin/email-templates`, `GET /api/admin/email-templates/{id}` |
+| `admin:write` | All POST/PATCH/PUT/DELETE under `/api/admin/*` (reset-sync, disable-sync, trigger-sync, reset-summaries, reset-releases, summaries/regenerate-all, sync/trigger-all, watchlist-template CRUD, email-template update/test)                                                              |
 
 An M2M client with `admin:write` implicitly has `admin:read` — the admin filter checks `admin:write` for mutating methods and `admin:read` for GET.
 
@@ -81,11 +81,11 @@ M2M auth is **not** accepted on non-admin routes. User, watchlist, subscription,
 
 Create M2M clients for each use case:
 
-| Client | Scopes | Purpose |
-|---|---|---|
-| `paul-cli` | `admin:read admin:write` | Personal admin CLI |
+| Client             | Scopes                   | Purpose                 |
+| ------------------ | ------------------------ | ----------------------- |
+| `paul-cli`         | `admin:read admin:write` | Personal admin CLI      |
 | `logwatcher-agent` | `admin:read admin:write` | LogWatcher issue filing |
-| `ci-readonly` | `admin:read` | CI health checks |
+| `ci-readonly`      | `admin:read`             | CI health checks        |
 
 Create via Stytch dashboard or API. The `client_secret` is returned once — store it securely.
 
@@ -274,11 +274,13 @@ The CLI handles the client_credentials exchange and caches the token:
 ### Trade-offs
 
 **Accepted:**
+
 - If Stytch is down, the CLI cannot obtain new tokens (existing cached tokens still work for up to 1 hour)
 - Each token request adds ~100-200ms latency (once per session, not per command)
 - M2M client management happens in the Stytch dashboard, not in the CLI itself
 
 **Avoided:**
+
 - No custom `ApiKey` table, no migration, no key hashing, no bootstrap problem
 - No custom auth middleware — standard JWT validation only
 - No credential lifecycle to build (rotation, revocation, expiry all handled by Stytch)
@@ -305,18 +307,18 @@ Design rule: the PatchNotes CLI only talks to `/api/admin/*` endpoints on the Pa
 
 These are already implemented and just need to accept M2M JWT auth alongside session cookies:
 
-| Endpoint | Method | CLI command |
-|---|---|---|
-| `/api/admin/packages/health` | GET | `packages list`, `sync status` |
-| `/api/admin/packages/{id}/reset-sync` | POST | `sync reset` |
-| `/api/admin/packages/{id}/disable-sync` | POST | `sync disable` |
-| `/api/admin/packages/{id}/trigger-sync` | POST | `sync trigger` |
-| `/api/admin/packages/{id}/reset-summaries` | POST | `summaries reset` |
-| `/api/admin/packages/{id}/reset-releases` | POST | `releases reset` |
-| `/api/admin/email-templates` | GET | `email templates list` |
-| `/api/admin/email-templates/{id}` | GET | `email templates show` |
-| `/api/admin/email-templates/{id}` | PUT | `email templates update` |
-| `/api/admin/email-templates/{id}/test` | POST | `email send-test` |
+| Endpoint                                   | Method | CLI command                    |
+| ------------------------------------------ | ------ | ------------------------------ |
+| `/api/admin/packages/health`               | GET    | `packages list`, `sync status` |
+| `/api/admin/packages/{id}/reset-sync`      | POST   | `sync reset`                   |
+| `/api/admin/packages/{id}/disable-sync`    | POST   | `sync disable`                 |
+| `/api/admin/packages/{id}/trigger-sync`    | POST   | `sync trigger`                 |
+| `/api/admin/packages/{id}/reset-summaries` | POST   | `summaries reset`              |
+| `/api/admin/packages/{id}/reset-releases`  | POST   | `releases reset`               |
+| `/api/admin/email-templates`               | GET    | `email templates list`         |
+| `/api/admin/email-templates/{id}`          | GET    | `email templates show`         |
+| `/api/admin/email-templates/{id}`          | PUT    | `email templates update`       |
+| `/api/admin/email-templates/{id}/test`     | POST   | `email send-test`              |
 
 ### New admin endpoints needed
 
@@ -324,13 +326,13 @@ These are already implemented and just need to accept M2M JWT auth alongside ses
 
 Add admin-path package management endpoints for all CLI package operations. Existing non-admin routes can remain for current web/session flows, but the CLI does not call them.
 
-| Endpoint | Method | Scope | Purpose |
-|---|---|---|---|
-| `GET /api/admin/packages/{id}` | GET | `admin:read` | Get package detail for admin/CLI usage |
-| `POST /api/admin/packages` | POST | `admin:write` | Add a package by GitHub owner/repo |
-| `PATCH /api/admin/packages/{id}` | PATCH | `admin:write` | Update package metadata/mapping |
-| `DELETE /api/admin/packages/{id}` | DELETE | `admin:write` | Delete a tracked package |
-| `GET /api/admin/github/search` | GET | `admin:read` | Search GitHub repositories for add flows |
+| Endpoint                          | Method | Scope         | Purpose                                  |
+| --------------------------------- | ------ | ------------- | ---------------------------------------- |
+| `GET /api/admin/packages/{id}`    | GET    | `admin:read`  | Get package detail for admin/CLI usage   |
+| `POST /api/admin/packages`        | POST   | `admin:write` | Add a package by GitHub owner/repo       |
+| `PATCH /api/admin/packages/{id}`  | PATCH  | `admin:write` | Update package metadata/mapping          |
+| `DELETE /api/admin/packages/{id}` | DELETE | `admin:write` | Delete a tracked package                 |
+| `GET /api/admin/github/search`    | GET    | `admin:read`  | Search GitHub repositories for add flows |
 
 Request body:
 
@@ -354,10 +356,10 @@ Only `githubOwner` and `githubRepo` are required. `name` defaults to `owner/repo
 
 No admin user endpoints exist today. All current user endpoints are `/api/users/me` (self-service).
 
-| Endpoint | Method | Scope | Purpose |
-|---|---|---|---|
-| `GET /api/admin/users` | GET | `admin:read` | List users with pagination |
-| `GET /api/admin/users/{id}` | GET | `admin:read` | User detail with subscription + watchlist |
+| Endpoint                    | Method | Scope        | Purpose                                   |
+| --------------------------- | ------ | ------------ | ----------------------------------------- |
+| `GET /api/admin/users`      | GET    | `admin:read` | List users with pagination                |
+| `GET /api/admin/users/{id}` | GET    | `admin:read` | User detail with subscription + watchlist |
 
 `GET /api/admin/users` response shape:
 
@@ -391,9 +393,9 @@ Query params: `?page=1&pageSize=50&search=<email or name>&pro=true|false&sort=cr
 
 Read-only access already exists via public endpoints. Add an admin list with broader filters:
 
-| Endpoint | Method | Scope | Purpose |
-|---|---|---|---|
-| `GET /api/admin/releases` | GET | `admin:read` | Query releases across all packages |
+| Endpoint                  | Method | Scope        | Purpose                            |
+| ------------------------- | ------ | ------------ | ---------------------------------- |
+| `GET /api/admin/releases` | GET    | `admin:read` | Query releases across all packages |
 
 Query params: `?packageId=<id>&stale=true|false&prerelease=true|false&since=<datetime>&page=1&pageSize=50`
 
@@ -403,10 +405,10 @@ This is useful for answering "which releases are stale?" or "what was synced in 
 
 The public `/api/summaries` endpoint returns summaries grouped by package. Add an admin view for operational queries:
 
-| Endpoint | Method | Scope | Purpose |
-|---|---|---|---|
-| `GET /api/admin/summaries` | GET | `admin:read` | Query summaries with operational metadata |
-| `POST /api/admin/summaries/regenerate-all` | POST | `admin:write` | Mark all releases stale, triggering full regeneration |
+| Endpoint                                   | Method | Scope         | Purpose                                               |
+| ------------------------------------------ | ------ | ------------- | ----------------------------------------------------- |
+| `GET /api/admin/summaries`                 | GET    | `admin:read`  | Query summaries with operational metadata             |
+| `POST /api/admin/summaries/regenerate-all` | POST   | `admin:write` | Mark all releases stale, triggering full regeneration |
 
 `GET /api/admin/summaries` query params: `?packageId=<id>&page=1&pageSize=50`
 
@@ -418,9 +420,9 @@ Response includes `generatedAt`, `updatedAt`, and the count of stale releases pe
 
 No endpoints exist for this table. Add read-only admin access:
 
-| Endpoint | Method | Scope | Purpose |
-|---|---|---|---|
-| `GET /api/admin/digest-emails` | GET | `admin:read` | Query sent digest history |
+| Endpoint                       | Method | Scope        | Purpose                   |
+| ------------------------------ | ------ | ------------ | ------------------------- |
+| `GET /api/admin/digest-emails` | GET    | `admin:read` | Query sent digest history |
 
 Query params: `?userId=<id>&status=sent|failed|pending&since=<datetime>&page=1&pageSize=50`
 
@@ -451,21 +453,21 @@ The `htmlBody` field is excluded from list responses (it's large). Include it on
 
 The web app can keep using public template read access. The CLI uses admin endpoints only, so add an admin list endpoint alongside the write operations:
 
-| Endpoint | Method | Scope | Purpose |
-|---|---|---|---|
-| `GET /api/admin/watchlist-templates` | GET | `admin:read` | List watchlist templates for admin/CLI usage |
-| `POST /api/admin/watchlist-templates` | POST | `admin:write` | Create a new template |
-| `PATCH /api/admin/watchlist-templates/{id}` | PATCH | `admin:write` | Update template name/description/sort order |
-| `DELETE /api/admin/watchlist-templates/{id}` | DELETE | `admin:write` | Delete a template |
-| `PUT /api/admin/watchlist-templates/{id}/packages` | PUT | `admin:write` | Replace template's package list |
+| Endpoint                                           | Method | Scope         | Purpose                                      |
+| -------------------------------------------------- | ------ | ------------- | -------------------------------------------- |
+| `GET /api/admin/watchlist-templates`               | GET    | `admin:read`  | List watchlist templates for admin/CLI usage |
+| `POST /api/admin/watchlist-templates`              | POST   | `admin:write` | Create a new template                        |
+| `PATCH /api/admin/watchlist-templates/{id}`        | PATCH  | `admin:write` | Update template name/description/sort order  |
+| `DELETE /api/admin/watchlist-templates/{id}`       | DELETE | `admin:write` | Delete a template                            |
+| `PUT /api/admin/watchlist-templates/{id}/packages` | PUT    | `admin:write` | Replace template's package list              |
 
 #### Processed Webhook Events
 
 Read-only access for debugging webhook issues:
 
-| Endpoint | Method | Scope | Purpose |
-|---|---|---|---|
-| `GET /api/admin/webhook-events` | GET | `admin:read` | Query processed webhook events |
+| Endpoint                        | Method | Scope        | Purpose                        |
+| ------------------------------- | ------ | ------------ | ------------------------------ |
+| `GET /api/admin/webhook-events` | GET    | `admin:read` | Query processed webhook events |
 
 Query params: `?since=<datetime>&page=1&pageSize=50`
 
@@ -475,32 +477,32 @@ This is a diagnostic endpoint — useful for answering "did we process that Stri
 
 The existing trigger endpoint works per-package. Add a bulk trigger:
 
-| Endpoint | Method | Scope | Purpose |
-|---|---|---|---|
-| `POST /api/admin/sync/trigger-all` | POST | `admin:write` | Trigger sync for all enabled packages |
+| Endpoint                           | Method | Scope         | Purpose                               |
+| ---------------------------------- | ------ | ------------- | ------------------------------------- |
+| `POST /api/admin/sync/trigger-all` | POST   | `admin:write` | Trigger sync for all enabled packages |
 
 ### Summary: all new endpoints
 
-| Endpoint | Method | Scope |
-|---|---|---|
-| `GET /api/admin/packages/{id}` | GET | `admin:read` |
-| `POST /api/admin/packages` | POST | `admin:write` |
-| `PATCH /api/admin/packages/{id}` | PATCH | `admin:write` |
-| `DELETE /api/admin/packages/{id}` | DELETE | `admin:write` |
-| `GET /api/admin/github/search` | GET | `admin:read` |
-| `GET /api/admin/users` | GET | `admin:read` |
-| `GET /api/admin/users/{id}` | GET | `admin:read` |
-| `GET /api/admin/releases` | GET | `admin:read` |
-| `GET /api/admin/summaries` | GET | `admin:read` |
-| `POST /api/admin/summaries/regenerate-all` | POST | `admin:write` |
-| `GET /api/admin/digest-emails` | GET | `admin:read` |
-| `GET /api/admin/watchlist-templates` | GET | `admin:read` |
-| `POST /api/admin/watchlist-templates` | POST | `admin:write` |
-| `PATCH /api/admin/watchlist-templates/{id}` | PATCH | `admin:write` |
-| `DELETE /api/admin/watchlist-templates/{id}` | DELETE | `admin:write` |
-| `PUT /api/admin/watchlist-templates/{id}/packages` | PUT | `admin:write` |
-| `GET /api/admin/webhook-events` | GET | `admin:read` |
-| `POST /api/admin/sync/trigger-all` | POST | `admin:write` |
+| Endpoint                                           | Method | Scope         |
+| -------------------------------------------------- | ------ | ------------- |
+| `GET /api/admin/packages/{id}`                     | GET    | `admin:read`  |
+| `POST /api/admin/packages`                         | POST   | `admin:write` |
+| `PATCH /api/admin/packages/{id}`                   | PATCH  | `admin:write` |
+| `DELETE /api/admin/packages/{id}`                  | DELETE | `admin:write` |
+| `GET /api/admin/github/search`                     | GET    | `admin:read`  |
+| `GET /api/admin/users`                             | GET    | `admin:read`  |
+| `GET /api/admin/users/{id}`                        | GET    | `admin:read`  |
+| `GET /api/admin/releases`                          | GET    | `admin:read`  |
+| `GET /api/admin/summaries`                         | GET    | `admin:read`  |
+| `POST /api/admin/summaries/regenerate-all`         | POST   | `admin:write` |
+| `GET /api/admin/digest-emails`                     | GET    | `admin:read`  |
+| `GET /api/admin/watchlist-templates`               | GET    | `admin:read`  |
+| `POST /api/admin/watchlist-templates`              | POST   | `admin:write` |
+| `PATCH /api/admin/watchlist-templates/{id}`        | PATCH  | `admin:write` |
+| `DELETE /api/admin/watchlist-templates/{id}`       | DELETE | `admin:write` |
+| `PUT /api/admin/watchlist-templates/{id}/packages` | PUT    | `admin:write` |
+| `GET /api/admin/webhook-events`                    | GET    | `admin:read`  |
+| `POST /api/admin/sync/trigger-all`                 | POST   | `admin:write` |
 
 All new endpoints live under `/api/admin/` and use `CreateM2MAuthFilter()` + `CreateAdminFilter()`. The scope check (`admin:read` vs `admin:write`) is handled by `CreateAdminFilter()` based on the HTTP method.
 
@@ -607,6 +609,7 @@ The CLI is an API client, not a second application with its own DB connection. T
 ```
 
 Override with environment variables:
+
 - `PATCHNOTES_API_URL`
 - `PATCHNOTES_CLIENT_ID`
 - `PATCHNOTES_CLIENT_SECRET`
@@ -648,6 +651,7 @@ PatchNotes.Cli/
 ### Phase 1: Auth infrastructure
 
 Server-side:
+
 - Add JWT Bearer authentication alongside existing Stytch session auth
 - Configure JWKS validation against Stytch's endpoint
 - Add `RouteUtils.CreateM2MAuthFilter()` for `/api/admin/*` route groups
@@ -656,6 +660,7 @@ Server-side:
 - Create M2M clients in Stytch dashboard for initial testing
 
 CLI:
+
 - Scaffold `PatchNotes.Cli` project with `System.CommandLine`
 - Implement `auth login`, `auth status`, `auth logout`
 - Implement credential storage and token caching (`M2MAuthHandler`)

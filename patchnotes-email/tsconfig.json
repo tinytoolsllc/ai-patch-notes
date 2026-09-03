@@ -9,9 +9,5 @@
     "esModuleInterop": true,
     "skipLibCheck": true
   },
-  "exclude": [
-    "scripts",
-    "prisma.config.ts",
-    "**/*.test.ts"
-  ]
+  "exclude": ["scripts", "prisma.config.ts", "**/*.test.ts"]
 }

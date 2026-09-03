@@ -76,15 +76,15 @@ This does not need to be a near-real-time pager. PatchNotes code and traffic do 
 
 ## What We Actually Need
 
-| Capability | Current-ai bender | Log Watcher for PatchNotes |
-|---|---|---|
-| Trigger | Trigger.dev scheduled task | Azure Functions timer trigger |
-| Log source | BetterStack MCP | Application Insights / Azure Monitor query |
-| LLM behavior | Multi-turn agent | Single-shot structured analysis |
-| Issue tracker | Linear | GitHub Issues |
-| Repo context | Full clone + tools | None |
-| Dedupe | Agent reasoning | Deterministic fingerprint in code |
-| Cost | High relative to project size | Near-zero to low |
+| Capability    | Current-ai bender             | Log Watcher for PatchNotes                 |
+| ------------- | ----------------------------- | ------------------------------------------ |
+| Trigger       | Trigger.dev scheduled task    | Azure Functions timer trigger              |
+| Log source    | BetterStack MCP               | Application Insights / Azure Monitor query |
+| LLM behavior  | Multi-turn agent              | Single-shot structured analysis            |
+| Issue tracker | Linear                        | GitHub Issues                              |
+| Repo context  | Full clone + tools            | None                                       |
+| Dedupe        | Agent reasoning               | Deterministic fingerprint in code          |
+| Cost          | High relative to project size | Near-zero to low                           |
 
 ## Design
 
@@ -290,6 +290,7 @@ Use the GitHub REST API, not the `gh` CLI, from inside the Azure Function.
 [LogWatcher] {title}
 
 ## Incident
+
 - Severity: {severity}
 - Category: {category}
 - Source: {source}
@@ -298,15 +299,18 @@ Use the GitHub REST API, not the `gh` CLI, from inside the Azure Function.
 - Last seen: {lastSeenUtc}
 
 ## Summary
+
 {summary}
 
 ## Sanitized Details
+
 - Exception type: `{exceptionType}`
 - Operation: `{operation}`
 - Top frame: `{topFrame}`
 - Sample telemetry id: `{sampleEventId}`
 
 ## Notes
+
 - Filed automatically by LogWatcher
 - Raw logs remain in Application Insights / Azure Monitor
 
@@ -431,14 +435,14 @@ With an hourly schedule, the baseline volume is low:
 
 Estimated cost envelope:
 
-| Component | Cost |
-|---|---|
-| Ollama Cloud free tier | Likely sufficient initially |
-| Ollama Cloud Pro tier | Fallback if volume grows |
-| Azure Functions | Already deployed |
-| App Insights / Azure Monitor query | Existing telemetry resource |
-| GitHub API | Well within authenticated limits |
-| **Total** | **Near-zero to low monthly cost** |
+| Component                          | Cost                              |
+| ---------------------------------- | --------------------------------- |
+| Ollama Cloud free tier             | Likely sufficient initially       |
+| Ollama Cloud Pro tier              | Fallback if volume grows          |
+| Azure Functions                    | Already deployed                  |
+| App Insights / Azure Monitor query | Existing telemetry resource       |
+| GitHub API                         | Well within authenticated limits  |
+| **Total**                          | **Near-zero to low monthly cost** |
 
 ## Rollout Plan
 

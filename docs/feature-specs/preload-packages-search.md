@@ -35,6 +35,7 @@ GET /api/packages/catalog
 ```
 
 **Why a new endpoint instead of `GET /api/packages?limit=999`:**
+
 - The existing `GET /api/packages` returns `PackageDto` with fields like `tagPrefix`, `lastFetchedAt`, `createdAt` that are irrelevant for search and waste bytes.
 - A dedicated DTO keeps the payload minimal — only the fields needed for display and search.
 - Easier to cache aggressively (packages change rarely).
@@ -67,17 +68,13 @@ Add a parallel `ensureQueryData` call in the index route loader, alongside the e
 
 ```typescript
 // routes/index.tsx
-export const Route = createFileRoute('/')({
+export const Route = createFileRoute("/")({
   loader: ({ context: { queryClient } }) => {
     // Fire both in parallel — no await, just prime the cache
-    queryClient.ensureQueryData(
-      getGetFeedQueryOptions({ excludePrerelease: true })
-    )
-    queryClient.ensureQueryData(
-      getGetPackageCatalogQueryOptions()
-    )
+    queryClient.ensureQueryData(getGetFeedQueryOptions({ excludePrerelease: true }));
+    queryClient.ensureQueryData(getGetPackageCatalogQueryOptions());
   },
-})
+});
 ```
 
 Both requests fire concurrently before the component mounts. TanStack Query caches the catalog, so subsequent navigations to `/` are instant.
@@ -114,12 +111,14 @@ This approach works well up to ~2,000-5,000 packages. Beyond that, the payload s
 ## Implementation Steps
 
 ### Backend
+
 - [ ] Add `PackageCatalogItemDto` and `PackageCatalogResponseDto`
 - [ ] Add `GET /api/packages/catalog` endpoint in `PackageRoutes.cs`
 - [ ] Add 5-minute `IMemoryCache` + `Cache-Control` response header
 - [ ] Run Orval to generate the React Query hook
 
 ### Frontend
+
 - [ ] Add `ensureQueryData` for catalog in `routes/index.tsx` loader
 - [ ] Add search input component to `HomePage.tsx` filter bar
 - [ ] Implement client-side filtering against cached catalog
