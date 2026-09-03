@@ -1,14 +1,14 @@
-import { Link } from '@tanstack/react-router'
-import { AppHeader, Breadcrumb, Container, Card } from '../components/ui'
-import { usePackagesByOwner } from '../api/hooks'
-import { formatDate } from '../utils/dateFormat'
+import { Link } from "@tanstack/react-router";
+import { AppHeader, Breadcrumb, Container, Card } from "../components/ui";
+import { usePackagesByOwner } from "../api/hooks";
+import { formatDate } from "../utils/dateFormat";
 
 interface OwnerPackagesPageProps {
-  owner: string
+  owner: string;
 }
 
 export function OwnerPackagesPage({ owner }: OwnerPackagesPageProps) {
-  const { data: packages, isLoading, error } = usePackagesByOwner(owner)
+  const { data: packages, isLoading, error } = usePackagesByOwner(owner);
 
   return (
     <div className="min-h-screen bg-surface-secondary">
@@ -16,9 +16,7 @@ export function OwnerPackagesPage({ owner }: OwnerPackagesPageProps) {
 
       <main className="py-8">
         <Container>
-          <h2 className="text-xl font-semibold text-text-primary mb-6">
-            Packages by {owner}
-          </h2>
+          <h2 className="text-xl font-semibold text-text-primary mb-6">Packages by {owner}</h2>
 
           {isLoading && (
             <div className="space-y-4">
@@ -37,15 +35,11 @@ export function OwnerPackagesPage({ owner }: OwnerPackagesPageProps) {
           )}
 
           {!!error && (
-            <p className="text-text-secondary">
-              Failed to load packages for this owner.
-            </p>
+            <p className="text-text-secondary">Failed to load packages for this owner.</p>
           )}
 
           {!isLoading && packages && packages.length === 0 && (
-            <p className="text-text-secondary">
-              No packages found for {owner}.
-            </p>
+            <p className="text-text-secondary">No packages found for {owner}.</p>
           )}
 
           {packages && packages.length > 0 && (
@@ -91,5 +85,5 @@ export function OwnerPackagesPage({ owner }: OwnerPackagesPageProps) {
         </Container>
       </main>
     </div>
-  )
+  );
 }

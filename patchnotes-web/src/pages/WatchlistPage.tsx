@@ -1,18 +1,18 @@
-import { useState, useEffect, useRef } from 'react'
-import { Link, useNavigate } from '@tanstack/react-router'
-import { useStytchUser } from '@stytch/react'
-import { useDebouncedValue } from '@tanstack/react-pacer'
-import { Search, X, Trash2, Plus, Star, Loader2 } from 'lucide-react'
-import { AppHeader, Container, Button, Card } from '../components/ui'
+import { useState, useEffect, useRef } from "react";
+import { Link, useNavigate } from "@tanstack/react-router";
+import { useStytchUser } from "@stytch/react";
+import { useDebouncedValue } from "@tanstack/react-pacer";
+import { Search, X, Trash2, Plus, Star, Loader2 } from "lucide-react";
+import { AppHeader, Container, Button, Card } from "../components/ui";
 import {
   useWatchlist,
   useRemoveFromWatchlist,
   useGithubSearch,
   useAddFromGithub,
-} from '../api/hooks'
-import type { WatchlistPackageDto } from '../api/generated/model'
-import type { GitHubRepoSearchResultDto } from '../api/generated/model'
-import { formatStars } from '../utils/formatStars'
+} from "../api/hooks";
+import type { WatchlistPackageDto } from "../api/generated/model";
+import type { GitHubRepoSearchResultDto } from "../api/generated/model";
+import { formatStars } from "../utils/formatStars";
 
 // ── Search Result Item ───────────────────────────────────────
 
@@ -22,10 +22,10 @@ function SearchResultItem({
   isAdding,
   onAdd,
 }: {
-  result: GitHubRepoSearchResultDto
-  isWatched: boolean
-  isAdding: boolean
-  onAdd: () => void
+  result: GitHubRepoSearchResultDto;
+  isWatched: boolean;
+  isAdding: boolean;
+  onAdd: () => void;
 }) {
   return (
     <div className="flex items-center justify-between gap-4 px-4 py-3 border-b border-border-muted last:border-0">
@@ -42,15 +42,11 @@ function SearchResultItem({
           )}
         </div>
         {result.description && (
-          <p className="text-xs text-text-secondary mt-0.5 line-clamp-1">
-            {result.description}
-          </p>
+          <p className="text-xs text-text-secondary mt-0.5 line-clamp-1">{result.description}</p>
         )}
       </div>
       {isWatched ? (
-        <span className="text-xs text-text-tertiary flex-shrink-0">
-          Already added
-        </span>
+        <span className="text-xs text-text-tertiary flex-shrink-0">Already added</span>
       ) : (
         <Button
           size="sm"
@@ -68,7 +64,7 @@ function SearchResultItem({
         </Button>
       )}
     </div>
-  )
+  );
 }
 
 // ── Watched Package Item ─────────────────────────────────────
@@ -78,11 +74,11 @@ function WatchedPackageItem({
   onRemove,
   isRemoving,
 }: {
-  pkg: WatchlistPackageDto
-  onRemove: () => void
-  isRemoving: boolean
+  pkg: WatchlistPackageDto;
+  onRemove: () => void;
+  isRemoving: boolean;
 }) {
-  const displayName = pkg.npmName ?? `${pkg.githubOwner}/${pkg.githubRepo}`
+  const displayName = pkg.npmName ?? `${pkg.githubOwner}/${pkg.githubRepo}`;
 
   return (
     <div className="flex items-center justify-between gap-3 px-4 py-2.5 border-b border-border-muted last:border-0">
@@ -107,80 +103,77 @@ function WatchedPackageItem({
         <Trash2 className="w-4 h-4" />
       </button>
     </div>
-  )
+  );
 }
 
 // ── Main Component ───────────────────────────────────────────
 
 export function WatchlistPage() {
-  const { user, isInitialized } = useStytchUser()
-  const navigate = useNavigate()
-  const [query, setQuery] = useState('')
-  const [debouncedQuery] = useDebouncedValue(query.trim(), { wait: 300 })
-  const inputRef = useRef<HTMLInputElement>(null)
-  const [addingGithub, setAddingGithub] = useState<string | null>(null)
+  const { user, isInitialized } = useStytchUser();
+  const navigate = useNavigate();
+  const [query, setQuery] = useState("");
+  const [debouncedQuery] = useDebouncedValue(query.trim(), { wait: 300 });
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [addingGithub, setAddingGithub] = useState<string | null>(null);
 
-  const { data: watchlist, isLoading: watchlistLoading } = useWatchlist()
-  const removeFromWatchlist = useRemoveFromWatchlist()
-  const addFromGithub = useAddFromGithub()
+  const { data: watchlist, isLoading: watchlistLoading } = useWatchlist();
+  const removeFromWatchlist = useRemoveFromWatchlist();
+  const addFromGithub = useAddFromGithub();
 
-  const { data: searchData, isFetching: isSearching } =
-    useGithubSearch(debouncedQuery)
+  const { data: searchData, isFetching: isSearching } = useGithubSearch(debouncedQuery);
 
   // Redirect if not authenticated
   useEffect(
     function redirectUnauthenticated() {
       if (isInitialized && !user) {
-        navigate({ to: '/login', search: { returnUrl: '/watchlist' } })
+        navigate({ to: "/login", search: { returnUrl: "/watchlist" } });
       }
     },
-    [isInitialized, user, navigate]
-  )
+    [isInitialized, user, navigate],
+  );
 
   if (!isInitialized || !user) {
     return (
       <div className="min-h-screen bg-surface-secondary flex items-center justify-center">
         <p className="text-text-secondary">Loading...</p>
       </div>
-    )
+    );
   }
 
   // Build a set of watched owner/repo pairs for matching search results
-  const watchedRepos = new Set<string>()
+  const watchedRepos = new Set<string>();
   if (watchlist) {
     for (const pkg of watchlist) {
-      watchedRepos.add(`${pkg.githubOwner}/${pkg.githubRepo}`.toLowerCase())
+      watchedRepos.add(`${pkg.githubOwner}/${pkg.githubRepo}`.toLowerCase());
     }
   }
 
   // Extract search results from the response
   const searchResults: GitHubRepoSearchResultDto[] =
-    searchData && 'data' in searchData
+    searchData && "data" in searchData
       ? ((searchData as { data: GitHubRepoSearchResultDto[] }).data ?? [])
-      : []
+      : [];
 
-  const showSearchResults = debouncedQuery.length >= 2
+  const showSearchResults = debouncedQuery.length >= 2;
 
   const handleAddFromGithub = (result: GitHubRepoSearchResultDto) => {
-    const key = `${result.owner}/${result.repo}`
-    setAddingGithub(key)
+    const key = `${result.owner}/${result.repo}`;
+    setAddingGithub(key);
     addFromGithub.mutate(
       { owner: result.owner, repo: result.repo },
       {
         onSettled: () => setAddingGithub(null),
-      }
-    )
-  }
+      },
+    );
+  };
 
   const handleRemove = (packageId: string) => {
-    removeFromWatchlist.mutate(packageId)
-  }
+    removeFromWatchlist.mutate(packageId);
+  };
 
   return (
     <div className="min-h-screen bg-surface-secondary">
-      <AppHeader
-        breadcrumbs={<span className="text-text-primary">Watchlist</span>}
-      />
+      <AppHeader breadcrumbs={<span className="text-text-primary">Watchlist</span>} />
 
       <main className="py-8">
         <Container>
@@ -188,9 +181,7 @@ export function WatchlistPage() {
             {/* Search Section */}
             <Card padding="none">
               <div className="p-4 border-b border-border-default">
-                <h2 className="text-base font-semibold text-text-primary mb-3">
-                  Add packages
-                </h2>
+                <h2 className="text-base font-semibold text-text-primary mb-3">Add packages</h2>
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-tertiary" />
                   <input
@@ -203,7 +194,7 @@ export function WatchlistPage() {
                   />
                   {query && (
                     <button
-                      onClick={() => setQuery('')}
+                      onClick={() => setQuery("")}
                       className="absolute right-3 top-1/2 -translate-y-1/2 text-text-tertiary hover:text-text-secondary"
                     >
                       <X className="w-4 h-4" />
@@ -222,7 +213,7 @@ export function WatchlistPage() {
                     </div>
                   ) : searchResults.length > 0 ? (
                     searchResults.map((result) => {
-                      const key = `${result.owner}/${result.repo}`
+                      const key = `${result.owner}/${result.repo}`;
                       return (
                         <SearchResultItem
                           key={key}
@@ -231,7 +222,7 @@ export function WatchlistPage() {
                           isAdding={addingGithub === key}
                           onAdd={() => handleAddFromGithub(result)}
                         />
-                      )
+                      );
                     })
                   ) : (
                     <div className="py-8 text-center text-sm text-text-secondary">
@@ -251,13 +242,11 @@ export function WatchlistPage() {
             {/* Current Watchlist */}
             <Card padding="none">
               <div className="px-4 py-3 border-b border-border-default">
-                <h2 className="text-base font-semibold text-text-primary">
-                  Your watchlist
-                </h2>
+                <h2 className="text-base font-semibold text-text-primary">Your watchlist</h2>
                 {watchlist && (
                   <p className="text-xs text-text-tertiary mt-0.5">
                     {watchlist.length} package
-                    {watchlist.length !== 1 ? 's' : ''}
+                    {watchlist.length !== 1 ? "s" : ""}
                   </p>
                 )}
               </div>
@@ -275,13 +264,9 @@ export function WatchlistPage() {
               ) : (
                 [...(watchlist ?? [])]
                   .sort((a, b) => {
-                    const nameA = (
-                      a.npmName ?? `${a.githubOwner}/${a.githubRepo}`
-                    ).toLowerCase()
-                    const nameB = (
-                      b.npmName ?? `${b.githubOwner}/${b.githubRepo}`
-                    ).toLowerCase()
-                    return nameA.localeCompare(nameB)
+                    const nameA = (a.npmName ?? `${a.githubOwner}/${a.githubRepo}`).toLowerCase();
+                    const nameB = (b.npmName ?? `${b.githubOwner}/${b.githubRepo}`).toLowerCase();
+                    return nameA.localeCompare(nameB);
                   })
                   .map((pkg) => (
                     <WatchedPackageItem
@@ -289,8 +274,7 @@ export function WatchlistPage() {
                       pkg={pkg}
                       onRemove={() => handleRemove(pkg.id)}
                       isRemoving={
-                        removeFromWatchlist.isPending &&
-                        removeFromWatchlist.variables === pkg.id
+                        removeFromWatchlist.isPending && removeFromWatchlist.variables === pkg.id
                       }
                     />
                   ))
@@ -300,5 +284,5 @@ export function WatchlistPage() {
         </Container>
       </main>
     </div>
-  )
+  );
 }

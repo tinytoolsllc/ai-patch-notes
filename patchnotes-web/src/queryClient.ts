@@ -1,31 +1,31 @@
-import { QueryClient, QueryCache, MutationCache } from '@tanstack/react-query'
-import { isApiError, getErrorMessage } from './api/client'
+import { QueryClient, QueryCache, MutationCache } from "@tanstack/react-query";
+import { isApiError, getErrorMessage } from "./api/client";
 
-type ErrorHandler = (message: string) => void
+type ErrorHandler = (message: string) => void;
 
 let globalErrorHandler: ErrorHandler = (message) => {
   // Fallback: log to console if no handler is registered
-  console.error('[API Error]', message)
-}
+  console.error("[API Error]", message);
+};
 
 export function setGlobalErrorHandler(handler: ErrorHandler) {
-  globalErrorHandler = handler
+  globalErrorHandler = handler;
 }
 
 function handleError(error: unknown) {
-  const message = getErrorMessage(error)
-  globalErrorHandler(message)
+  const message = getErrorMessage(error);
+  globalErrorHandler(message);
 }
 
 function shouldRetry(failureCount: number, error: unknown): boolean {
   // Don't retry on client errors (4xx) except for rate limiting (429)
   if (isApiError(error)) {
     if (error.status >= 400 && error.status < 500 && error.status !== 429) {
-      return false
+      return false;
     }
   }
   // Retry up to 2 times for network/server errors
-  return failureCount < 2
+  return failureCount < 2;
 }
 
 export const queryClient = new QueryClient({
@@ -34,14 +34,14 @@ export const queryClient = new QueryClient({
       // Only show error toast if the query has already been successful before
       // (this avoids showing errors during initial load)
       if (query.state.data !== undefined) {
-        handleError(error)
+        handleError(error);
       }
     },
   }),
   mutationCache: new MutationCache({
     onError: (error) => {
       // Always show errors for mutations
-      handleError(error)
+      handleError(error);
     },
   }),
   defaultOptions: {
@@ -54,4 +54,4 @@ export const queryClient = new QueryClient({
       retry: false, // Don't retry mutations by default
     },
   },
-})
+});

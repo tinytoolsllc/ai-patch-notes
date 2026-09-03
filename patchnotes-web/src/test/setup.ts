@@ -1,5 +1,5 @@
 // Mock window.matchMedia for components using theme/media queries
-Object.defineProperty(window, 'matchMedia', {
+Object.defineProperty(window, "matchMedia", {
   writable: true,
   value: (query: string) => ({
     matches: false,
@@ -11,16 +11,16 @@ Object.defineProperty(window, 'matchMedia', {
     removeEventListener: () => {},
     dispatchEvent: () => false,
   }),
-})
+});
 
-import '@testing-library/jest-dom/vitest'
-import { cleanup } from '@testing-library/react'
-import { afterEach, beforeAll, afterAll, vi } from 'vitest'
-import { server } from './mocks/server'
+import "@testing-library/jest-dom/vitest";
+import { cleanup } from "@testing-library/react";
+import { afterEach, beforeAll, afterAll, vi } from "vitest";
+import { server } from "./mocks/server";
 
 // Mock @stytch/react to avoid StytchProvider requirement in tests
 // Default mock returns an authenticated user for existing tests
-vi.mock('@stytch/react', () => ({
+vi.mock("@stytch/react", () => ({
   StytchProvider: ({ children }: { children: React.ReactNode }) => children,
   useStytch: () => ({
     magicLinks: { authenticate: vi.fn() },
@@ -29,23 +29,23 @@ vi.mock('@stytch/react', () => ({
   }),
   useStytchUser: () => ({
     user: {
-      user_id: 'test-user-id',
-      emails: [{ email: 'test@example.com' }],
-      roles: ['patch_notes_admin'],
+      user_id: "test-user-id",
+      emails: [{ email: "test@example.com" }],
+      roles: ["patch_notes_admin"],
     },
     isInitialized: true,
   }),
-}))
+}));
 
 beforeAll(() => {
-  server.listen({ onUnhandledRequest: 'error' })
-})
+  server.listen({ onUnhandledRequest: "error" });
+});
 
 afterEach(() => {
-  cleanup()
-  server.resetHandlers()
-})
+  cleanup();
+  server.resetHandlers();
+});
 
 afterAll(() => {
-  server.close()
-})
+  server.close();
+});

@@ -1,6 +1,6 @@
-import { AppHeader, Breadcrumb, Container } from '../components/ui'
+import { AppHeader, Breadcrumb, Container } from "../components/ui";
 
-const LAST_UPDATED = 'February 7, 2026'
+const LAST_UPDATED = "February 7, 2026";
 
 export function Privacy() {
   return (
@@ -10,19 +10,13 @@ export function Privacy() {
       <main className="py-12">
         <Container>
           <div className="max-w-3xl mx-auto prose prose-neutral dark:prose-invert">
-            <p className="text-sm text-text-tertiary mb-8">
-              Last updated: {LAST_UPDATED}
-            </p>
+            <p className="text-sm text-text-tertiary mb-8">Last updated: {LAST_UPDATED}</p>
 
             <p className="text-text-secondary leading-relaxed">
-              Tiny Tools LLC (&quot;we&quot;, &quot;us&quot;, or
-              &quot;our&quot;) is operated by Tiny Tools LLC. This policy
-              describes how we collect, use, and protect your information when
-              you use our service at{' '}
-              <a
-                href="https://app.myreleasenotes.ai"
-                className="text-brand-500 hover:underline"
-              >
+              Tiny Tools LLC (&quot;we&quot;, &quot;us&quot;, or &quot;our&quot;) is operated by
+              Tiny Tools LLC. This policy describes how we collect, use, and protect your
+              information when you use our service at{" "}
+              <a href="https://app.myreleasenotes.ai" className="text-brand-500 hover:underline">
                 app.myreleasenotes.ai
               </a>
               .
@@ -31,32 +25,30 @@ export function Privacy() {
             <Section title="Information We Collect">
               <SubSection title="Account Data">
                 <p className="text-text-secondary leading-relaxed">
-                  When you create an account, we collect your email address and
-                  optionally your name (via OAuth). We store a user ID for
-                  authentication purposes.
+                  When you create an account, we collect your email address and optionally your name
+                  (via OAuth). We store a user ID for authentication purposes.
                 </p>
               </SubSection>
 
               <SubSection title="Usage Data">
                 <p className="text-text-secondary leading-relaxed">
-                  We store your package watchlist (which npm packages you choose
-                  to track) and account timestamps (creation and last update).
+                  We store your package watchlist (which npm packages you choose to track) and
+                  account timestamps (creation and last update).
                 </p>
               </SubSection>
 
               <SubSection title="Payment Data">
                 <p className="text-text-secondary leading-relaxed">
-                  If you subscribe to Pro, Stripe processes your payment. We
-                  store only your Stripe customer ID, subscription ID, and
-                  subscription status. We never see or store your card number.
+                  If you subscribe to Pro, Stripe processes your payment. We store only your Stripe
+                  customer ID, subscription ID, and subscription status. We never see or store your
+                  card number.
                 </p>
               </SubSection>
 
               <SubSection title="Operational Data">
                 <p className="text-text-secondary leading-relaxed">
-                  We use Azure Application Insights for operational monitoring
-                  and debugging. No advertising or third-party analytics
-                  trackers are used.
+                  We use Azure Application Insights for operational monitoring and debugging. No
+                  advertising or third-party analytics trackers are used.
                 </p>
               </SubSection>
             </Section>
@@ -66,10 +58,7 @@ export function Privacy() {
                 <li>Authenticate you and manage your session</li>
                 <li>Display release notes for packages you track</li>
                 <li>Process Pro subscription payments</li>
-                <li>
-                  Generate AI-powered release summaries (using public release
-                  text only)
-                </li>
+                <li>Generate AI-powered release summaries (using public release text only)</li>
                 <li>Monitor and debug service issues</li>
               </ul>
             </Section>
@@ -125,16 +114,15 @@ export function Privacy() {
                 </table>
               </div>
               <p className="text-text-secondary leading-relaxed mt-4">
-                We do not sell, rent, or share your data with advertisers or any
-                other third parties.
+                We do not sell, rent, or share your data with advertisers or any other third
+                parties.
               </p>
             </Section>
 
             <Section title="Cookies">
               <p className="text-text-secondary leading-relaxed">
-                We use only functional session cookies (via Stytch) to keep you
-                logged in. We do not use advertising cookies, tracking pixels,
-                or third-party analytics cookies.
+                We use only functional session cookies (via Stytch) to keep you logged in. We do not
+                use advertising cookies, tracking pixels, or third-party analytics cookies.
               </p>
             </Section>
 
@@ -154,20 +142,17 @@ export function Privacy() {
               </p>
               <ul className="list-disc pl-6 space-y-2 text-text-secondary mt-2">
                 <li>
-                  <strong>Access</strong> &mdash; Request a copy of the data we
-                  hold about you
+                  <strong>Access</strong> &mdash; Request a copy of the data we hold about you
                 </li>
                 <li>
-                  <strong>Deletion</strong> &mdash; Request that we delete your
-                  account and all associated data
+                  <strong>Deletion</strong> &mdash; Request that we delete your account and all
+                  associated data
                 </li>
                 <li>
-                  <strong>Portability</strong> &mdash; Receive your data in a
-                  portable format
+                  <strong>Portability</strong> &mdash; Receive your data in a portable format
                 </li>
                 <li>
-                  <strong>Correction</strong> &mdash; Request correction of
-                  inaccurate data
+                  <strong>Correction</strong> &mdash; Request correction of inaccurate data
                 </li>
               </ul>
               <p className="text-text-secondary leading-relaxed mt-4">
@@ -177,15 +162,14 @@ export function Privacy() {
 
             <Section title="Data Retention">
               <p className="text-text-secondary leading-relaxed">
-                We retain your data for as long as your account is active. If
-                you request deletion, we will remove your data within 30 days.
+                We retain your data for as long as your account is active. If you request deletion,
+                we will remove your data within 30 days.
               </p>
             </Section>
 
             <Section title="Contact Us">
               <p className="text-text-secondary leading-relaxed">
-                For privacy-related questions or to exercise your rights, email
-                us at{' '}
+                For privacy-related questions or to exercise your rights, email us at{" "}
                 <a
                   href="mailto:privacy@yourtinytools.com"
                   className="text-brand-500 hover:underline"
@@ -199,37 +183,25 @@ export function Privacy() {
         </Container>
       </main>
     </div>
-  )
+  );
 }
 
-function Section({
-  title,
-  children,
-}: {
-  title: string
-  children: React.ReactNode
-}) {
+function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section className="mt-10">
       <h2 className="text-xl font-semibold text-text-primary mb-4">{title}</h2>
       {children}
     </section>
-  )
+  );
 }
 
-function SubSection({
-  title,
-  children,
-}: {
-  title: string
-  children: React.ReactNode
-}) {
+function SubSection({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div className="mt-4">
       <h3 className="text-base font-medium text-text-primary mb-2">{title}</h3>
       {children}
     </div>
-  )
+  );
 }
 
 function ServiceRow({
@@ -237,9 +209,9 @@ function ServiceRow({
   purpose,
   data,
 }: {
-  service: string
-  purpose: string
-  data: string
+  service: string;
+  purpose: string;
+  data: string;
 }) {
   return (
     <tr>
@@ -247,5 +219,5 @@ function ServiceRow({
       <td className="py-3 pr-4">{purpose}</td>
       <td className="py-3">{data}</td>
     </tr>
-  )
+  );
 }

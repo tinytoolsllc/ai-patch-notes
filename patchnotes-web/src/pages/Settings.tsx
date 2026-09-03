@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react'
-import { Link, useNavigate } from '@tanstack/react-router'
-import { useStytchUser } from '@stytch/react'
-import { AppHeader, Container, Button, Input } from '../components/ui'
-import { Checkbox } from '../components/ui/Checkbox'
+import { useState, useEffect } from "react";
+import { Link, useNavigate } from "@tanstack/react-router";
+import { useStytchUser } from "@stytch/react";
+import { AppHeader, Container, Button, Input } from "../components/ui";
+import { Checkbox } from "../components/ui/Checkbox";
 import {
   useGetCurrentUser,
   useUpdateCurrentUser,
@@ -10,43 +10,35 @@ import {
   useUpdateEmailPreferences,
   getGetEmailPreferencesQueryKey,
   getGetCurrentUserQueryKey,
-} from '../api/hooks'
-import { useQueryClient } from '@tanstack/react-query'
+} from "../api/hooks";
+import { useQueryClient } from "@tanstack/react-query";
 
-const DAY_NAMES = [
-  'Sunday',
-  'Monday',
-  'Tuesday',
-  'Wednesday',
-  'Thursday',
-  'Friday',
-  'Saturday',
-]
+const DAY_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
 function formatHour(hour: number): string {
-  const ampm = hour < 12 ? 'AM' : 'PM'
-  const h = hour % 12 === 0 ? 12 : hour % 12
-  return `${h}:00 ${ampm}`
+  const ampm = hour < 12 ? "AM" : "PM";
+  const h = hour % 12 === 0 ? 12 : hour % 12;
+  return `${h}:00 ${ampm}`;
 }
 
 function utcHourToLocal(utcHour: number): number {
-  const now = new Date()
-  now.setUTCHours(utcHour, 0, 0, 0)
-  return now.getHours()
+  const now = new Date();
+  now.setUTCHours(utcHour, 0, 0, 0);
+  return now.getHours();
 }
 
 function localHourToUtc(localHour: number): number {
-  const now = new Date()
-  now.setHours(localHour, 0, 0, 0)
-  return now.getUTCHours()
+  const now = new Date();
+  now.setHours(localHour, 0, 0, 0);
+  return now.getUTCHours();
 }
 
 function getLocalTimezoneAbbr(): string {
   return (
-    new Intl.DateTimeFormat('en', { timeZoneName: 'short' })
+    new Intl.DateTimeFormat("en", { timeZoneName: "short" })
       .formatToParts(new Date())
-      .find((p) => p.type === 'timeZoneName')?.value ?? 'local'
-  )
+      .find((p) => p.type === "timeZoneName")?.value ?? "local"
+  );
 }
 
 function SettingsSkeleton() {
@@ -83,13 +75,13 @@ function SettingsSkeleton() {
         </div>
       </div>
     </div>
-  )
+  );
 }
 
 export function Settings() {
-  const { user, isInitialized } = useStytchUser()
-  const navigate = useNavigate()
-  const queryClient = useQueryClient()
+  const { user, isInitialized } = useStytchUser();
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   const {
     data: currentUser,
@@ -97,63 +89,60 @@ export function Settings() {
     isLoading: userLoading,
   } = useGetCurrentUser({
     query: { enabled: !!user },
-  })
-  const updateUser = useUpdateCurrentUser()
+  });
+  const updateUser = useUpdateCurrentUser();
 
-  const userData = currentUser?.status === 200 ? currentUser.data : null
-  const serverName = userData?.name ?? ''
-  const [nameOverride, setNameOverride] = useState<string | null>(null)
-  const [saved, setSaved] = useState(false)
+  const userData = currentUser?.status === 200 ? currentUser.data : null;
+  const serverName = userData?.name ?? "";
+  const [nameOverride, setNameOverride] = useState<string | null>(null);
+  const [saved, setSaved] = useState(false);
 
-  const name = nameOverride ?? serverName
+  const name = nameOverride ?? serverName;
 
   // Redirect if not authenticated
   useEffect(
     function redirectUnauthenticated() {
       if (isInitialized && !user) {
-        navigate({ to: '/login', search: { returnUrl: '/settings' } })
+        navigate({ to: "/login", search: { returnUrl: "/settings" } });
       }
     },
-    [isInitialized, user, navigate]
-  )
+    [isInitialized, user, navigate],
+  );
 
   const handleSave = () => {
-    setSaved(false)
+    setSaved(false);
 
-    const previousData = queryClient.getQueryData(getGetCurrentUserQueryKey())
+    const previousData = queryClient.getQueryData(getGetCurrentUserQueryKey());
 
     // Optimistically update cache
-    queryClient.setQueryData(
-      getGetCurrentUserQueryKey(),
-      (old: typeof currentUser) => {
-        if (!old || old.status !== 200) return old
-        return {
-          ...old,
-          data: { ...old.data, name: name || null },
-        }
-      }
-    )
+    queryClient.setQueryData(getGetCurrentUserQueryKey(), (old: typeof currentUser) => {
+      if (!old || old.status !== 200) return old;
+      return {
+        ...old,
+        data: { ...old.data, name: name || null },
+      };
+    });
 
-    setNameOverride(null)
+    setNameOverride(null);
 
     updateUser.mutate(
       { data: { name: name || null } },
       {
         onSuccess: () => {
-          setSaved(true)
+          setSaved(true);
           queryClient.invalidateQueries({
             queryKey: getGetCurrentUserQueryKey(),
-          })
+          });
         },
         onError: () => {
-          queryClient.setQueryData(getGetCurrentUserQueryKey(), previousData)
+          queryClient.setQueryData(getGetCurrentUserQueryKey(), previousData);
         },
-      }
-    )
-  }
+      },
+    );
+  };
 
   // Email preferences
-  const isPro = userData?.isPro ?? false
+  const isPro = userData?.isPro ?? false;
 
   const {
     data: emailPrefs,
@@ -161,110 +150,90 @@ export function Settings() {
     isLoading: emailPrefsLoading,
   } = useGetEmailPreferences({
     query: { enabled: !!user },
-  })
-  const updateEmailPrefs = useUpdateEmailPreferences()
+  });
+  const updateEmailPrefs = useUpdateEmailPreferences();
 
-  const emailPrefsData = emailPrefs?.status === 200 ? emailPrefs.data : null
-  const serverDigestEnabled = emailPrefsData?.emailDigestEnabled ?? true
-  const serverDigestDay = emailPrefsData?.digestDay ?? 1
-  const serverDigestHour = emailPrefsData?.digestHour ?? 4
+  const emailPrefsData = emailPrefs?.status === 200 ? emailPrefs.data : null;
+  const serverDigestEnabled = emailPrefsData?.emailDigestEnabled ?? true;
+  const serverDigestDay = emailPrefsData?.digestDay ?? 1;
+  const serverDigestHour = emailPrefsData?.digestHour ?? 4;
 
   // Local overrides — only set while the user is editing (before saving)
-  const [digestEnabledOverride, setDigestEnabledOverride] = useState<
-    boolean | null
-  >(null)
-  const [digestDayOverride, setDigestDayOverride] = useState<number | null>(
-    null
-  )
-  const [digestHourOverride, setDigestHourOverride] = useState<number | null>(
-    null
-  )
-  const [emailPrefsSaved, setEmailPrefsSaved] = useState(false)
+  const [digestEnabledOverride, setDigestEnabledOverride] = useState<boolean | null>(null);
+  const [digestDayOverride, setDigestDayOverride] = useState<number | null>(null);
+  const [digestHourOverride, setDigestHourOverride] = useState<number | null>(null);
+  const [emailPrefsSaved, setEmailPrefsSaved] = useState(false);
 
   // Displayed values: local override if editing, otherwise server data
-  const digestEnabled = digestEnabledOverride ?? serverDigestEnabled
-  const digestDay = digestDayOverride ?? serverDigestDay
+  const digestEnabled = digestEnabledOverride ?? serverDigestEnabled;
+  const digestDay = digestDayOverride ?? serverDigestDay;
   const digestHour =
-    digestHourOverride !== null
-      ? digestHourOverride
-      : utcHourToLocal(serverDigestHour)
+    digestHourOverride !== null ? digestHourOverride : utcHourToLocal(serverDigestHour);
 
   const handleSaveEmailPrefs = () => {
-    setEmailPrefsSaved(false)
+    setEmailPrefsSaved(false);
 
     const newData = {
       emailDigestEnabled: digestEnabled,
       digestDay,
       digestHour: localHourToUtc(digestHour),
-    }
+    };
 
     // Capture previous cache for rollback
-    const previousData = queryClient.getQueryData(
-      getGetEmailPreferencesQueryKey()
-    )
+    const previousData = queryClient.getQueryData(getGetEmailPreferencesQueryKey());
 
     // Optimistically update the cache so UI reflects changes immediately
-    queryClient.setQueryData(
-      getGetEmailPreferencesQueryKey(),
-      (old: typeof emailPrefs) => {
-        if (!old || old.status !== 200) return old
-        return {
-          ...old,
-          data: {
-            ...old.data,
-            emailDigestEnabled: newData.emailDigestEnabled,
-            digestDay: newData.digestDay,
-            digestHour: newData.digestHour,
-          },
-        }
-      }
-    )
+    queryClient.setQueryData(getGetEmailPreferencesQueryKey(), (old: typeof emailPrefs) => {
+      if (!old || old.status !== 200) return old;
+      return {
+        ...old,
+        data: {
+          ...old.data,
+          emailDigestEnabled: newData.emailDigestEnabled,
+          digestDay: newData.digestDay,
+          digestHour: newData.digestHour,
+        },
+      };
+    });
 
     // Clear overrides since cache now has the new values
-    setDigestEnabledOverride(null)
-    setDigestDayOverride(null)
-    setDigestHourOverride(null)
+    setDigestEnabledOverride(null);
+    setDigestDayOverride(null);
+    setDigestHourOverride(null);
 
     updateEmailPrefs.mutate(
       { data: newData },
       {
         onSuccess: () => {
-          setEmailPrefsSaved(true)
+          setEmailPrefsSaved(true);
           queryClient.invalidateQueries({
             queryKey: getGetEmailPreferencesQueryKey(),
-          })
+          });
         },
         onError: () => {
           // Rollback cache on failure
-          queryClient.setQueryData(
-            getGetEmailPreferencesQueryKey(),
-            previousData
-          )
+          queryClient.setQueryData(getGetEmailPreferencesQueryKey(), previousData);
         },
-      }
-    )
-  }
+      },
+    );
+  };
 
-  const isLoading = userLoading || emailPrefsLoading
-  const tzAbbr = getLocalTimezoneAbbr()
-  const scheduleText = `Your digest will be sent every ${DAY_NAMES[digestDay]} at ${formatHour(digestHour)} ${tzAbbr}`
+  const isLoading = userLoading || emailPrefsLoading;
+  const tzAbbr = getLocalTimezoneAbbr();
+  const scheduleText = `Your digest will be sent every ${DAY_NAMES[digestDay]} at ${formatHour(digestHour)} ${tzAbbr}`;
 
   if (!isInitialized || !user) {
-    return null
+    return null;
   }
 
   return (
     <div className="min-h-screen bg-surface-secondary">
-      <AppHeader
-        breadcrumbs={<span className="text-text-primary">Settings</span>}
-      />
+      <AppHeader breadcrumbs={<span className="text-text-primary">Settings</span>} />
 
       <main className="py-12">
         <Container>
           <div className="max-w-lg mx-auto">
-            <h1 className="text-2xl font-bold text-text-primary mb-8">
-              Settings
-            </h1>
+            <h1 className="text-2xl font-bold text-text-primary mb-8">Settings</h1>
 
             {isLoading ? (
               <SettingsSkeleton />
@@ -276,24 +245,19 @@ export function Settings() {
                     type="text"
                     value={name}
                     onChange={(e) => {
-                      setNameOverride(e.target.value)
-                      setSaved(false)
+                      setNameOverride(e.target.value);
+                      setSaved(false);
                     }}
                     placeholder="Your name"
                   />
 
                   {currentUserError != null && (
-                    <p className="text-sm text-red-600 dark:text-red-400">
-                      Failed to load profile
-                    </p>
+                    <p className="text-sm text-red-600 dark:text-red-400">Failed to load profile</p>
                   )}
 
                   <div className="flex items-center gap-3">
-                    <Button
-                      onClick={handleSave}
-                      disabled={updateUser.isPending}
-                    >
-                      {updateUser.isPending ? 'Saving...' : 'Save'}
+                    <Button onClick={handleSave} disabled={updateUser.isPending}>
+                      {updateUser.isPending ? "Saving..." : "Save"}
                     </Button>
                     {saved && (
                       <span className="text-sm text-emerald-600 dark:text-emerald-400">
@@ -301,9 +265,7 @@ export function Settings() {
                       </span>
                     )}
                     {updateUser.isError && (
-                      <span className="text-sm text-red-600 dark:text-red-400">
-                        Failed to save
-                      </span>
+                      <span className="text-sm text-red-600 dark:text-red-400">Failed to save</span>
                     )}
                   </div>
                 </div>
@@ -319,14 +281,14 @@ export function Settings() {
                     </p>
                   )}
 
-                  <div className={`space-y-4 ${!isPro ? 'opacity-60' : ''}`}>
+                  <div className={`space-y-4 ${!isPro ? "opacity-60" : ""}`}>
                     <Checkbox
                       label="Enable email digest"
                       description="Receive a weekly digest of release notes in your inbox"
                       checked={digestEnabled}
                       onChange={(e) => {
-                        setDigestEnabledOverride(e.target.checked)
-                        setEmailPrefsSaved(false)
+                        setDigestEnabledOverride(e.target.checked);
+                        setEmailPrefsSaved(false);
                       }}
                       disabled={!isPro}
                     />
@@ -339,8 +301,8 @@ export function Settings() {
                         <select
                           value={digestDay}
                           onChange={(e) => {
-                            setDigestDayOverride(Number(e.target.value))
-                            setEmailPrefsSaved(false)
+                            setDigestDayOverride(Number(e.target.value));
+                            setEmailPrefsSaved(false);
                           }}
                           disabled={!isPro}
                           className="w-full px-3 py-2 text-sm rounded-lg border border-border-default bg-surface-primary text-text-primary focus:outline-none focus:ring-2 focus:ring-brand-500 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -360,8 +322,8 @@ export function Settings() {
                         <select
                           value={digestHour}
                           onChange={(e) => {
-                            setDigestHourOverride(Number(e.target.value))
-                            setEmailPrefsSaved(false)
+                            setDigestHourOverride(Number(e.target.value));
+                            setEmailPrefsSaved(false);
                           }}
                           disabled={!isPro}
                           className="w-full px-3 py-2 text-sm rounded-lg border border-border-default bg-surface-primary text-text-primary focus:outline-none focus:ring-2 focus:ring-brand-500 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -375,11 +337,7 @@ export function Settings() {
                       </div>
                     </div>
 
-                    {isPro && (
-                      <p className="text-sm text-text-secondary">
-                        {scheduleText}
-                      </p>
-                    )}
+                    {isPro && <p className="text-sm text-text-secondary">{scheduleText}</p>}
                   </div>
 
                   {!isPro && (
@@ -390,7 +348,7 @@ export function Settings() {
                           className="font-medium text-brand-600 hover:text-brand-700 underline"
                         >
                           Upgrade to Pro
-                        </Link>{' '}
+                        </Link>{" "}
                         to customize your digest schedule
                       </p>
                     </div>
@@ -398,13 +356,8 @@ export function Settings() {
 
                   {isPro && (
                     <div className="mt-4 flex items-center gap-3">
-                      <Button
-                        onClick={handleSaveEmailPrefs}
-                        disabled={updateEmailPrefs.isPending}
-                      >
-                        {updateEmailPrefs.isPending
-                          ? 'Saving...'
-                          : 'Save Schedule'}
+                      <Button onClick={handleSaveEmailPrefs} disabled={updateEmailPrefs.isPending}>
+                        {updateEmailPrefs.isPending ? "Saving..." : "Save Schedule"}
                       </Button>
                       {emailPrefsSaved && (
                         <span className="text-sm text-emerald-600 dark:text-emerald-400">
@@ -425,5 +378,5 @@ export function Settings() {
         </Container>
       </main>
     </div>
-  )
+  );
 }

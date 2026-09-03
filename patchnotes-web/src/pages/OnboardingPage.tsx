@@ -1,64 +1,59 @@
-import { useEffect, useState } from 'react'
-import { useNavigate } from '@tanstack/react-router'
-import { useStytchUser } from '@stytch/react'
-import { Loader2, Code2, Server, TrendingUp, CircleDashed } from 'lucide-react'
-import { Container, Card } from '../components/ui'
-import { useWatchlistTemplates, useApplyTemplate } from '../api/hooks'
+import { useEffect, useState } from "react";
+import { useNavigate } from "@tanstack/react-router";
+import { useStytchUser } from "@stytch/react";
+import { Loader2, Code2, Server, TrendingUp, CircleDashed } from "lucide-react";
+import { Container, Card } from "../components/ui";
+import { useWatchlistTemplates, useApplyTemplate } from "../api/hooks";
 
 const templateIcons: Record<string, typeof Code2> = {
   Frontend: Code2,
   Backend: Server,
   Popular: TrendingUp,
   Empty: CircleDashed,
-}
+};
 
 export function OnboardingPage() {
-  const { user, isInitialized } = useStytchUser()
-  const navigate = useNavigate()
-  const { data: templates, isLoading } = useWatchlistTemplates()
-  const applyTemplate = useApplyTemplate()
-  const [applying, setApplying] = useState<string | null>(null)
+  const { user, isInitialized } = useStytchUser();
+  const navigate = useNavigate();
+  const { data: templates, isLoading } = useWatchlistTemplates();
+  const applyTemplate = useApplyTemplate();
+  const [applying, setApplying] = useState<string | null>(null);
 
   useEffect(
     function redirectUnauthenticated() {
       if (isInitialized && !user) {
-        navigate({ to: '/login', search: { returnUrl: '/onboarding' } })
+        navigate({ to: "/login", search: { returnUrl: "/onboarding" } });
       }
     },
-    [isInitialized, user, navigate]
-  )
+    [isInitialized, user, navigate],
+  );
 
   if (!isInitialized || !user) {
     return (
       <div className="min-h-screen bg-surface-secondary flex items-center justify-center">
         <p className="text-text-secondary">Loading...</p>
       </div>
-    )
+    );
   }
 
-  const handleSelect = async (template: {
-    id: string
-    packages?: string[]
-  }) => {
-    setApplying(template.id)
+  const handleSelect = async (template: { id: string; packages?: string[] }) => {
+    setApplying(template.id);
     try {
-      if (template.id !== 'empty' && (template.packages ?? []).length > 0) {
-        await applyTemplate.mutateAsync(template.id)
+      if (template.id !== "empty" && (template.packages ?? []).length > 0) {
+        await applyTemplate.mutateAsync(template.id);
       }
-      navigate({ to: '/watchlist' })
+      navigate({ to: "/watchlist" });
     } catch {
-      navigate({ to: '/watchlist' })
+      navigate({ to: "/watchlist" });
     }
-  }
+  };
 
   return (
     <div className="min-h-screen bg-surface-secondary">
       <main className="flex flex-col items-center justify-center px-4 py-16 min-h-screen">
         <Container>
           <div className="max-w-2xl mx-auto text-center mb-10">
-            <h1 className="text-3xl font-bold text-text-primary">
-              Welcome to My Release Notes
-            </h1>
+            <h1 className="text-3xl font-bold text-text-primary">Welcome to My Release Notes</h1>
             <p className="mt-3 text-text-secondary text-lg">
               Pick a template to start your watchlist, or start from scratch.
             </p>
@@ -71,9 +66,9 @@ export function OnboardingPage() {
               </div>
             ) : (
               (templates ?? []).map((template) => {
-                const Icon = templateIcons[template.name] ?? CircleDashed
-                const isApplying = applying === template.id
-                const isDisabled = applying !== null
+                const Icon = templateIcons[template.name] ?? CircleDashed;
+                const isApplying = applying === template.id;
+                const isDisabled = applying !== null;
 
                 return (
                   <button
@@ -85,8 +80,8 @@ export function OnboardingPage() {
                     <Card
                       className={`h-full transition-all cursor-pointer ${
                         isDisabled && !isApplying
-                          ? 'opacity-50'
-                          : 'hover:border-brand-500 hover:shadow-md'
+                          ? "opacity-50"
+                          : "hover:border-brand-500 hover:shadow-md"
                       }`}
                     >
                       <div className="flex items-start gap-3">
@@ -98,32 +93,28 @@ export function OnboardingPage() {
                           )}
                         </div>
                         <div>
-                          <h2 className="font-semibold text-text-primary">
-                            {template.name}
-                          </h2>
+                          <h2 className="font-semibold text-text-primary">{template.name}</h2>
                           <p className="text-sm text-text-secondary mt-0.5">
                             {template.description}
                           </p>
                           {(template.packages ?? []).length > 0 && (
                             <p className="text-xs text-text-tertiary mt-2">
                               {(template.packages ?? []).length} package
-                              {(template.packages ?? []).length !== 1
-                                ? 's'
-                                : ''}
+                              {(template.packages ?? []).length !== 1 ? "s" : ""}
                             </p>
                           )}
                         </div>
                       </div>
                     </Card>
                   </button>
-                )
+                );
               })
             )}
           </div>
 
           <div className="max-w-2xl mx-auto mt-6 text-center">
             <button
-              onClick={() => navigate({ to: '/watchlist' })}
+              onClick={() => navigate({ to: "/watchlist" })}
               disabled={applying !== null}
               className="text-sm text-text-tertiary hover:text-text-secondary transition-colors disabled:opacity-50"
             >
@@ -133,5 +124,5 @@ export function OnboardingPage() {
         </Container>
       </main>
     </div>
-  )
+  );
 }

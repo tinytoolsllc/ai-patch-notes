@@ -1,42 +1,39 @@
-import { useState, useCallback, useMemo } from 'react'
-import { Link } from '@tanstack/react-router'
-import { AppHeader, Container } from '../components/ui'
-import { usePackageByOwnerRepo } from '../api/hooks'
-import type {
-  PackageDetailGroupDto,
-  PackageDetailResponseDto,
-} from '../api/generated/model'
-import { detectPrereleaseType } from '../utils/dateFormat'
-import { SummaryCard, type SummaryGroup } from '../components/releases'
-import { HeroCard } from '../components/landing/HeroCard'
+import { useState, useCallback, useMemo } from "react";
+import { Link } from "@tanstack/react-router";
+import { AppHeader, Container } from "../components/ui";
+import { usePackageByOwnerRepo } from "../api/hooks";
+import type { PackageDetailGroupDto, PackageDetailResponseDto } from "../api/generated/model";
+import { detectPrereleaseType } from "../utils/dateFormat";
+import { SummaryCard, type SummaryGroup } from "../components/releases";
+import { HeroCard } from "../components/landing/HeroCard";
 
 interface PackageDetailByRepoProps {
-  owner: string
-  repo: string
+  owner: string;
+  repo: string;
 }
 
 function buildSummaryGroup(
   group: PackageDetailGroupDto,
   pkg: {
-    id: string
-    githubOwner: string
-    githubRepo: string
-    npmName?: string | null
-    name: string
-  }
+    id: string;
+    githubOwner: string;
+    githubRepo: string;
+    npmName?: string | null;
+    name: string;
+  },
 ): SummaryGroup {
-  const displayName = pkg.npmName ?? `${pkg.githubOwner}/${pkg.githubRepo}`
-  const hasSummary = !!group.summary
-  const releaseCount = group.releaseCount ?? 0
+  const displayName = pkg.npmName ?? `${pkg.githubOwner}/${pkg.githubRepo}`;
+  const hasSummary = !!group.summary;
+  const releaseCount = group.releaseCount ?? 0;
 
-  let displaySummary = group.summary ?? ''
+  let displaySummary = group.summary ?? "";
   if (!displaySummary) {
     const titles = group.releases
       .slice(0, 3)
       .map((r) => r.title || r.tag)
-      .join(', ')
-    const extra = releaseCount > 3 ? ` and ${releaseCount - 3} more` : ''
-    displaySummary = `${releaseCount} release${releaseCount !== 1 ? 's' : ''}: ${titles}${extra}.`
+      .join(", ");
+    const extra = releaseCount > 3 ? ` and ${releaseCount - 3} more` : "";
+    displaySummary = `${releaseCount} release${releaseCount !== 1 ? "s" : ""}: ${titles}${extra}.`;
   }
 
   return {
@@ -47,15 +44,13 @@ function buildSummaryGroup(
     githubRepo: pkg.githubRepo,
     versionRange: group.versionRange,
     isPrerelease: group.isPrerelease,
-    prereleaseType: group.isPrerelease
-      ? detectPrereleaseType(group.releases)
-      : undefined,
+    prereleaseType: group.isPrerelease ? detectPrereleaseType(group.releases) : undefined,
     displaySummary,
     hasSummary,
     releaseCount,
-    lastUpdated: group.lastUpdated ?? '',
+    lastUpdated: group.lastUpdated ?? "",
     releases: group.releases,
-  }
+  };
 }
 
 function PageHeader({ owner, repo }: { owner: string; repo: string }) {
@@ -75,36 +70,34 @@ function PageHeader({ owner, repo }: { owner: string; repo: string }) {
         </>
       }
     />
-  )
+  );
 }
 
 export function PackageDetailByRepo({ owner, repo }: PackageDetailByRepoProps) {
   const isSyncing = (d: PackageDetailResponseDto | undefined) =>
-    d != null && d.groups?.length === 0 && !d.package?.lastFetchedAt
+    d != null && d.groups?.length === 0 && !d.package?.lastFetchedAt;
   const { data, isLoading, error } = usePackageByOwnerRepo(owner, repo, {
     refetchInterval: (query) =>
-      isSyncing(query.state.data as PackageDetailResponseDto | undefined)
-        ? 30_000
-        : false,
-  })
-  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set())
+      isSyncing(query.state.data as PackageDetailResponseDto | undefined) ? 30_000 : false,
+  });
+  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
 
   const toggleExpanded = useCallback((groupId: string) => {
     setExpandedGroups((prev) => {
-      const next = new Set(prev)
+      const next = new Set(prev);
       if (next.has(groupId)) {
-        next.delete(groupId)
+        next.delete(groupId);
       } else {
-        next.add(groupId)
+        next.add(groupId);
       }
-      return next
-    })
-  }, [])
+      return next;
+    });
+  }, []);
 
   const summaryGroups = useMemo(() => {
-    if (!data) return []
-    return data.groups.map((g) => buildSummaryGroup(g, data.package))
-  }, [data])
+    if (!data) return [];
+    return data.groups.map((g) => buildSummaryGroup(g, data.package));
+  }, [data]);
 
   if (isLoading) {
     return (
@@ -116,7 +109,7 @@ export function PackageDetailByRepo({ owner, repo }: PackageDetailByRepoProps) {
           </Container>
         </main>
       </div>
-    )
+    );
   }
 
   if (error || !data) {
@@ -125,13 +118,11 @@ export function PackageDetailByRepo({ owner, repo }: PackageDetailByRepoProps) {
         <PageHeader owner={owner} repo={repo} />
         <main className="py-8">
           <Container>
-            <p className="text-text-secondary">
-              The requested package could not be found.
-            </p>
+            <p className="text-text-secondary">The requested package could not be found.</p>
           </Container>
         </main>
       </div>
-    )
+    );
   }
 
   return (
@@ -170,5 +161,5 @@ export function PackageDetailByRepo({ owner, repo }: PackageDetailByRepoProps) {
         </Container>
       </main>
     </div>
-  )
+  );
 }

@@ -1,58 +1,49 @@
-import { useState, useEffect, useMemo, useRef } from 'react'
-import { useNavigate } from '@tanstack/react-router'
-import { useQuery, useQueryClient } from '@tanstack/react-query'
-import {
-  AppHeader,
-  Breadcrumb,
-  Container,
-  Button,
-  Card,
-} from '../components/ui'
-import { useStytchUser } from '@stytch/react'
-import { useIsAdmin } from '../utils/auth'
-import { api } from '../api/client'
-import {
-  useUpdateEmailTemplate,
-  getGetEmailTemplatesQueryKey,
-} from '../api/hooks'
+import { useState, useEffect, useMemo, useRef } from "react";
+import { useNavigate } from "@tanstack/react-router";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { AppHeader, Breadcrumb, Container, Button, Card } from "../components/ui";
+import { useStytchUser } from "@stytch/react";
+import { useIsAdmin } from "../utils/auth";
+import { api } from "../api/client";
+import { useUpdateEmailTemplate, getGetEmailTemplatesQueryKey } from "../api/hooks";
 
 // ── Types ────────────────────────────────────────────────────
 
 interface EmailTemplateDto {
-  id: string
-  name: string
-  subject: string
-  jsxSource: string
-  updatedAt: string
+  id: string;
+  name: string;
+  subject: string;
+  jsxSource: string;
+  updatedAt: string;
 }
 
 // ── Sample Data ──────────────────────────────────────────────
 
-const EMPTY_SAMPLE_DATA: Record<string, unknown> = {}
+const EMPTY_SAMPLE_DATA: Record<string, unknown> = {};
 
 const SAMPLE_DATA: Record<string, Record<string, unknown>> = {
-  welcome: { name: 'Jane Doe' },
+  welcome: { name: "Jane Doe" },
   digest: {
-    name: 'Jane Doe',
-    count: '2',
+    name: "Jane Doe",
+    count: "2",
     packages: [
       {
-        packageName: 'react',
+        packageName: "react",
         releaseCount: 3,
-        latestVersion: '19.1.0',
-        oldestVersion: '19.0.1',
-        summary: 'New compiler features and performance improvements',
+        latestVersion: "19.1.0",
+        oldestVersion: "19.0.1",
+        summary: "New compiler features and performance improvements",
       },
       {
-        packageName: 'lodash',
+        packageName: "lodash",
         releaseCount: 1,
-        latestVersion: '5.0.0',
-        oldestVersion: '5.0.0',
-        summary: 'ES module support and tree-shaking improvements',
+        latestVersion: "5.0.0",
+        oldestVersion: "5.0.0",
+        summary: "ES module support and tree-shaking improvements",
       },
     ],
   },
-}
+};
 
 // ── Template Tab ─────────────────────────────────────────────
 
@@ -61,118 +52,113 @@ function TemplateTab({
   active,
   onClick,
 }: {
-  label: string
-  active: boolean
-  onClick: () => void
+  label: string;
+  active: boolean;
+  onClick: () => void;
 }) {
   return (
     <button
       onClick={onClick}
       className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
         active
-          ? 'bg-brand-500 text-white'
-          : 'bg-surface-primary text-text-secondary hover:text-text-primary hover:bg-surface-secondary'
+          ? "bg-brand-500 text-white"
+          : "bg-surface-primary text-text-secondary hover:text-text-primary hover:bg-surface-secondary"
       }`}
     >
       {label}
     </button>
-  )
+  );
 }
 
 // ── Main Page ────────────────────────────────────────────────
 
 export function AdminEmails() {
-  const { isAdmin, isLoading: authLoading } = useIsAdmin()
-  const navigate = useNavigate()
-  const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(
-    null
-  )
-  const [showSource, setShowSource] = useState(false)
-  const [isEditing, setIsEditing] = useState(false)
-  const [editSubject, setEditSubject] = useState('')
-  const [editJsxSource, setEditJsxSource] = useState('')
+  const { isAdmin, isLoading: authLoading } = useIsAdmin();
+  const navigate = useNavigate();
+  const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(null);
+  const [showSource, setShowSource] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editSubject, setEditSubject] = useState("");
+  const [editJsxSource, setEditJsxSource] = useState("");
   const [saveStatus, setSaveStatus] = useState<{
-    type: 'success' | 'error'
-    message: string
-  } | null>(null)
+    type: "success" | "error";
+    message: string;
+  } | null>(null);
 
-  const [showTestEmailCard, setShowTestEmailCard] = useState(false)
-  const [testEmailAddress, setTestEmailAddress] = useState('')
-  const [useSampleData, setUseSampleData] = useState(false)
+  const [showTestEmailCard, setShowTestEmailCard] = useState(false);
+  const [testEmailAddress, setTestEmailAddress] = useState("");
+  const [useSampleData, setUseSampleData] = useState(false);
   const [testSendStatus, setTestSendStatus] = useState<{
-    type: 'sending' | 'success' | 'error'
-    message: string
-  } | null>(null)
+    type: "sending" | "success" | "error";
+    message: string;
+  } | null>(null);
 
-  const { user: stytchUser } = useStytchUser()
+  const { user: stytchUser } = useStytchUser();
 
-  const statusTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const testStatusTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
-    null
-  )
+  const statusTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const testStatusTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const clearStatusTimeout = () => {
     if (statusTimeoutRef.current) {
-      clearTimeout(statusTimeoutRef.current)
-      statusTimeoutRef.current = null
+      clearTimeout(statusTimeoutRef.current);
+      statusTimeoutRef.current = null;
     }
-  }
+  };
   const clearTestStatusTimeout = () => {
     if (testStatusTimeoutRef.current) {
-      clearTimeout(testStatusTimeoutRef.current)
-      testStatusTimeoutRef.current = null
+      clearTimeout(testStatusTimeoutRef.current);
+      testStatusTimeoutRef.current = null;
     }
-  }
+  };
 
   useEffect(function cleanupStatusTimeouts() {
     return () => {
-      clearStatusTimeout()
-      clearTestStatusTimeout()
-    }
-  }, [])
+      clearStatusTimeout();
+      clearTestStatusTimeout();
+    };
+  }, []);
 
-  const queryClient = useQueryClient()
+  const queryClient = useQueryClient();
   const updateMutation = useUpdateEmailTemplate({
     mutation: {
       onSuccess: () => {
         queryClient.invalidateQueries({
           queryKey: getGetEmailTemplatesQueryKey(),
-        })
-        setIsEditing(false)
+        });
+        setIsEditing(false);
         setSaveStatus({
-          type: 'success',
-          message: 'Template saved successfully',
-        })
-        clearStatusTimeout()
-        statusTimeoutRef.current = setTimeout(() => setSaveStatus(null), 3000)
+          type: "success",
+          message: "Template saved successfully",
+        });
+        clearStatusTimeout();
+        statusTimeoutRef.current = setTimeout(() => setSaveStatus(null), 3000);
       },
       onError: () => {
-        setSaveStatus({ type: 'error', message: 'Failed to save template' })
-        clearStatusTimeout()
-        statusTimeoutRef.current = setTimeout(() => setSaveStatus(null), 5000)
+        setSaveStatus({ type: "error", message: "Failed to save template" });
+        clearStatusTimeout();
+        statusTimeoutRef.current = setTimeout(() => setSaveStatus(null), 5000);
       },
     },
-  })
+  });
 
   const { data: templates, isLoading } = useQuery({
-    queryKey: ['/api/admin/email-templates'],
-    queryFn: () => api.get<EmailTemplateDto[]>('/admin/email-templates'),
+    queryKey: ["/api/admin/email-templates"],
+    queryFn: () => api.get<EmailTemplateDto[]>("/admin/email-templates"),
     enabled: isAdmin,
-  })
+  });
 
   // Auth gate: redirect non-admins
   useEffect(
     function redirectNonAdmins() {
       if (!authLoading && !isAdmin) {
-        navigate({ to: '/' })
+        navigate({ to: "/" });
       }
     },
-    [authLoading, isAdmin, navigate]
-  )
+    [authLoading, isAdmin, navigate],
+  );
 
-  const activeTemplateId = selectedTemplateId ?? templates?.[0]?.id ?? ''
-  const currentTemplate = templates?.find((t) => t.id === activeTemplateId)
-  const sampleData =
-    SAMPLE_DATA[currentTemplate?.name ?? ''] ?? EMPTY_SAMPLE_DATA
+  const activeTemplateId = selectedTemplateId ?? templates?.[0]?.id ?? "";
+  const currentTemplate = templates?.find((t) => t.id === activeTemplateId);
+  const sampleData = SAMPLE_DATA[currentTemplate?.name ?? ""] ?? EMPTY_SAMPLE_DATA;
 
   const {
     data: previewData,
@@ -180,87 +166,81 @@ export function AdminEmails() {
     error: previewError,
   } = useQuery({
     queryKey: [
-      '/api/admin/email-templates/preview',
+      "/api/admin/email-templates/preview",
       currentTemplate?.jsxSource,
       activeTemplateId,
       sampleData,
     ],
     queryFn: () =>
-      api.post<{ html: string }>('/admin/email-templates/preview', {
+      api.post<{ html: string }>("/admin/email-templates/preview", {
         jsxSource: currentTemplate!.jsxSource,
         props: sampleData,
       }),
     enabled: !!currentTemplate && isAdmin,
-  })
-  const previewHtml = previewData?.html ?? ''
+  });
+  const previewHtml = previewData?.html ?? "";
 
   const subjectPreview = useMemo(() => {
-    if (!currentTemplate) return ''
+    if (!currentTemplate) return "";
     return currentTemplate.subject.replace(/\{\{(\w+)\}\}/g, (_, key: string) =>
-      String(sampleData[key] ?? `{{${key}}}`)
-    )
-  }, [currentTemplate, sampleData])
+      String(sampleData[key] ?? `{{${key}}}`),
+    );
+  }, [currentTemplate, sampleData]);
 
   function enterEditMode() {
-    if (!currentTemplate) return
-    setEditSubject(currentTemplate.subject)
-    setEditJsxSource(currentTemplate.jsxSource)
-    setIsEditing(true)
-    setShowSource(true)
-    setSaveStatus(null)
+    if (!currentTemplate) return;
+    setEditSubject(currentTemplate.subject);
+    setEditJsxSource(currentTemplate.jsxSource);
+    setIsEditing(true);
+    setShowSource(true);
+    setSaveStatus(null);
   }
 
   function cancelEdit() {
-    setIsEditing(false)
-    setSaveStatus(null)
+    setIsEditing(false);
+    setSaveStatus(null);
   }
 
   function handleSave() {
-    if (!currentTemplate) return
+    if (!currentTemplate) return;
     updateMutation.mutate({
       id: currentTemplate.id,
       data: {
         subject: editSubject,
         jsxSource: editJsxSource,
       },
-    })
+    });
   }
 
   async function handleSendTestEmail() {
-    if (!currentTemplate || !testEmailAddress) return
+    if (!currentTemplate || !testEmailAddress) return;
 
-    setTestSendStatus({ type: 'sending', message: 'Sending test email...' })
+    setTestSendStatus({ type: "sending", message: "Sending test email..." });
 
     try {
       const payload: Record<string, unknown> = {
         recipientEmail: testEmailAddress,
-      }
+      };
       if (useSampleData) {
-        payload.testData = sampleData
+        payload.testData = sampleData;
       }
-      await api.post(
-        `/admin/email-templates/${currentTemplate.id}/test`,
-        payload
-      )
+      await api.post(`/admin/email-templates/${currentTemplate.id}/test`, payload);
       setTestSendStatus({
-        type: 'success',
+        type: "success",
         message: `Test email sent to ${testEmailAddress}`,
-      })
-      clearTestStatusTimeout()
+      });
+      clearTestStatusTimeout();
       testStatusTimeoutRef.current = setTimeout(() => {
-        setTestSendStatus(null)
-        setShowTestEmailCard(false)
-      }, 3000)
+        setTestSendStatus(null);
+        setShowTestEmailCard(false);
+      }, 3000);
     } catch {
       setTestSendStatus({
-        type: 'error',
-        message: 'Failed to send test email',
-      })
-      clearTestStatusTimeout()
-      testStatusTimeoutRef.current = setTimeout(
-        () => setTestSendStatus(null),
-        5000
-      )
+        type: "error",
+        message: "Failed to send test email",
+      });
+      clearTestStatusTimeout();
+      testStatusTimeoutRef.current = setTimeout(() => setTestSendStatus(null), 5000);
     }
   }
 
@@ -268,10 +248,10 @@ export function AdminEmails() {
     return (
       <div className="min-h-screen bg-surface-secondary flex items-center justify-center">
         <p className="text-text-secondary">
-          {authLoading ? 'Checking access...' : 'Redirecting...'}
+          {authLoading ? "Checking access..." : "Redirecting..."}
         </p>
       </div>
-    )
+    );
   }
 
   return (
@@ -283,24 +263,22 @@ export function AdminEmails() {
           {/* Template Selector */}
           <div className="flex gap-2 mb-6">
             {(templates ?? []).map((t) => {
-              const name = t.name || `Template #${t.id}`
+              const name = t.name || `Template #${t.id}`;
               return (
                 <TemplateTab
                   key={t.id}
                   label={name.charAt(0).toUpperCase() + name.slice(1)}
                   active={activeTemplateId === t.id}
                   onClick={() => {
-                    setSelectedTemplateId(t.id)
-                    setIsEditing(false)
-                    setSaveStatus(null)
+                    setSelectedTemplateId(t.id);
+                    setIsEditing(false);
+                    setSaveStatus(null);
                   }}
                 />
-              )
+              );
             })}
             {isLoading && (
-              <span className="text-text-secondary text-sm py-2">
-                Loading templates...
-              </span>
+              <span className="text-text-secondary text-sm py-2">Loading templates...</span>
             )}
           </div>
 
@@ -321,9 +299,7 @@ export function AdminEmails() {
                     />
                   ) : (
                     <>
-                      <p className="text-text-primary font-medium">
-                        {subjectPreview}
-                      </p>
+                      <p className="text-text-primary font-medium">{subjectPreview}</p>
                       <p className="text-xs text-text-tertiary">
                         Template: {currentTemplate.subject}
                       </p>
@@ -335,7 +311,7 @@ export function AdminEmails() {
               {/* Toggle Source / Preview + Edit controls */}
               <div className="flex items-center gap-2">
                 <Button
-                  variant={showSource ? 'secondary' : 'primary'}
+                  variant={showSource ? "secondary" : "primary"}
                   size="sm"
                   onClick={() => setShowSource(false)}
                   disabled={isEditing}
@@ -343,7 +319,7 @@ export function AdminEmails() {
                   Preview
                 </Button>
                 <Button
-                  variant={showSource ? 'primary' : 'secondary'}
+                  variant={showSource ? "primary" : "secondary"}
                   size="sm"
                   onClick={() => setShowSource(true)}
                 >
@@ -352,7 +328,7 @@ export function AdminEmails() {
                 <div className="ml-auto flex items-center gap-2">
                   {saveStatus && (
                     <span
-                      className={`text-sm ${saveStatus.type === 'success' ? 'text-green-600' : 'text-red-600'}`}
+                      className={`text-sm ${saveStatus.type === "success" ? "text-green-600" : "text-red-600"}`}
                     >
                       {saveStatus.message}
                     </span>
@@ -373,7 +349,7 @@ export function AdminEmails() {
                         onClick={handleSave}
                         disabled={updateMutation.isPending}
                       >
-                        {updateMutation.isPending ? 'Saving...' : 'Save'}
+                        {updateMutation.isPending ? "Saving..." : "Save"}
                       </Button>
                     </>
                   ) : (
@@ -382,19 +358,15 @@ export function AdminEmails() {
                         variant="secondary"
                         size="sm"
                         onClick={() => {
-                          const email = stytchUser?.emails?.[0]?.email ?? ''
-                          setTestEmailAddress(email)
-                          setShowTestEmailCard(true)
-                          setTestSendStatus(null)
+                          const email = stytchUser?.emails?.[0]?.email ?? "";
+                          setTestEmailAddress(email);
+                          setShowTestEmailCard(true);
+                          setTestSendStatus(null);
                         }}
                       >
                         Send Test Email
                       </Button>
-                      <Button
-                        variant="secondary"
-                        size="sm"
-                        onClick={enterEditMode}
-                      >
+                      <Button variant="secondary" size="sm" onClick={enterEditMode}>
                         Edit
                       </Button>
                     </>
@@ -405,19 +377,14 @@ export function AdminEmails() {
               {showTestEmailCard && !isEditing && (
                 <Card>
                   <div className="space-y-3">
-                    <h3 className="text-sm font-semibold text-text-primary">
-                      Send Test Email
-                    </h3>
+                    <h3 className="text-sm font-semibold text-text-primary">Send Test Email</h3>
                     <p className="text-xs text-text-secondary">
-                      Sends a real email using the{' '}
-                      <strong>
-                        {currentTemplate?.name ||
-                          `Template #${currentTemplate?.id}`}
-                      </strong>{' '}
+                      Sends a real email using the{" "}
+                      <strong>{currentTemplate?.name || `Template #${currentTemplate?.id}`}</strong>{" "}
                       template
                       {useSampleData
-                        ? ' with the sample data shown below.'
-                        : ' with real data from the database.'}
+                        ? " with the sample data shown below."
+                        : " with real data from the database."}
                     </p>
                     <div>
                       <label className="text-xs font-medium text-text-secondary">
@@ -445,31 +412,24 @@ export function AdminEmails() {
                         variant="primary"
                         size="sm"
                         onClick={handleSendTestEmail}
-                        disabled={
-                          !testEmailAddress ||
-                          testSendStatus?.type === 'sending'
-                        }
+                        disabled={!testEmailAddress || testSendStatus?.type === "sending"}
                       >
-                        {testSendStatus?.type === 'sending'
-                          ? 'Sending...'
-                          : 'Send'}
+                        {testSendStatus?.type === "sending" ? "Sending..." : "Send"}
                       </Button>
                       <Button
                         variant="secondary"
                         size="sm"
                         onClick={() => {
-                          setShowTestEmailCard(false)
-                          setTestSendStatus(null)
+                          setShowTestEmailCard(false);
+                          setTestSendStatus(null);
                         }}
                       >
                         Cancel
                       </Button>
-                      {testSendStatus && testSendStatus.type !== 'sending' && (
+                      {testSendStatus && testSendStatus.type !== "sending" && (
                         <span
                           className={`text-sm ${
-                            testSendStatus.type === 'success'
-                              ? 'text-green-600'
-                              : 'text-red-600'
+                            testSendStatus.type === "success" ? "text-green-600" : "text-red-600"
                           }`}
                         >
                           {testSendStatus.message}
@@ -485,13 +445,10 @@ export function AdminEmails() {
                 <Card padding="none">
                   <div className="px-6 py-4 border-b border-border-default">
                     <h2 className="text-sm font-semibold text-text-primary">
-                      JSX Source —{' '}
-                      {currentTemplate.name ||
-                        `Template #${currentTemplate.id}`}
+                      JSX Source — {currentTemplate.name || `Template #${currentTemplate.id}`}
                     </h2>
                     <p className="text-xs text-text-tertiary mt-1">
-                      Last updated:{' '}
-                      {new Date(currentTemplate.updatedAt).toLocaleString()}
+                      Last updated: {new Date(currentTemplate.updatedAt).toLocaleString()}
                     </p>
                   </div>
                   {isEditing ? (
@@ -499,7 +456,7 @@ export function AdminEmails() {
                       value={editJsxSource}
                       onChange={(e) => setEditJsxSource(e.target.value)}
                       className="w-full p-6 text-sm font-mono text-text-primary bg-surface-primary leading-relaxed border-0 resize-y focus:outline-none focus:ring-2 focus:ring-inset focus:ring-brand-500"
-                      style={{ minHeight: '400px' }}
+                      style={{ minHeight: "400px" }}
                       spellCheck={false}
                     />
                   ) : (
@@ -513,33 +470,25 @@ export function AdminEmails() {
                 <Card padding="none">
                   <div className="px-6 py-4 border-b border-border-default">
                     <h2 className="text-sm font-semibold text-text-primary">
-                      Email Preview —{' '}
-                      {currentTemplate.name ||
-                        `Template #${currentTemplate.id}`}
+                      Email Preview — {currentTemplate.name || `Template #${currentTemplate.id}`}
                     </h2>
-                    <p className="text-xs text-text-tertiary mt-1">
-                      Rendered with sample data
-                    </p>
+                    <p className="text-xs text-text-tertiary mt-1">Rendered with sample data</p>
                   </div>
                   <div className="p-4 bg-neutral-100">
                     {previewLoading ? (
                       <div className="flex items-center justify-center py-16">
-                        <span className="text-text-secondary text-sm">
-                          Rendering preview...
-                        </span>
+                        <span className="text-text-secondary text-sm">Rendering preview...</span>
                       </div>
                     ) : previewError ? (
                       <div className="flex items-center justify-center py-16">
-                        <span className="text-red-600 text-sm">
-                          Failed to render preview
-                        </span>
+                        <span className="text-red-600 text-sm">Failed to render preview</span>
                       </div>
                     ) : (
                       <iframe
                         srcDoc={previewHtml}
                         title={`Preview of ${currentTemplate.name || `Template #${currentTemplate.id}`} template`}
                         className="w-full border-0 rounded bg-white"
-                        style={{ minHeight: '400px' }}
+                        style={{ minHeight: "400px" }}
                         sandbox=""
                       />
                     )}
@@ -563,5 +512,5 @@ export function AdminEmails() {
         </Container>
       </main>
     </div>
-  )
+  );
 }

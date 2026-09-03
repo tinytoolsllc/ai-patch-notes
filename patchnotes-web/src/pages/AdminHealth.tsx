@@ -1,62 +1,56 @@
-import { useState, useEffect, useCallback } from 'react'
-import { Link, useNavigate } from '@tanstack/react-router'
-import {
-  AppHeader,
-  Breadcrumb,
-  Container,
-  Button,
-  Card,
-} from '../components/ui'
-import { useIsAdmin } from '../utils/auth'
+import { useState, useEffect, useCallback } from "react";
+import { Link, useNavigate } from "@tanstack/react-router";
+import { AppHeader, Breadcrumb, Container, Button, Card } from "../components/ui";
+import { useIsAdmin } from "../utils/auth";
 import {
   usePackageHealth,
   useResetPackageSync,
   useDisablePackageSync,
   useTriggerPackageSync,
   getGetPackagesHealthQueryKey,
-} from '../api/hooks'
-import { useQueryClient } from '@tanstack/react-query'
-import type { PackageHealthDto } from '../api/generated/model'
+} from "../api/hooks";
+import { useQueryClient } from "@tanstack/react-query";
+import type { PackageHealthDto } from "../api/generated/model";
 
 // ── Helpers ───────────────────────────────────────────────────
 
 function formatRelativeTime(dateString: string | null | undefined): string {
-  if (!dateString) return '—'
-  const date = new Date(dateString)
-  const now = new Date()
-  const diffMs = now.getTime() - date.getTime()
-  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24))
-  const diffHours = Math.floor(diffMs / (1000 * 60 * 60))
-  const diffMinutes = Math.floor(diffMs / (1000 * 60))
+  if (!dateString) return "—";
+  const date = new Date(dateString);
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+  const diffMinutes = Math.floor(diffMs / (1000 * 60));
 
-  if (diffDays > 30) return date.toLocaleDateString()
-  if (diffDays > 0) return `${diffDays}d ago`
-  if (diffHours > 0) return `${diffHours}h ago`
-  if (diffMinutes > 0) return `${diffMinutes}m ago`
-  return 'just now'
+  if (diffDays > 30) return date.toLocaleDateString();
+  if (diffDays > 0) return `${diffDays}d ago`;
+  if (diffHours > 0) return `${diffHours}h ago`;
+  if (diffMinutes > 0) return `${diffMinutes}m ago`;
+  return "just now";
 }
 
-type HealthStatus = 'healthy' | 'failing' | 'disabled'
+type HealthStatus = "healthy" | "failing" | "disabled";
 
 function getStatus(pkg: PackageHealthDto): HealthStatus {
-  if (pkg.isSyncDisabled) return 'disabled'
-  if ((pkg.consecutiveFailures ?? 0) > 0) return 'failing'
-  return 'healthy'
+  if (pkg.isSyncDisabled) return "disabled";
+  if ((pkg.consecutiveFailures ?? 0) > 0) return "failing";
+  return "healthy";
 }
 
 // ── Status Badge ─────────────────────────────────────────────
 
 function StatusBadge({ status }: { status: HealthStatus }) {
   const styles: Record<HealthStatus, string> = {
-    healthy: 'bg-minor/15 text-minor border border-minor/30',
-    failing: 'bg-[#b45309]/15 text-[#b45309] border border-[#b45309]/30',
-    disabled: 'bg-major/15 text-major border border-major/30',
-  }
+    healthy: "bg-minor/15 text-minor border border-minor/30",
+    failing: "bg-[#b45309]/15 text-[#b45309] border border-[#b45309]/30",
+    disabled: "bg-major/15 text-major border border-major/30",
+  };
   const labels: Record<HealthStatus, string> = {
-    healthy: 'Healthy',
-    failing: 'Failing',
-    disabled: 'Disabled',
-  }
+    healthy: "Healthy",
+    failing: "Failing",
+    disabled: "Disabled",
+  };
 
   return (
     <span
@@ -64,26 +58,22 @@ function StatusBadge({ status }: { status: HealthStatus }) {
     >
       {labels[status]}
     </span>
-  )
+  );
 }
 
 // ── Failure Message Cell ──────────────────────────────────────
 
-function FailureMessageCell({
-  message,
-}: {
-  message: string | null | undefined
-}) {
-  const [expanded, setExpanded] = useState(false)
+function FailureMessageCell({ message }: { message: string | null | undefined }) {
+  const [expanded, setExpanded] = useState(false);
 
-  if (!message) return <span className="text-text-tertiary">—</span>
+  if (!message) return <span className="text-text-tertiary">—</span>;
 
-  const truncated = message.length > 80
+  const truncated = message.length > 80;
 
   return (
     <div className="max-w-xs">
       <p
-        className={`text-xs text-text-secondary font-mono ${!expanded && truncated ? 'line-clamp-2' : ''}`}
+        className={`text-xs text-text-secondary font-mono ${!expanded && truncated ? "line-clamp-2" : ""}`}
       >
         {message}
       </p>
@@ -93,23 +83,23 @@ function FailureMessageCell({
           onClick={() => setExpanded((v) => !v)}
           className="text-xs text-brand-600 hover:text-brand-700 mt-0.5"
         >
-          {expanded ? 'Show less' : 'Show more'}
+          {expanded ? "Show less" : "Show more"}
         </button>
       )}
     </div>
-  )
+  );
 }
 
 // ── Package Health Row ────────────────────────────────────────
 
 interface HealthRowProps {
-  pkg: PackageHealthDto
-  onReset: (id: string) => void
-  onDisable: (id: string) => void
-  onTriggerSync: (id: string) => void
-  isResetting: boolean
-  isDisabling: boolean
-  isSyncing: boolean
+  pkg: PackageHealthDto;
+  onReset: (id: string) => void;
+  onDisable: (id: string) => void;
+  onTriggerSync: (id: string) => void;
+  isResetting: boolean;
+  isDisabling: boolean;
+  isSyncing: boolean;
 }
 
 function HealthRow({
@@ -121,8 +111,8 @@ function HealthRow({
   isDisabling,
   isSyncing,
 }: HealthRowProps) {
-  const status = getStatus(pkg)
-  const githubUrl = `https://github.com/${pkg.githubOwner}/${pkg.githubRepo}`
+  const status = getStatus(pkg);
+  const githubUrl = `https://github.com/${pkg.githubOwner}/${pkg.githubRepo}`;
 
   return (
     <tr className="border-b border-border-default last:border-0">
@@ -146,9 +136,7 @@ function HealthRow({
       </td>
       <td className="py-3 px-4 text-sm text-text-secondary text-right">
         {(pkg.consecutiveFailures ?? 0) > 0 ? (
-          <span className="font-medium text-[#b45309]">
-            {pkg.consecutiveFailures}
-          </span>
+          <span className="font-medium text-[#b45309]">{pkg.consecutiveFailures}</span>
         ) : (
           <span className="text-text-tertiary">0</span>
         )}
@@ -170,7 +158,7 @@ function HealthRow({
             onClick={() => onTriggerSync(pkg.id)}
             disabled={isSyncing || isResetting || isDisabling}
           >
-            {isSyncing ? 'Syncing...' : 'Sync Now'}
+            {isSyncing ? "Syncing..." : "Sync Now"}
           </Button>
           <Button
             variant="secondary"
@@ -178,43 +166,41 @@ function HealthRow({
             onClick={() => onReset(pkg.id)}
             disabled={isResetting || isDisabling || isSyncing}
           >
-            {isResetting ? 'Resetting...' : 'Reset'}
+            {isResetting ? "Resetting..." : "Reset"}
           </Button>
           <Button
             variant="ghost"
             size="sm"
             onClick={() => onDisable(pkg.id)}
-            disabled={
-              isResetting || isDisabling || isSyncing || pkg.isSyncDisabled
-            }
+            disabled={isResetting || isDisabling || isSyncing || pkg.isSyncDisabled}
             className="text-major hover:text-major"
           >
-            {isDisabling ? 'Disabling...' : 'Disable'}
+            {isDisabling ? "Disabling..." : "Disable"}
           </Button>
         </div>
       </td>
     </tr>
-  )
+  );
 }
 
 // ── Filter Controls ───────────────────────────────────────────
 
-type FilterMode = 'all' | 'failing' | 'disabled'
+type FilterMode = "all" | "failing" | "disabled";
 
 function FilterBar({
   filter,
   onChange,
   counts,
 }: {
-  filter: FilterMode
-  onChange: (f: FilterMode) => void
-  counts: { all: number; failing: number; disabled: number }
+  filter: FilterMode;
+  onChange: (f: FilterMode) => void;
+  counts: { all: number; failing: number; disabled: number };
 }) {
   const options: { value: FilterMode; label: string; count: number }[] = [
-    { value: 'all', label: 'All', count: counts.all },
-    { value: 'failing', label: 'Failing', count: counts.failing },
-    { value: 'disabled', label: 'Disabled', count: counts.disabled },
-  ]
+    { value: "all", label: "All", count: counts.all },
+    { value: "failing", label: "Failing", count: counts.failing },
+    { value: "disabled", label: "Disabled", count: counts.disabled },
+  ];
 
   return (
     <div className="flex gap-1">
@@ -225,39 +211,39 @@ function FilterBar({
           onClick={() => onChange(opt.value)}
           className={`px-3 py-1.5 text-sm rounded-md font-medium transition-colors ${
             filter === opt.value
-              ? 'bg-brand-500 text-white'
-              : 'text-text-secondary hover:bg-surface-tertiary'
+              ? "bg-brand-500 text-white"
+              : "text-text-secondary hover:bg-surface-tertiary"
           }`}
         >
           {opt.label}
           <span
-            className={`ml-1.5 text-xs ${filter === opt.value ? 'opacity-80' : 'text-text-tertiary'}`}
+            className={`ml-1.5 text-xs ${filter === opt.value ? "opacity-80" : "text-text-tertiary"}`}
           >
             {opt.count}
           </span>
         </button>
       ))}
     </div>
-  )
+  );
 }
 
 // ── Main Page ─────────────────────────────────────────────────
 
 export function AdminHealth() {
-  const { isAdmin, isLoading: authLoading } = useIsAdmin()
-  const navigate = useNavigate()
-  const queryClient = useQueryClient()
-  const [filter, setFilter] = useState<FilterMode>('all')
-  const [resettingId, setResettingId] = useState<string | null>(null)
-  const [disablingId, setDisablingId] = useState<string | null>(null)
-  const [syncingId, setSyncingId] = useState<string | null>(null)
+  const { isAdmin, isLoading: authLoading } = useIsAdmin();
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const [filter, setFilter] = useState<FilterMode>("all");
+  const [resettingId, setResettingId] = useState<string | null>(null);
+  const [disablingId, setDisablingId] = useState<string | null>(null);
+  const [syncingId, setSyncingId] = useState<string | null>(null);
 
-  const { data: healthResponse, isLoading } = usePackageHealth()
-  const resetSync = useResetPackageSync()
-  const disableSync = useDisablePackageSync()
-  const triggerSync = useTriggerPackageSync()
+  const { data: healthResponse, isLoading } = usePackageHealth();
+  const resetSync = useResetPackageSync();
+  const disableSync = useDisablePackageSync();
+  const triggerSync = useTriggerPackageSync();
 
-  const packages = healthResponse?.status === 200 ? healthResponse.data : []
+  const packages = healthResponse?.status === 200 ? healthResponse.data : [];
 
   // Auto-refresh every 30 seconds
   useEffect(
@@ -265,108 +251,105 @@ export function AdminHealth() {
       const timer = setInterval(() => {
         queryClient.invalidateQueries({
           queryKey: getGetPackagesHealthQueryKey(),
-        })
-      }, 30_000)
-      return () => clearInterval(timer)
+        });
+      }, 30_000);
+      return () => clearInterval(timer);
     },
-    [queryClient]
-  )
+    [queryClient],
+  );
 
   // Auth gate
   useEffect(
     function redirectNonAdmins() {
       if (!authLoading && !isAdmin) {
-        navigate({ to: '/' })
+        navigate({ to: "/" });
       }
     },
-    [authLoading, isAdmin, navigate]
-  )
+    [authLoading, isAdmin, navigate],
+  );
 
   const handleRefresh = useCallback(() => {
-    queryClient.invalidateQueries({ queryKey: getGetPackagesHealthQueryKey() })
-  }, [queryClient])
+    queryClient.invalidateQueries({ queryKey: getGetPackagesHealthQueryKey() });
+  }, [queryClient]);
 
   const handleReset = useCallback(
     async (id: string) => {
-      setResettingId(id)
+      setResettingId(id);
       try {
-        await resetSync.mutateAsync({ id })
+        await resetSync.mutateAsync({ id });
         queryClient.invalidateQueries({
           queryKey: getGetPackagesHealthQueryKey(),
-        })
+        });
       } finally {
-        setResettingId(null)
+        setResettingId(null);
       }
     },
-    [resetSync, queryClient]
-  )
+    [resetSync, queryClient],
+  );
 
   const handleDisable = useCallback(
     async (id: string) => {
-      setDisablingId(id)
+      setDisablingId(id);
       try {
-        await disableSync.mutateAsync({ id })
+        await disableSync.mutateAsync({ id });
         queryClient.invalidateQueries({
           queryKey: getGetPackagesHealthQueryKey(),
-        })
+        });
       } finally {
-        setDisablingId(null)
+        setDisablingId(null);
       }
     },
-    [disableSync, queryClient]
-  )
+    [disableSync, queryClient],
+  );
 
   const handleTriggerSync = useCallback(
     async (id: string) => {
-      setSyncingId(id)
+      setSyncingId(id);
       try {
-        await triggerSync.mutateAsync({ id })
+        await triggerSync.mutateAsync({ id });
         queryClient.invalidateQueries({
           queryKey: getGetPackagesHealthQueryKey(),
-        })
+        });
       } finally {
-        setSyncingId(null)
+        setSyncingId(null);
       }
     },
-    [triggerSync, queryClient]
-  )
+    [triggerSync, queryClient],
+  );
 
   if (authLoading || !isAdmin) {
     return (
       <div className="min-h-screen bg-surface-secondary flex items-center justify-center">
         <p className="text-text-secondary">
-          {authLoading ? 'Checking access...' : 'Redirecting...'}
+          {authLoading ? "Checking access..." : "Redirecting..."}
         </p>
       </div>
-    )
+    );
   }
 
   const counts = {
     all: packages.length,
-    failing: packages.filter(
-      (p) => !p.isSyncDisabled && (p.consecutiveFailures ?? 0) > 0
-    ).length,
+    failing: packages.filter((p) => !p.isSyncDisabled && (p.consecutiveFailures ?? 0) > 0).length,
     disabled: packages.filter((p) => p.isSyncDisabled).length,
-  }
+  };
 
   const filtered = packages.filter((p) => {
-    if (filter === 'failing')
-      return !p.isSyncDisabled && (p.consecutiveFailures ?? 0) > 0
-    if (filter === 'disabled') return p.isSyncDisabled
-    return true
-  })
+    if (filter === "failing") return !p.isSyncDisabled && (p.consecutiveFailures ?? 0) > 0;
+    if (filter === "disabled") return p.isSyncDisabled;
+    return true;
+  });
 
   // Sort: disabled first, then by failure count desc, then alphabetical
   const sorted = [...filtered].sort((a, b) => {
-    const sa = getStatus(a)
-    const sb = getStatus(b)
-    if (sa === 'disabled' && sb !== 'disabled') return -1
-    if (sb === 'disabled' && sa !== 'disabled') return 1
-    const fa = a.consecutiveFailures ?? 0
-    const fb = b.consecutiveFailures ?? 0
-    if (fa !== fb) return fb - fa
-    return (a.name || '').localeCompare(b.name || '')
-  })
+    const sa = getStatus(a);
+    const sb = getStatus(b);
+    if (sa === "disabled" && sb !== "disabled") return -1;
+    if (sb === "disabled" && sa !== "disabled") return 1;
+    const fa = a.consecutiveFailures ?? 0;
+    const fb = b.consecutiveFailures ?? 0;
+    if (fa !== fb) return fb - fa;
+    return (a.name || "").localeCompare(b.name || "");
+  });
 
   return (
     <div className="min-h-screen bg-surface-secondary">
@@ -385,9 +368,7 @@ export function AdminHealth() {
         <Container>
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h1 className="text-xl font-semibold text-text-primary">
-                Package Health
-              </h1>
+              <h1 className="text-xl font-semibold text-text-primary">Package Health</h1>
               <p className="text-sm text-text-secondary mt-1">
                 Sync status for all tracked packages
               </p>
@@ -414,20 +395,16 @@ export function AdminHealth() {
               <FilterBar filter={filter} onChange={setFilter} counts={counts} />
               <p className="text-sm text-text-secondary shrink-0">
                 {isLoading
-                  ? 'Loading...'
-                  : `${sorted.length} package${sorted.length !== 1 ? 's' : ''}`}
+                  ? "Loading..."
+                  : `${sorted.length} package${sorted.length !== 1 ? "s" : ""}`}
               </p>
             </div>
 
             {isLoading ? (
-              <div className="p-6 text-text-secondary">
-                Loading health data...
-              </div>
+              <div className="p-6 text-text-secondary">Loading health data...</div>
             ) : sorted.length === 0 ? (
               <div className="p-6 text-text-secondary">
-                {filter === 'all'
-                  ? 'No packages tracked.'
-                  : `No ${filter} packages.`}
+                {filter === "all" ? "No packages tracked." : `No ${filter} packages.`}
               </div>
             ) : (
               <div className="overflow-x-auto">
@@ -478,5 +455,5 @@ export function AdminHealth() {
         </Container>
       </main>
     </div>
-  )
+  );
 }
