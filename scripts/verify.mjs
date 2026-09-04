@@ -15,9 +15,9 @@
  *   oxfmt    a formatter upgrade reformatted two existing files
  *
  * Every step below mirrors a step in .github/workflows/ci.yml, except the two
- * marked NOT-IN-CI, which cover a real gap: CI's "Email Function (Node.js)" job
- * runs only `pnpm build`, so the email package's lint and its 47 tests never
- * run in CI at all. They run here.
+ * marked NOT-IN-CI, which covers a real gap: CI's "Email Function (Node.js)" job
+ * runs only `pnpm build`, so the email package's 47 tests never run in CI at
+ * all. They run here. (Its lint is covered by the repo-wide oxlint step.)
  *
  * NOT covered: the .NET side (backend build/test, EF model-change check,
  * OpenAPI spec drift) and the Prisma schema drift job. Run those with dotnet
@@ -45,9 +45,13 @@ const steps = [
     cwd: repoRoot,
   },
   {
-    name: "web: lint",
+    // oxlint is configured at the repo root and covers both packages, so one
+    // root run replaces what used to be two eslint runs. --type-aware is what
+    // brings in tsgolint; a plain run reports nothing on this codebase, so
+    // dropping that flag would silently make this check meaningless.
+    name: "repo: lint (oxlint --type-aware)",
     cmd: "pnpm",
-    args: ["--filter", "patchnotes-web", "lint"],
+    args: ["lint"],
     cwd: repoRoot,
   },
   {
@@ -75,13 +79,6 @@ const steps = [
     cmd: "pnpm",
     args: ["--filter", "patchnotes-email", "build"],
     cwd: repoRoot,
-  },
-  {
-    name: "email: lint",
-    cmd: "pnpm",
-    args: ["--filter", "patchnotes-email", "lint"],
-    cwd: repoRoot,
-    note: "NOT-IN-CI",
   },
   {
     name: "email: test",

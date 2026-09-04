@@ -115,11 +115,16 @@ export async function sendTestEmail(
       return { status: 404, body: `Template not found: ${body.templateId}` };
     }
 
-    // Use provided testData or build from real DB data
-    const useRealData = !body.testData || typeof body.testData !== "object";
-    const templateData = useRealData
-      ? await buildRealData(db, template.Name, body.recipientEmail, context)
-      : body.testData;
+    // Use provided testData or build from real DB data. The narrowing happens on
+    // `body.testData` itself rather than through a separate boolean, because the
+    // compiler cannot carry a type guard across an intermediate variable -- under
+    // strictNullChecks the old form left templateData possibly undefined even
+    // though it never is at runtime.
+    const providedData =
+      body.testData && typeof body.testData === "object" ? body.testData : undefined;
+    const useRealData = providedData === undefined;
+    const templateData =
+      providedData ?? (await buildRealData(db, template.Name, body.recipientEmail, context));
 
     context.log(`Using ${useRealData ? "real" : "sample"} data for test email`);
 
@@ -129,7 +134,14 @@ export async function sendTestEmail(
     // Build subject interpolation vars by stringifying templateData values
     const subjectVars: Record<string, string> = {};
     for (const [key, value] of Object.entries(templateData)) {
-      subjectVars[key] = String(value);
+      // templateData holds `unknown`, and some entries are arrays of objects
+      // (digest `releases`, for one). A subject line is plain text, so only
+      // primitives are interpolated -- stringifying an object would put
+      // "[object Object]" in the subject. Skipped keys interpolate to "",
+      // which is what interpolateSubject does for anything it cannot find.
+      if (typeof value === "string" || typeof value === "number" || typeof value === "boolean") {
+        subjectVars[key] = String(value);
+      }
     }
     // Derive count from releases array for digest templates
     const releases = templateData.releases;

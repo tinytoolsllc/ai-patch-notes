@@ -281,7 +281,7 @@ export function UserMenu() {
   useEffect(
     function checkSubscriptionOnLogin() {
       if (user) {
-        checkSubscription();
+        void checkSubscription();
       }
     },
     [user, checkSubscription],
@@ -294,7 +294,7 @@ export function UserMenu() {
 
   const handleSettings = () => {
     setIsOpen(false);
-    navigate({ to: "/settings" });
+    void navigate({ to: "/settings" });
   };
 
   const handleUpgrade = () => {
@@ -306,7 +306,7 @@ export function UserMenu() {
   };
 
   const handleAdmin = () => {
-    navigate({ to: "/admin" });
+    void navigate({ to: "/admin" });
   };
 
   // Loading state

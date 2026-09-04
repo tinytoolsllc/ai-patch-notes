@@ -37,8 +37,35 @@ export function trackEvent(name: string, properties?: Record<string, string>): v
   client?.trackEvent({ name, properties });
 }
 
+/**
+ * `String(value)` renders a plain object as "[object Object]", which throws away
+ * the whole payload of a non-Error rejection -- exactly the detail an exception
+ * report exists to carry. Prefer JSON, falling back to String for values JSON
+ * cannot represent (circular structures, BigInt, symbols).
+ */
+function describeNonError(value: unknown): string {
+  if (typeof value === "string") return value;
+  if (value === null) return "null";
+  if (value === undefined) return "undefined";
+  if (
+    typeof value === "number" ||
+    typeof value === "boolean" ||
+    typeof value === "bigint" ||
+    typeof value === "symbol"
+  ) {
+    return value.toString();
+  }
+  try {
+    // JSON.stringify returns undefined for a function or an unsupported value.
+    return JSON.stringify(value) ?? Object.prototype.toString.call(value);
+  } catch {
+    // Circular structure, or a throwing toJSON.
+    return Object.prototype.toString.call(value);
+  }
+}
+
 export function trackException(error: unknown, properties?: Record<string, string>): void {
-  const exception = error instanceof Error ? error : new Error(String(error));
+  const exception = error instanceof Error ? error : new Error(describeNonError(error));
   client?.trackException({ exception, properties });
 }
 

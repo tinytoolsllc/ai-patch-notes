@@ -237,7 +237,7 @@ export function AdminReset() {
   useEffect(
     function redirectNonAdmins() {
       if (!authLoading && !isAdmin) {
-        navigate({ to: "/" });
+        void navigate({ to: "/" });
       }
     },
     [authLoading, isAdmin, navigate],

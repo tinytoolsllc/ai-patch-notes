@@ -249,7 +249,7 @@ export function AdminHealth() {
   useEffect(
     function autoRefreshHealthStatus() {
       const timer = setInterval(() => {
-        queryClient.invalidateQueries({
+        void queryClient.invalidateQueries({
           queryKey: getGetPackagesHealthQueryKey(),
         });
       }, 30_000);
@@ -262,14 +262,14 @@ export function AdminHealth() {
   useEffect(
     function redirectNonAdmins() {
       if (!authLoading && !isAdmin) {
-        navigate({ to: "/" });
+        void navigate({ to: "/" });
       }
     },
     [authLoading, isAdmin, navigate],
   );
 
   const handleRefresh = useCallback(() => {
-    queryClient.invalidateQueries({ queryKey: getGetPackagesHealthQueryKey() });
+    void queryClient.invalidateQueries({ queryKey: getGetPackagesHealthQueryKey() });
   }, [queryClient]);
 
   const handleReset = useCallback(
@@ -277,7 +277,7 @@ export function AdminHealth() {
       setResettingId(id);
       try {
         await resetSync.mutateAsync({ id });
-        queryClient.invalidateQueries({
+        void queryClient.invalidateQueries({
           queryKey: getGetPackagesHealthQueryKey(),
         });
       } finally {
@@ -292,7 +292,7 @@ export function AdminHealth() {
       setDisablingId(id);
       try {
         await disableSync.mutateAsync({ id });
-        queryClient.invalidateQueries({
+        void queryClient.invalidateQueries({
           queryKey: getGetPackagesHealthQueryKey(),
         });
       } finally {
@@ -307,7 +307,7 @@ export function AdminHealth() {
       setSyncingId(id);
       try {
         await triggerSync.mutateAsync({ id });
-        queryClient.invalidateQueries({
+        void queryClient.invalidateQueries({
           queryKey: getGetPackagesHealthQueryKey(),
         });
       } finally {

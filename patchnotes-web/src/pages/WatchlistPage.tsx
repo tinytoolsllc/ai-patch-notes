@@ -126,7 +126,7 @@ export function WatchlistPage() {
   useEffect(
     function redirectUnauthenticated() {
       if (isInitialized && !user) {
-        navigate({ to: "/login", search: { returnUrl: "/watchlist" } });
+        void navigate({ to: "/login", search: { returnUrl: "/watchlist" } });
       }
     },
     [isInitialized, user, navigate],

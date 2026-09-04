@@ -29,7 +29,7 @@ export function Login() {
   useEffect(
     function redirectAuthenticatedUser() {
       if (isInitialized && user) {
-        navigate({ to: destination });
+        void navigate({ to: destination });
       }
     },
     [user, isInitialized, navigate, destination],

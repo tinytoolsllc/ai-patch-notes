@@ -22,7 +22,7 @@ export function OnboardingPage() {
   useEffect(
     function redirectUnauthenticated() {
       if (isInitialized && !user) {
-        navigate({ to: "/login", search: { returnUrl: "/onboarding" } });
+        void navigate({ to: "/login", search: { returnUrl: "/onboarding" } });
       }
     },
     [isInitialized, user, navigate],
@@ -42,9 +42,9 @@ export function OnboardingPage() {
       if (template.id !== "empty" && (template.packages ?? []).length > 0) {
         await applyTemplate.mutateAsync(template.id);
       }
-      navigate({ to: "/watchlist" });
+      void navigate({ to: "/watchlist" });
     } catch {
-      navigate({ to: "/watchlist" });
+      void navigate({ to: "/watchlist" });
     }
   };
 

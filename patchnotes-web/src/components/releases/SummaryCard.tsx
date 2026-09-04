@@ -112,9 +112,12 @@ export const SummaryCard = memo(function SummaryCard({
 
   const handleCopyLink = () => {
     const url = `${window.location.origin}/s/${group.packageId}`;
-    navigator.clipboard.writeText(url).then(() => {
-      showToast("Link copied!", "success");
-    });
+    // Clipboard writes reject on a denied permission or a non-secure context,
+    // so the failure path needs a handler rather than an unhandled rejection.
+    navigator.clipboard.writeText(url).then(
+      () => showToast("Link copied!", "success"),
+      () => showToast("Could not copy link to clipboard", "error"),
+    );
   };
 
   return (

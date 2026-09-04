@@ -1,4 +1,4 @@
-/* eslint-disable react-refresh/only-export-components */
+/* oxlint-disable react/only-export-components */
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { XCircle } from "lucide-react";
 import { AppHeader, Container, Button, Card } from "../components/ui";

@@ -57,13 +57,15 @@ interface RequestOptions extends Omit<RequestInit, "body"> {
 async function request<T>(endpoint: string, options: RequestOptions = {}): Promise<T> {
   const { body, headers, ...rest } = options;
 
+  // See the note in custom-fetch.ts: object-spreading a HeadersInit drops a
+  // Headers instance entirely and turns an array of pairs into index keys.
+  const mergedHeaders = new Headers({ "Content-Type": "application/json" });
+  new Headers(headers).forEach((value, key) => mergedHeaders.set(key, value));
+
   const config: RequestInit = {
     ...rest,
     credentials: "include", // Include cookies for Stytch session auth
-    headers: {
-      "Content-Type": "application/json",
-      ...headers,
-    },
+    headers: mergedHeaders,
   };
 
   if (body !== undefined) {

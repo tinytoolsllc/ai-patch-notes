@@ -140,7 +140,7 @@ export function PackagePicker({
     (e: React.KeyboardEvent) => {
       if (e.key === "Enter" && !e.shiftKey) {
         e.preventDefault();
-        handleAddPackage();
+        void handleAddPackage();
       }
     },
     [handleAddPackage],

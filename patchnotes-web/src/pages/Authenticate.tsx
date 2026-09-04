@@ -30,7 +30,7 @@ export function Authenticate() {
       if (!isInitialized || error) return;
 
       if (user) {
-        navigate({ to: returnUrl });
+        void navigate({ to: returnUrl });
         return;
       }
 
@@ -55,14 +55,14 @@ export function Authenticate() {
 
           // Sync user to backend database
           const loginResponse = await api.post<{ isNewUser?: boolean }>("/users/login");
-          navigate({ to: loginResponse?.isNewUser ? "/onboarding" : returnUrl });
+          void navigate({ to: loginResponse?.isNewUser ? "/onboarding" : returnUrl });
         } catch (err) {
           console.error("Authentication failed:", err);
           setError("Authentication failed. Please try again.");
         }
       };
 
-      authenticate();
+      void authenticate();
     },
     [stytch, token, tokenType, user, isInitialized, navigate, error, returnUrl],
   );

@@ -161,7 +161,7 @@ export function useDeletePackage() {
   return useMutation({
     mutationFn: (id: string) => deletePackage(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: getGetPackagesQueryKey() });
+      void queryClient.invalidateQueries({ queryKey: getGetPackagesQueryKey() });
     },
   });
 }
@@ -196,7 +196,7 @@ export function useUpdatePackage() {
         url: url ?? null,
       }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: getGetPackagesQueryKey() });
+      void queryClient.invalidateQueries({ queryKey: getGetPackagesQueryKey() });
     },
   });
 }
@@ -207,7 +207,7 @@ export function useResetSummaries() {
   return useMutation({
     mutationFn: (id: string) => resetPackageSummaries(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: getGetPackagesQueryKey() });
+      void queryClient.invalidateQueries({ queryKey: getGetPackagesQueryKey() });
     },
   });
 }
@@ -218,7 +218,7 @@ export function useResetReleases() {
   return useMutation({
     mutationFn: (id: string) => resetPackageReleases(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: getGetPackagesQueryKey() });
+      void queryClient.invalidateQueries({ queryKey: getGetPackagesQueryKey() });
     },
   });
 }
@@ -249,8 +249,8 @@ export function useAddToWatchlist() {
   return useMutation({
     mutationFn: (packageId: string) => addToWatchlist(packageId),
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: getGetWatchlistQueryKey() });
-      queryClient.invalidateQueries({ queryKey: ["/api/feed"] });
+      void queryClient.invalidateQueries({ queryKey: getGetWatchlistQueryKey() });
+      void queryClient.invalidateQueries({ queryKey: ["/api/feed"] });
     },
   });
 }
@@ -276,8 +276,8 @@ export function useRemoveFromWatchlist() {
       }
     },
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: getGetWatchlistQueryKey() });
-      queryClient.invalidateQueries({ queryKey: ["/api/feed"] });
+      void queryClient.invalidateQueries({ queryKey: getGetWatchlistQueryKey() });
+      void queryClient.invalidateQueries({ queryKey: ["/api/feed"] });
     },
   });
 }
@@ -289,8 +289,8 @@ export function useAddFromGithub() {
     mutationFn: ({ owner, repo }: { owner: string; repo: string }) =>
       addToWatchlistFromGitHub(owner, repo),
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: getGetWatchlistQueryKey() });
-      queryClient.invalidateQueries({ queryKey: getGetPackagesQueryKey() });
+      void queryClient.invalidateQueries({ queryKey: getGetWatchlistQueryKey() });
+      void queryClient.invalidateQueries({ queryKey: getGetPackagesQueryKey() });
     },
   });
 }
@@ -301,8 +301,8 @@ export function useApplyTemplate() {
   return useMutation({
     mutationFn: (templateId: string) => applyWatchlistTemplate({ templateId }),
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: getGetWatchlistQueryKey() });
-      queryClient.invalidateQueries({ queryKey: ["/api/feed"] });
+      void queryClient.invalidateQueries({ queryKey: getGetWatchlistQueryKey() });
+      void queryClient.invalidateQueries({ queryKey: ["/api/feed"] });
     },
   });
 }

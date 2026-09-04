@@ -121,7 +121,7 @@ export function AdminEmails() {
   const updateMutation = useUpdateEmailTemplate({
     mutation: {
       onSuccess: () => {
-        queryClient.invalidateQueries({
+        void queryClient.invalidateQueries({
           queryKey: getGetEmailTemplatesQueryKey(),
         });
         setIsEditing(false);
@@ -150,7 +150,7 @@ export function AdminEmails() {
   useEffect(
     function redirectNonAdmins() {
       if (!authLoading && !isAdmin) {
-        navigate({ to: "/" });
+        void navigate({ to: "/" });
       }
     },
     [authLoading, isAdmin, navigate],
@@ -182,9 +182,17 @@ export function AdminEmails() {
 
   const subjectPreview = useMemo(() => {
     if (!currentTemplate) return "";
-    return currentTemplate.subject.replace(/\{\{(\w+)\}\}/g, (_, key: string) =>
-      String(sampleData[key] ?? `{{${key}}}`),
-    );
+    return currentTemplate.subject.replace(/\{\{(\w+)\}\}/g, (_, key: string) => {
+      // Sample values are `unknown` and some are arrays of objects (see the
+      // `digest` entry in SAMPLE_DATA). A subject line is plain text, so only
+      // primitives are substituted -- stringifying an object here would render
+      // "[object Object]" and misrepresent the preview. Anything else keeps its
+      // placeholder.
+      const value = sampleData[key];
+      return typeof value === "string" || typeof value === "number" || typeof value === "boolean"
+        ? String(value)
+        : `{{${key}}}`;
+    });
   }, [currentTemplate, sampleData]);
 
   function enterEditMode() {

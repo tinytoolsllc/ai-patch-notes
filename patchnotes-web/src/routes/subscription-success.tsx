@@ -1,4 +1,4 @@
-/* eslint-disable react-refresh/only-export-components */
+/* oxlint-disable react/only-export-components */
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { CheckCircle } from "lucide-react";
@@ -11,7 +11,7 @@ function SubscriptionSuccess() {
   // Refresh subscription status on mount
   useEffect(
     function refreshSubscriptionStatus() {
-      checkSubscription();
+      void checkSubscription();
     },
     [checkSubscription],
   );

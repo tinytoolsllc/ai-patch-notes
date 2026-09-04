@@ -27,7 +27,7 @@ export function Pricing() {
 
   const handleUpgrade = () => {
     if (!user) {
-      navigate({ to: "/login", search: { returnUrl: "/pricing" } });
+      void navigate({ to: "/login", search: { returnUrl: "/pricing" } });
       return;
     }
     startCheckout();

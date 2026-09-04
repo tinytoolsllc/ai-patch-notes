@@ -103,7 +103,7 @@ export function Settings() {
   useEffect(
     function redirectUnauthenticated() {
       if (isInitialized && !user) {
-        navigate({ to: "/login", search: { returnUrl: "/settings" } });
+        void navigate({ to: "/login", search: { returnUrl: "/settings" } });
       }
     },
     [isInitialized, user, navigate],
@@ -130,7 +130,7 @@ export function Settings() {
       {
         onSuccess: () => {
           setSaved(true);
-          queryClient.invalidateQueries({
+          void queryClient.invalidateQueries({
             queryKey: getGetCurrentUserQueryKey(),
           });
         },
@@ -206,7 +206,7 @@ export function Settings() {
       {
         onSuccess: () => {
           setEmailPrefsSaved(true);
-          queryClient.invalidateQueries({
+          void queryClient.invalidateQueries({
             queryKey: getGetEmailPreferencesQueryKey(),
           });
         },

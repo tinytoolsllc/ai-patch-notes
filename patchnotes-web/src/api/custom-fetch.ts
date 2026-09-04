@@ -10,13 +10,18 @@ import { ApiError, API_ROOT } from "./client.ts";
  * the base URL (e.g. https://api.myreleasenotes.ai) without /api.
  */
 export const customFetch = async <T>(url: string, init: RequestInit): Promise<T> => {
+  // `HeadersInit` is `string[][] | Record<string, string> | Headers`, and object
+  // spread mangles two of those three: a Headers instance has no own enumerable
+  // properties so it spreads to `{}` and every header is silently dropped, while
+  // an array of pairs spreads to `{0: [...], 1: [...]}`. Merge via the Headers
+  // API, which accepts all three forms.
+  const headers = new Headers({ "Content-Type": "application/json" });
+  new Headers(init.headers).forEach((value, key) => headers.set(key, value));
+
   const config: RequestInit = {
     ...init,
     credentials: "include",
-    headers: {
-      "Content-Type": "application/json",
-      ...init.headers,
-    },
+    headers,
   };
 
   let response: Response;
