@@ -141,11 +141,16 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile --dir ${{ github.workspace }}
 
+      # oxlint and oxfmt are both configured at the repo root and cover every
+      # package, so these two run from there rather than from patchnotes-web.
+      # This job duplicates ci.yml's frontend pipeline -- keep the two in step.
       - name: Lint
         run: pnpm lint
+        working-directory: ${{ github.workspace }}
 
       - name: Format check
         run: pnpm format:check
+        working-directory: ${{ github.workspace }}
 
       - name: Run tests
         run: pnpm test:run
