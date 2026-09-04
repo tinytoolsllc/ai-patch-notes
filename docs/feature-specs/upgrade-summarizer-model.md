@@ -28,15 +28,16 @@ Low. The change is a single config value (`AI:Model`). The prompt, API endpoint,
 
 Run the summarizer against a fixed set of release inputs and save the outputs. Use packages with varied changelog styles:
 
-| Package | Release(s) | Why this sample |
-|---|---|---|
-| Vite | A major release (e.g., v8.0.0) | Long changelog, breaking changes, multiple sections |
-| React | A patch release (e.g., v19.0.1) | Short changelog, mostly fixes |
-| TanStack Router | A minor release with several features | Mid-length, feature-focused |
-| ESLint | A major release with migration notes | Breaking changes + upgrade steps |
-| Tailwind CSS | A prerelease/beta | Prerelease-specific language, experimental features |
+| Package         | Release(s)                            | Why this sample                                     |
+| --------------- | ------------------------------------- | --------------------------------------------------- |
+| Vite            | A major release (e.g., v8.0.0)        | Long changelog, breaking changes, multiple sections |
+| React           | A patch release (e.g., v19.0.1)       | Short changelog, mostly fixes                       |
+| TanStack Router | A minor release with several features | Mid-length, feature-focused                         |
+| ESLint          | A major release with migration notes  | Breaking changes + upgrade steps                    |
+| Tailwind CSS    | A prerelease/beta                     | Prerelease-specific language, experimental features |
 
 For each sample, record:
+
 - The exact input (package name + release tag + body)
 - The gemma3:27b output
 - Timestamp and any token usage reported
@@ -51,15 +52,15 @@ Change `AI:Model` to `gemma4:31b` in local config and re-run the same inputs. Sa
 
 For each sample pair, evaluate:
 
-| Criterion | What to check |
-|---|---|
-| **Format compliance** | Does the output follow the expected section structure (TL;DR, Breaking, New, Fixes Worth Knowing, Before You Upgrade)? Are empty sections omitted? |
-| **Accuracy** | Are breaking changes correctly identified? Are features attributed correctly? No hallucinated items? |
-| **Conciseness** | Is it under 150 words? Is it tighter or more verbose than gemma3? |
-| **Tone** | Direct, developer-facing, no filler? Matches the "senior developer writing for their team" voice? |
-| **Parenthetical clarifications** | Are unfamiliar concepts given 3-5 word clarifications as instructed? |
-| **Multi-release consolidation** | For grouped releases, does it produce a single coherent summary rather than listing each release separately? |
-| **Edge cases** | How does it handle changelogs that are mostly links, very short, or contain only a title with no body? |
+| Criterion                        | What to check                                                                                                                                      |
+| -------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Format compliance**            | Does the output follow the expected section structure (TL;DR, Breaking, New, Fixes Worth Knowing, Before You Upgrade)? Are empty sections omitted? |
+| **Accuracy**                     | Are breaking changes correctly identified? Are features attributed correctly? No hallucinated items?                                               |
+| **Conciseness**                  | Is it under 150 words? Is it tighter or more verbose than gemma3?                                                                                  |
+| **Tone**                         | Direct, developer-facing, no filler? Matches the "senior developer writing for their team" voice?                                                  |
+| **Parenthetical clarifications** | Are unfamiliar concepts given 3-5 word clarifications as instructed?                                                                               |
+| **Multi-release consolidation**  | For grouped releases, does it produce a single coherent summary rather than listing each release separately?                                       |
+| **Edge cases**                   | How does it handle changelogs that are mostly links, very short, or contain only a title with no body?                                             |
 
 ### Step 4: Spot-check regressions
 

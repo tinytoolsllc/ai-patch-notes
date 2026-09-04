@@ -1,53 +1,50 @@
-import { StytchLogin } from '@stytch/react'
-import { useStytchUser } from '@stytch/react'
-import { Link, useNavigate, useSearch } from '@tanstack/react-router'
-import { useEffect, useMemo } from 'react'
-import { ArrowLeft } from 'lucide-react'
-import { getStytchLoginConfig, getStytchPresentation } from '../auth/stytch'
-import { useTheme } from '../components/theme'
-import { ThemeToggle } from '../components/theme'
+import { StytchLogin } from "@stytch/react";
+import { useStytchUser } from "@stytch/react";
+import { Link, useNavigate, useSearch } from "@tanstack/react-router";
+import { useEffect, useMemo } from "react";
+import { ArrowLeft } from "lucide-react";
+import { getStytchLoginConfig, getStytchPresentation } from "../auth/stytch";
+import { useTheme } from "../components/theme";
+import { ThemeToggle } from "../components/theme";
 
 export function Login() {
-  const { user, isInitialized } = useStytchUser()
-  const navigate = useNavigate()
-  const { resolvedTheme } = useTheme()
-  const { returnUrl } = useSearch({ from: '/login' })
+  const { user, isInitialized } = useStytchUser();
+  const navigate = useNavigate();
+  const { resolvedTheme } = useTheme();
+  const { returnUrl } = useSearch({ from: "/login" });
 
   // Only accept relative paths to prevent open redirects
-  const validReturnUrl = returnUrl?.startsWith('/') ? returnUrl : undefined
+  const validReturnUrl = returnUrl?.startsWith("/") ? returnUrl : undefined;
 
   const stytchPresentation = useMemo(
-    () => getStytchPresentation(resolvedTheme === 'dark'),
-    [resolvedTheme]
-  )
+    () => getStytchPresentation(resolvedTheme === "dark"),
+    [resolvedTheme],
+  );
 
-  const stytchLoginConfig = useMemo(
-    () => getStytchLoginConfig(validReturnUrl),
-    [validReturnUrl]
-  )
+  const stytchLoginConfig = useMemo(() => getStytchLoginConfig(validReturnUrl), [validReturnUrl]);
 
   // Destination for already-authenticated users and Back link
-  const destination = validReturnUrl ?? '/'
+  const destination = validReturnUrl ?? "/";
 
   useEffect(
     function redirectAuthenticatedUser() {
       if (isInitialized && user) {
-        navigate({ to: destination })
+        void navigate({ to: destination });
       }
     },
-    [user, isInitialized, navigate, destination]
-  )
+    [user, isInitialized, navigate, destination],
+  );
 
   if (!isInitialized) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-surface-secondary">
         <div className="animate-pulse text-text-tertiary">Loading...</div>
       </div>
-    )
+    );
   }
 
   if (user) {
-    return null
+    return null;
   }
 
   return (
@@ -57,9 +54,9 @@ export function Login() {
         className="fixed inset-0 pointer-events-none opacity-40 dark:opacity-20"
         style={{
           background:
-            resolvedTheme === 'dark'
-              ? 'radial-gradient(ellipse at top, rgba(99, 102, 241, 0.15) 0%, transparent 50%)'
-              : 'radial-gradient(ellipse at top, rgba(79, 70, 229, 0.08) 0%, transparent 50%)',
+            resolvedTheme === "dark"
+              ? "radial-gradient(ellipse at top, rgba(99, 102, 241, 0.15) 0%, transparent 50%)"
+              : "radial-gradient(ellipse at top, rgba(79, 70, 229, 0.08) 0%, transparent 50%)",
         }}
       />
 
@@ -77,10 +74,7 @@ export function Login() {
 
       {/* Main content */}
       <main className="relative z-10 flex flex-col items-center justify-center px-4 pt-24 pb-24">
-        <StytchLogin
-          config={stytchLoginConfig}
-          presentation={stytchPresentation}
-        />
+        <StytchLogin config={stytchLoginConfig} presentation={stytchPresentation} />
 
         {/* Footer text */}
         <p className="mt-6 text-center text-xs text-text-tertiary">
@@ -88,5 +82,5 @@ export function Login() {
         </p>
       </main>
     </div>
-  )
+  );
 }

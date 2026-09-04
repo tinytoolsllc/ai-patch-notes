@@ -91,6 +91,6 @@ writeFileSync(seedPath, JSON.stringify(seedPackages, null, 2) + "\n");
 
 console.log(`Wrote ${seedPackages.length} packages to PatchNotes.Data/SeedData/packages.json`);
 console.log(
-  `  - ${dedupedLibraries.length} from seed-libraries.json (${allLibraries.length} total, ${allLibraries.length - dedupedLibraries.length} duplicates removed)`
+  `  - ${dedupedLibraries.length} from seed-libraries.json (${allLibraries.length} total, ${allLibraries.length - dedupedLibraries.length} duplicates removed)`,
 );
 console.log(`  - ${existingByRepo.size} preserved from existing seed data`);

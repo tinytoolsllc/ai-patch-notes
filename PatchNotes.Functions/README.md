@@ -23,13 +23,13 @@ HTTP POST trigger (`/api/sync-new-packages`) that syncs packages which have neve
 
 ## Configuration
 
-| Setting | Description |
-|---|---|
-| `ConnectionStrings:PatchNotes` | SQL Server connection string |
-| `GitHub:Token` | GitHub PAT for API access |
-| `AI:BaseUrl` | AI provider base URL |
-| `AI:ApiKey` | AI provider API key |
-| `AI:Model` | AI model name (e.g. `gemma4:31b`) |
+| Setting                        | Description                       |
+| ------------------------------ | --------------------------------- |
+| `ConnectionStrings:PatchNotes` | SQL Server connection string      |
+| `GitHub:Token`                 | GitHub PAT for API access         |
+| `AI:BaseUrl`                   | AI provider base URL              |
+| `AI:ApiKey`                    | AI provider API key               |
+| `AI:Model`                     | AI model name (e.g. `gemma4:31b`) |
 
 In Azure, these are set as Function App application settings with `__` as the separator (e.g. `ConnectionStrings__PatchNotes`).
 
@@ -37,10 +37,10 @@ In Azure, these are set as Function App application settings with `__` as the se
 
 The API needs these settings to ping the Function after creating a new package:
 
-| Setting | Description |
-|---|---|
+| Setting            | Description                                                                                                    |
+| ------------------ | -------------------------------------------------------------------------------------------------------------- |
 | `SyncFunction:Url` | Full URL of the SyncNewPackages endpoint: `https://fn-patchnotes-sync.azurewebsites.net/api/sync-new-packages` |
-| `SyncFunction:Key` | Function key from Azure Portal: Functions > SyncNewPackages > Function Keys > default |
+| `SyncFunction:Key` | Function key from Azure Portal: Functions > SyncNewPackages > Function Keys > default                          |
 
 ## Local Development
 

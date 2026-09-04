@@ -8,10 +8,10 @@ A TypeScript Azure Functions app that handles email notifications via [Resend](h
 
 ## Functions
 
-| Function | Trigger | Description |
-|----------|---------|-------------|
-| `sendWelcome` | HTTP POST | Sends welcome email to new users |
-| `sendDigest` | Timer | Sends weekly digest of release activity |
+| Function      | Trigger   | Description                             |
+| ------------- | --------- | --------------------------------------- |
+| `sendWelcome` | HTTP POST | Sends welcome email to new users        |
+| `sendDigest`  | Timer     | Sends weekly digest of release activity |
 
 ## Running
 
@@ -24,11 +24,11 @@ This builds the TypeScript and starts the Azure Functions runtime.
 
 ## Scripts
 
-| Command | Description |
-|---------|-------------|
-| `pnpm build` | Compile TypeScript |
-| `pnpm watch` | Watch mode compilation |
-| `pnpm clean` | Remove dist/ |
+| Command      | Description                           |
+| ------------ | ------------------------------------- |
+| `pnpm build` | Compile TypeScript                    |
+| `pnpm watch` | Watch mode compilation                |
+| `pnpm clean` | Remove dist/                          |
 | `pnpm start` | Clean, build, and start function host |
 
 ## Configuration
@@ -82,6 +82,7 @@ Commit both the EF Core migration and the updated Prisma schema together.
 ### CI enforcement
 
 CI runs a `schema-drift` job that:
+
 1. Spins up a SQL Server instance
 2. Applies all EF Core migrations
 3. Runs `prisma db pull` against that database

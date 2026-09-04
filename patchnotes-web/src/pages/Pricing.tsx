@@ -1,48 +1,41 @@
-import { useStytchUser } from '@stytch/react'
-import { Link, useNavigate } from '@tanstack/react-router'
-import { Check, Sparkles } from 'lucide-react'
-import {
-  AppHeader,
-  Breadcrumb,
-  Container,
-  Button,
-  Card,
-} from '../components/ui'
-import { useSubscriptionStore } from '../stores/subscriptionStore'
-import { useGeofencing } from '../hooks/useGeofencing'
+import { useStytchUser } from "@stytch/react";
+import { Link, useNavigate } from "@tanstack/react-router";
+import { Check, Sparkles } from "lucide-react";
+import { AppHeader, Breadcrumb, Container, Button, Card } from "../components/ui";
+import { useSubscriptionStore } from "../stores/subscriptionStore";
+import { useGeofencing } from "../hooks/useGeofencing";
 
 const FREE_FEATURES = [
-  'Track up to 5 packages',
-  'AI-powered release summaries',
-  'Version grouping & filtering',
-  'No advertisements',
-]
+  "Track up to 5 packages",
+  "AI-powered release summaries",
+  "Version grouping & filtering",
+  "No advertisements",
+];
 
 const PRO_FEATURES = [
-  'Everything in Free',
-  'Track unlimited packages',
-  'Weekly email digest',
-  'Priority support',
-]
+  "Everything in Free",
+  "Track unlimited packages",
+  "Weekly email digest",
+  "Priority support",
+];
 
 export function Pricing() {
-  const { user, isInitialized } = useStytchUser()
-  const { isPro, isLoading, startCheckout, openPortal } = useSubscriptionStore()
-  const { isAllowed: isGeofencingAllowed, isLoading: isGeofencingLoading } =
-    useGeofencing()
-  const navigate = useNavigate()
+  const { user, isInitialized } = useStytchUser();
+  const { isPro, isLoading, startCheckout, openPortal } = useSubscriptionStore();
+  const { isAllowed: isGeofencingAllowed, isLoading: isGeofencingLoading } = useGeofencing();
+  const navigate = useNavigate();
 
   const handleUpgrade = () => {
     if (!user) {
-      navigate({ to: '/login', search: { returnUrl: '/pricing' } })
-      return
+      void navigate({ to: "/login", search: { returnUrl: "/pricing" } });
+      return;
     }
-    startCheckout()
-  }
+    startCheckout();
+  };
 
   const handleManageSubscription = () => {
-    openPortal()
-  }
+    openPortal();
+  };
 
   return (
     <div className="min-h-screen bg-surface-secondary">
@@ -55,8 +48,7 @@ export function Pricing() {
               Simple, transparent pricing
             </h1>
             <p className="text-lg text-text-secondary max-w-2xl mx-auto">
-              Start free and upgrade when you need more. No hidden fees, cancel
-              anytime.
+              Start free and upgrade when you need more. No hidden fees, cancel anytime.
             </p>
           </div>
 
@@ -64,13 +56,9 @@ export function Pricing() {
             {/* Free Tier */}
             <Card className="relative flex flex-col">
               <div className="mb-6">
-                <h2 className="text-xl font-semibold text-text-primary mb-2">
-                  Free
-                </h2>
+                <h2 className="text-xl font-semibold text-text-primary mb-2">Free</h2>
                 <div className="flex items-baseline gap-1">
-                  <span className="text-4xl font-bold text-text-primary">
-                    $0
-                  </span>
+                  <span className="text-4xl font-bold text-text-primary">$0</span>
                   <span className="text-text-secondary">/forever</span>
                 </div>
               </div>
@@ -86,31 +74,17 @@ export function Pricing() {
 
               <div className="mt-auto">
                 {!isInitialized ? (
-                  <Button
-                    variant="secondary"
-                    size="lg"
-                    className="w-full"
-                    disabled
-                  >
+                  <Button variant="secondary" size="lg" className="w-full" disabled>
                     Loading...
                   </Button>
                 ) : !user ? (
-                  <Link
-                    to="/login"
-                    search={{ returnUrl: '/pricing' }}
-                    className="block"
-                  >
+                  <Link to="/login" search={{ returnUrl: "/pricing" }} className="block">
                     <Button variant="secondary" size="lg" className="w-full">
                       Get Started
                     </Button>
                   </Link>
                 ) : (
-                  <Button
-                    variant="secondary"
-                    size="lg"
-                    className="w-full"
-                    disabled
-                  >
+                  <Button variant="secondary" size="lg" className="w-full" disabled>
                     Current Plan
                   </Button>
                 )}
@@ -127,18 +101,12 @@ export function Pricing() {
               </div>
 
               <div className="mb-6">
-                <h2 className="text-xl font-semibold text-text-primary mb-2">
-                  Pro
-                </h2>
+                <h2 className="text-xl font-semibold text-text-primary mb-2">Pro</h2>
                 <div className="flex items-baseline gap-1">
-                  <span className="text-4xl font-bold text-text-primary">
-                    $20
-                  </span>
+                  <span className="text-4xl font-bold text-text-primary">$20</span>
                   <span className="text-text-secondary">/year</span>
                 </div>
-                <p className="text-sm text-text-tertiary mt-1">
-                  Less than $2/month
-                </p>
+                <p className="text-sm text-text-tertiary mt-1">Less than $2/month</p>
               </div>
 
               <ul className="space-y-3 mb-8">
@@ -152,8 +120,8 @@ export function Pricing() {
 
               {isGeofencingAllowed === false && !isPro && (
                 <p className="text-sm text-text-secondary mb-4">
-                  Pro subscription is not available in your region. You can
-                  continue using the free tier.
+                  Pro subscription is not available in your region. You can continue using the free
+                  tier.
                 </p>
               )}
 
@@ -170,20 +138,15 @@ export function Pricing() {
                     onClick={handleManageSubscription}
                     disabled={isLoading}
                   >
-                    {isLoading ? 'Loading...' : 'Manage Subscription'}
+                    {isLoading ? "Loading..." : "Manage Subscription"}
                   </Button>
                 ) : isGeofencingAllowed === false ? (
                   <Button size="lg" className="w-full" disabled>
                     Not Available in Your Region
                   </Button>
                 ) : (
-                  <Button
-                    size="lg"
-                    className="w-full"
-                    onClick={handleUpgrade}
-                    disabled={isLoading}
-                  >
-                    {isLoading ? 'Loading...' : 'Upgrade to Pro'}
+                  <Button size="lg" className="w-full" onClick={handleUpgrade} disabled={isLoading}>
+                    {isLoading ? "Loading..." : "Upgrade to Pro"}
                   </Button>
                 )}
               </div>
@@ -196,5 +159,5 @@ export function Pricing() {
         </Container>
       </main>
     </div>
-  )
+  );
 }

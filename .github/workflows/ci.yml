@@ -12,12 +12,12 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@v5
+        uses: actions/setup-dotnet@v6
         with:
-          dotnet-version: '10.0.x'
+          dotnet-version: "10.0.x"
 
       - name: Restore dependencies
         run: dotnet restore PatchNotes.slnx
@@ -93,7 +93,7 @@ jobs:
         working-directory: patchnotes-web
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v5
@@ -101,10 +101,10 @@ jobs:
           version: 10.28.0
 
       - name: Setup Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v7
         with:
-          node-version: '22'
-          cache: 'pnpm'
+          node-version: "22"
+          cache: "pnpm"
           cache-dependency-path: pnpm-lock.yaml
 
       - name: Install dependencies
@@ -118,11 +118,18 @@ jobs:
             exit 1
           }
 
+      # oxlint is configured at the repo root and covers both packages, so this
+      # runs from there. Type-aware linting is enabled via options.typeAware in
+      # .oxlintrc.json, not a flag here.
       - name: Lint
         run: pnpm lint
+        working-directory: ${{ github.workspace }}
 
+      # oxfmt is configured at the repo root and covers YAML, Markdown and JSON
+      # as well as the TypeScript packages, so this one step runs from there.
       - name: Format check
         run: pnpm format:check
+        working-directory: ${{ github.workspace }}
 
       - name: Run tests
         run: pnpm test:run
@@ -139,7 +146,7 @@ jobs:
         working-directory: patchnotes-email
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v5
@@ -147,10 +154,10 @@ jobs:
           version: 10.28.0
 
       - name: Setup Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v7
         with:
-          node-version: '22'
-          cache: 'pnpm'
+          node-version: "22"
+          cache: "pnpm"
           cache-dependency-path: pnpm-lock.yaml
 
       - name: Install dependencies
@@ -179,12 +186,12 @@ jobs:
           --health-start-period 30s
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@v5
+        uses: actions/setup-dotnet@v6
         with:
-          dotnet-version: '10.0.x'
+          dotnet-version: "10.0.x"
 
       - name: Restore and build
         run: dotnet build PatchNotes.slnx --configuration Release
@@ -209,10 +216,10 @@ jobs:
           version: 10.28.0
 
       - name: Setup Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v7
         with:
-          node-version: '22'
-          cache: 'pnpm'
+          node-version: "22"
+          cache: "pnpm"
           cache-dependency-path: pnpm-lock.yaml
 
       - name: Install dependencies

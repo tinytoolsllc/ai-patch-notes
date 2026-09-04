@@ -1,7 +1,7 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { useStytchUser } from '@stytch/react'
-import * as z from 'zod'
-import type { GetReleasesParams, WatchlistPackageDto } from './generated/model'
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useStytchUser } from "@stytch/react";
+import * as z from "zod";
+import type { GetReleasesParams, WatchlistPackageDto } from "./generated/model";
 
 import {
   useGetPackages,
@@ -12,8 +12,8 @@ import {
   getGetPackagesQueryKey,
   deletePackage,
   updatePackage,
-} from './generated/packages/packages'
-import { useGetRelease, useGetReleases } from './generated/releases/releases'
+} from "./generated/packages/packages";
+import { useGetRelease, useGetReleases } from "./generated/releases/releases";
 import {
   useGetWatchlist,
   useGetWatchlistTemplates,
@@ -22,11 +22,11 @@ import {
   removeFromWatchlist,
   addToWatchlistFromGitHub,
   applyWatchlistTemplate,
-} from './generated/watchlist/watchlist'
+} from "./generated/watchlist/watchlist";
 import {
   searchGitHubRepositoriesUser,
   getSearchGitHubRepositoriesUserQueryKey,
-} from './generated/git-hub-search/git-hub-search'
+} from "./generated/git-hub-search/git-hub-search";
 import {
   resetPackageSummaries,
   resetPackageReleases,
@@ -35,9 +35,9 @@ import {
   useDisablePackageSync,
   useTriggerPackageSync,
   getGetPackagesHealthQueryKey,
-} from './generated/admin-packages/admin-packages'
-import { useGetFeed, getGetFeedQueryOptions } from './generated/feed/feed'
-import { GetFeedResponse } from './generated/feed/feed.zod'
+} from "./generated/admin-packages/admin-packages";
+import { useGetFeed, getGetFeedQueryOptions } from "./generated/feed/feed";
+import { GetFeedResponse } from "./generated/feed/feed.zod";
 
 import {
   GetPackagesResponse,
@@ -45,28 +45,22 @@ import {
   GetPackageReleasesResponse,
   GetPackagesByOwnerResponse,
   GetPackageByOwnerRepoResponse,
-} from './generated/packages/packages.zod'
-import {
-  GetReleaseResponse,
-  GetReleasesResponse,
-} from './generated/releases/releases.zod'
+} from "./generated/packages/packages.zod";
+import { GetReleaseResponse, GetReleasesResponse } from "./generated/releases/releases.zod";
 import {
   GetWatchlistResponse,
   GetWatchlistTemplatesResponse,
-} from './generated/watchlist/watchlist.zod'
+} from "./generated/watchlist/watchlist.zod";
 
 // ── Helpers ─────────────────────────────────────────────────
 
-function validateResponse<T extends z.ZodType>(
-  schema: T,
-  data: unknown
-): z.output<T> {
-  const result = schema.safeParse(data)
+function validateResponse<T extends z.ZodType>(schema: T, data: unknown): z.output<T> {
+  const result = schema.safeParse(data);
   if (!result.success) {
-    console.error('[Zod validation error]', z.prettifyError(result.error))
-    throw result.error
+    console.error("[Zod validation error]", z.prettifyError(result.error));
+    throw result.error;
   }
-  return result.data
+  return result.data;
 }
 
 // ── Query Hooks ──────────────────────────────────────────────
@@ -76,56 +70,58 @@ export function usePackages() {
     query: {
       select: (res) => validateResponse(GetPackagesResponse, res.data).items,
     },
-  })
+  });
 }
 
 export function usePackage(id: string) {
   return useGetPackage(id, {
     query: {
+      enabled: !!id,
       select: (res) => validateResponse(GetPackageResponse, res.data),
     },
-  })
+  });
 }
 
 interface ReleasesOptions {
-  packages?: string[]
-  days?: number
-  excludePrerelease?: boolean
-  majorVersion?: number
+  packages?: string[];
+  days?: number;
+  excludePrerelease?: boolean;
+  majorVersion?: number;
 }
 
 export function useReleases(options?: ReleasesOptions) {
   const params: GetReleasesParams | undefined = options
     ? {
-        packages: options.packages?.join(','),
+        packages: options.packages?.join(","),
         days: options.days,
         excludePrerelease: options.excludePrerelease,
         majorVersion: options.majorVersion,
       }
-    : undefined
+    : undefined;
 
   return useGetReleases(params, {
     query: {
       select: (res) => validateResponse(GetReleasesResponse, res.data).items,
     },
-  })
+  });
 }
 
 export function useRelease(id: string) {
   return useGetRelease(id, {
     query: {
+      enabled: !!id,
       select: (res) => validateResponse(GetReleaseResponse, res.data),
     },
-  })
+  });
 }
 
 export function usePackageReleases(packageId: string) {
   return useGetPackageReleases(packageId, undefined, {
     query: {
-      select: (res) =>
-        validateResponse(GetPackageReleasesResponse, res.data).items,
+      enabled: !!packageId,
+      select: (res) => validateResponse(GetPackageReleasesResponse, res.data).items,
     },
-  })
+  });
 }
 
 // ── Owner/Repo Query Hooks ──────────────────────────────────
@@ -133,46 +129,45 @@ export function usePackageReleases(packageId: string) {
 export function usePackagesByOwner(owner: string) {
   return useGetPackagesByOwner(owner, undefined, {
     query: {
-      select: (res) =>
-        validateResponse(GetPackagesByOwnerResponse, res.data).items,
+      enabled: !!owner,
+      select: (res) => validateResponse(GetPackagesByOwnerResponse, res.data).items,
     },
-  })
+  });
 }
 
 export function usePackageByOwnerRepo(
   owner: string,
   repo: string,
   opts?: {
-    refetchInterval?:
-      number | false | ((query: { state: { data: unknown } }) => number | false)
-  }
+    refetchInterval?: number | false | ((query: { state: { data: unknown } }) => number | false);
+  },
 ) {
   return useGetPackageByOwnerRepo(owner, repo, {
     query: {
-      select: (res) =>
-        validateResponse(GetPackageByOwnerRepoResponse, res.data),
+      enabled: !!(owner && repo),
+      select: (res) => validateResponse(GetPackageByOwnerRepoResponse, res.data),
       ...(opts?.refetchInterval !== undefined && {
         refetchInterval: opts.refetchInterval,
       }),
     },
-  })
+  });
 }
 
 // ── Mutation Hooks ───────────────────────────────────────────
 
 export function useDeletePackage() {
-  const queryClient = useQueryClient()
+  const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: (id: string) => deletePackage(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: getGetPackagesQueryKey() })
+      void queryClient.invalidateQueries({ queryKey: getGetPackagesQueryKey() });
     },
-  })
+  });
 }
 
 export function useUpdatePackage() {
-  const queryClient = useQueryClient()
+  const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: ({
@@ -184,13 +179,13 @@ export function useUpdatePackage() {
       npmName,
       url,
     }: {
-      id: string
-      githubOwner?: string
-      githubRepo?: string
-      tagPrefix?: string
-      name?: string
-      npmName?: string
-      url?: string
+      id: string;
+      githubOwner?: string;
+      githubRepo?: string;
+      tagPrefix?: string;
+      name?: string;
+      npmName?: string;
+      url?: string;
     }) =>
       updatePackage(id, {
         githubOwner: githubOwner ?? null,
@@ -201,134 +196,130 @@ export function useUpdatePackage() {
         url: url ?? null,
       }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: getGetPackagesQueryKey() })
+      void queryClient.invalidateQueries({ queryKey: getGetPackagesQueryKey() });
     },
-  })
+  });
 }
 
 export function useResetSummaries() {
-  const queryClient = useQueryClient()
+  const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: (id: string) => resetPackageSummaries(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: getGetPackagesQueryKey() })
+      void queryClient.invalidateQueries({ queryKey: getGetPackagesQueryKey() });
     },
-  })
+  });
 }
 
 export function useResetReleases() {
-  const queryClient = useQueryClient()
+  const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: (id: string) => resetPackageReleases(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: getGetPackagesQueryKey() })
+      void queryClient.invalidateQueries({ queryKey: getGetPackagesQueryKey() });
     },
-  })
+  });
 }
 
 // ── Watchlist Hooks ──────────────────────────────────────────
 
 export function useWatchlist() {
-  const { user } = useStytchUser()
+  const { user } = useStytchUser();
   return useGetWatchlist({
     query: {
       enabled: !!user,
       select: (res) => validateResponse(GetWatchlistResponse, res.data),
     },
-  })
+  });
 }
 
 export function useWatchlistTemplates() {
   return useGetWatchlistTemplates({
     query: {
-      select: (res) =>
-        validateResponse(GetWatchlistTemplatesResponse, res.data),
+      select: (res) => validateResponse(GetWatchlistTemplatesResponse, res.data),
     },
-  })
+  });
 }
 
 export function useAddToWatchlist() {
-  const queryClient = useQueryClient()
+  const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: (packageId: string) => addToWatchlist(packageId),
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: getGetWatchlistQueryKey() })
-      queryClient.invalidateQueries({ queryKey: ['/api/feed'] })
+      void queryClient.invalidateQueries({ queryKey: getGetWatchlistQueryKey() });
+      void queryClient.invalidateQueries({ queryKey: ["/api/feed"] });
     },
-  })
+  });
 }
 
 export function useRemoveFromWatchlist() {
-  const queryClient = useQueryClient()
+  const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: (packageId: string) => removeFromWatchlist(packageId),
     onMutate: async (packageId) => {
-      await queryClient.cancelQueries({ queryKey: getGetWatchlistQueryKey() })
-      const previous = queryClient.getQueryData(getGetWatchlistQueryKey())
+      await queryClient.cancelQueries({ queryKey: getGetWatchlistQueryKey() });
+      const previous = queryClient.getQueryData(getGetWatchlistQueryKey());
       queryClient.setQueryData(
         getGetWatchlistQueryKey(),
         (old: { data: WatchlistPackageDto[] } | undefined) =>
-          old
-            ? { ...old, data: old.data.filter((pkg) => pkg.id !== packageId) }
-            : old
-      )
-      return { previous }
+          old ? { ...old, data: old.data.filter((pkg) => pkg.id !== packageId) } : old,
+      );
+      return { previous };
     },
     onError: (_err, _packageId, context) => {
       if (context?.previous) {
-        queryClient.setQueryData(getGetWatchlistQueryKey(), context.previous)
+        queryClient.setQueryData(getGetWatchlistQueryKey(), context.previous);
       }
     },
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: getGetWatchlistQueryKey() })
-      queryClient.invalidateQueries({ queryKey: ['/api/feed'] })
+      void queryClient.invalidateQueries({ queryKey: getGetWatchlistQueryKey() });
+      void queryClient.invalidateQueries({ queryKey: ["/api/feed"] });
     },
-  })
+  });
 }
 
 export function useAddFromGithub() {
-  const queryClient = useQueryClient()
+  const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: ({ owner, repo }: { owner: string; repo: string }) =>
       addToWatchlistFromGitHub(owner, repo),
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: getGetWatchlistQueryKey() })
-      queryClient.invalidateQueries({ queryKey: getGetPackagesQueryKey() })
+      void queryClient.invalidateQueries({ queryKey: getGetWatchlistQueryKey() });
+      void queryClient.invalidateQueries({ queryKey: getGetPackagesQueryKey() });
     },
-  })
+  });
 }
 
 export function useApplyTemplate() {
-  const queryClient = useQueryClient()
+  const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: (templateId: string) => applyWatchlistTemplate({ templateId }),
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: getGetWatchlistQueryKey() })
-      queryClient.invalidateQueries({ queryKey: ['/api/feed'] })
+      void queryClient.invalidateQueries({ queryKey: getGetWatchlistQueryKey() });
+      void queryClient.invalidateQueries({ queryKey: ["/api/feed"] });
     },
-  })
+  });
 }
 
 export function useGithubSearch(query: string) {
   return useQuery({
     queryKey: getSearchGitHubRepositoriesUserQueryKey({ q: query }),
-    queryFn: ({ signal }) =>
-      searchGitHubRepositoriesUser({ q: query }, { signal }),
+    queryFn: ({ signal }) => searchGitHubRepositoriesUser({ q: query }, { signal }),
     enabled: query.length >= 2,
     staleTime: 60_000,
-  })
+  });
 }
 
 // ── Package Health Hooks ─────────────────────────────────────
 
 export function usePackageHealth() {
-  return useGetPackagesHealth()
+  return useGetPackagesHealth();
 }
 
 export {
@@ -336,17 +327,17 @@ export {
   useDisablePackageSync,
   useTriggerPackageSync,
   getGetPackagesHealthQueryKey,
-}
+};
 
 // ── Re-exports (used directly by pages) ─────────────────────
 
-export { useGetPackages } from './generated/packages/packages'
-export { getGetPackageByOwnerRepoQueryOptions } from './generated/packages/packages'
-export { getGetReleaseQueryOptions } from './generated/releases/releases'
+export { useGetPackages } from "./generated/packages/packages";
+export { getGetPackageByOwnerRepoQueryOptions } from "./generated/packages/packages";
+export { getGetReleaseQueryOptions } from "./generated/releases/releases";
 export {
   useUpdateEmailTemplate,
   getGetEmailTemplatesQueryKey,
-} from './generated/email-templates/email-templates'
+} from "./generated/email-templates/email-templates";
 export {
   useGetCurrentUser,
   useUpdateCurrentUser,
@@ -354,14 +345,14 @@ export {
   useUpdateEmailPreferences,
   getGetEmailPreferencesQueryKey,
   getGetCurrentUserQueryKey,
-} from './generated/users/users'
+} from "./generated/users/users";
 
 // ── Feed Hook ───────────────────────────────────────────────
 
-export type { FeedResponseDto, FeedGroupDto } from './generated/model'
+export type { FeedResponseDto, FeedGroupDto } from "./generated/model";
 
 interface FeedOptions {
-  excludePrerelease?: boolean
+  excludePrerelease?: boolean;
 }
 
 export function useFeed(options?: FeedOptions) {
@@ -369,7 +360,7 @@ export function useFeed(options?: FeedOptions) {
     query: {
       select: (res) => validateResponse(GetFeedResponse, res.data),
     },
-  })
+  });
 }
 
-export { getGetFeedQueryOptions }
+export { getGetFeedQueryOptions };

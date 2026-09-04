@@ -75,6 +75,7 @@ Stytch's GitHub OAuth start endpoint supports a `custom_scopes` parameter, which
 8. User selects which repos to add to their watchlist
 
 **References:**
+
 - [Stytch GitHub OAuth Start](https://stytch.com/docs/api/oauth-github-start) — documents `custom_scopes` parameter
 - [Stytch OAuth Authenticate](https://stytch.com/docs/api/oauth-authenticate) — session merging via `session_jwt`
 

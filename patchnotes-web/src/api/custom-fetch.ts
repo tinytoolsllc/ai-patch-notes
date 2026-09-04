@@ -1,4 +1,4 @@
-import { ApiError, API_ROOT } from './client.ts'
+import { ApiError, API_ROOT } from "./client.ts";
 
 /**
  * Custom fetch instance for Orval-generated API hooks.
@@ -9,37 +9,39 @@ import { ApiError, API_ROOT } from './client.ts'
  * The generated URLs already include the /api prefix, so we prepend only
  * the base URL (e.g. https://api.myreleasenotes.ai) without /api.
  */
-export const customFetch = async <T>(
-  url: string,
-  init: RequestInit
-): Promise<T> => {
+export const customFetch = async <T>(url: string, init: RequestInit): Promise<T> => {
+  // `HeadersInit` is `string[][] | Record<string, string> | Headers`, and object
+  // spread mangles two of those three: a Headers instance has no own enumerable
+  // properties so it spreads to `{}` and every header is silently dropped, while
+  // an array of pairs spreads to `{0: [...], 1: [...]}`. Merge via the Headers
+  // API, which accepts all three forms.
+  const headers = new Headers({ "Content-Type": "application/json" });
+  new Headers(init.headers).forEach((value, key) => headers.set(key, value));
+
   const config: RequestInit = {
     ...init,
-    credentials: 'include',
-    headers: {
-      'Content-Type': 'application/json',
-      ...init.headers,
-    },
-  }
+    credentials: "include",
+    headers,
+  };
 
-  let response: Response
+  let response: Response;
   try {
-    response = await fetch(`${API_ROOT}${url}`, config)
+    response = await fetch(`${API_ROOT}${url}`, config);
   } catch (error) {
     throw new ApiError(
       0,
-      error instanceof Error ? error.message : 'Network request failed',
+      error instanceof Error ? error.message : "Network request failed",
       undefined,
-      true
-    )
+      true,
+    );
   }
 
   if (!response.ok) {
-    const errorData = await response.json().catch(() => null)
-    throw new ApiError(response.status, response.statusText, errorData)
+    const errorData = await response.json().catch(() => null);
+    throw new ApiError(response.status, response.statusText, errorData);
   }
 
-  const data = response.status === 204 ? undefined : await response.json()
+  const data = response.status === 204 ? undefined : await response.json();
 
-  return { data, status: response.status, headers: response.headers } as T
-}
+  return { data, status: response.status, headers: response.headers } as T;
+};

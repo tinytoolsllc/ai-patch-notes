@@ -6,43 +6,43 @@ This document lists all environment variables needed for each service in the ai-
 
 ### Stytch Authentication
 
-| Config Key | Env Variable | Required | Description |
-|------------|-------------|----------|-------------|
-| `Stytch:ProjectId` | `Stytch__ProjectId` | Yes | Stytch project ID for authentication |
-| `Stytch:Secret` | `Stytch__Secret` | Yes | Stytch project secret |
-| `Stytch:WebhookSecret` | `Stytch__WebhookSecret` | Yes | Secret for verifying Stytch webhook signatures |
+| Config Key             | Env Variable            | Required | Description                                    |
+| ---------------------- | ----------------------- | -------- | ---------------------------------------------- |
+| `Stytch:ProjectId`     | `Stytch__ProjectId`     | Yes      | Stytch project ID for authentication           |
+| `Stytch:Secret`        | `Stytch__Secret`        | Yes      | Stytch project secret                          |
+| `Stytch:WebhookSecret` | `Stytch__WebhookSecret` | Yes      | Secret for verifying Stytch webhook signatures |
 
 All three Stytch variables are validated at startup; the application will throw if any are missing.
 
 ### AI / LLM
 
-| Config Key | Env Variable | Required | Default | Description |
-|------------|-------------|----------|---------|-------------|
-| `AI:ApiKey` | `AI__ApiKey` | Yes | - | API key for the AI/LLM provider |
-| `AI:BaseUrl` | `AI__BaseUrl` | No | `https://api.openai.com/v1` | Base URL for the AI API |
-| `AI:Model` | `AI__Model` | No | `gpt-4o-mini` | Model name to use for patch note generation |
+| Config Key   | Env Variable  | Required | Default                     | Description                                 |
+| ------------ | ------------- | -------- | --------------------------- | ------------------------------------------- |
+| `AI:ApiKey`  | `AI__ApiKey`  | Yes      | -                           | API key for the AI/LLM provider             |
+| `AI:BaseUrl` | `AI__BaseUrl` | No       | `https://api.openai.com/v1` | Base URL for the AI API                     |
+| `AI:Model`   | `AI__Model`   | No       | `gpt-4o-mini`               | Model name to use for patch note generation |
 
 ### Stripe
 
-| Config Key | Env Variable | Required | Description |
-|------------|-------------|----------|-------------|
-| `Stripe:SecretKey` | `Stripe__SecretKey` | Yes | Stripe secret API key (`sk_live_...` or `sk_test_...`) |
-| `Stripe:WebhookSecret` | `Stripe__WebhookSecret` | Yes | Stripe webhook signing secret (`whsec_...`) |
-| `Stripe:PriceId` | `Stripe__PriceId` | No | Overrides the default PatchNotes Pro price ID from appsettings.json |
+| Config Key             | Env Variable            | Required | Description                                                         |
+| ---------------------- | ----------------------- | -------- | ------------------------------------------------------------------- |
+| `Stripe:SecretKey`     | `Stripe__SecretKey`     | Yes      | Stripe secret API key (`sk_live_...` or `sk_test_...`)              |
+| `Stripe:WebhookSecret` | `Stripe__WebhookSecret` | Yes      | Stripe webhook signing secret (`whsec_...`)                         |
+| `Stripe:PriceId`       | `Stripe__PriceId`       | No       | Overrides the default PatchNotes Pro price ID from appsettings.json |
 
 The secret key and webhook secret are configured on Azure App Service. The price ID defaults to the PatchNotes Pro annual plan in `appsettings.json`.
 
 ### GitHub
 
-| Config Key | Env Variable | Required | Description |
-|------------|-------------|----------|-------------|
-| `GitHub:Token` | `GitHub__Token` | Yes | GitHub personal access token for fetching release data |
+| Config Key     | Env Variable    | Required | Description                                            |
+| -------------- | --------------- | -------- | ------------------------------------------------------ |
+| `GitHub:Token` | `GitHub__Token` | Yes      | GitHub personal access token for fetching release data |
 
 ### Database
 
-| Config Key | Env Variable | Required | Default | Description |
-|------------|-------------|----------|---------|-------------|
-| `ConnectionStrings:PatchNotes` | `ConnectionStrings__PatchNotes` | No | `Data Source=patchnotes.db` (SQLite) | Database connection string. Supports SQLite (file path ending in `.db`) and SQL Server |
+| Config Key                     | Env Variable                    | Required | Default                              | Description                                                                            |
+| ------------------------------ | ------------------------------- | -------- | ------------------------------------ | -------------------------------------------------------------------------------------- |
+| `ConnectionStrings:PatchNotes` | `ConnectionStrings__PatchNotes` | No       | `Data Source=patchnotes.db` (SQLite) | Database connection string. Supports SQLite (file path ending in `.db`) and SQL Server |
 
 When no connection string is provided, the app defaults to a local SQLite database. For production, supply a SQL Server connection string.
 
@@ -50,10 +50,10 @@ When no connection string is provided, the app defaults to a local SQLite databa
 
 Location: `patchnotes-web/.env.local` (or `.env.development`)
 
-| Variable | Required | Default | Description |
-|----------|----------|---------|-------------|
-| `VITE_STYTCH_PUBLIC_TOKEN` | Yes | - | Stytch public token for client-side authentication |
-| `VITE_API_URL` | Yes | `/api` | Base URL for the PatchNotes API. Set as a GitHub Actions variable (`VITE_API_URL`) for production builds. Local devbox: `http://notes-api.devbox.home.arpa/api` (set in `.env.local`) |
+| Variable                   | Required | Default | Description                                                                                                                                                                           |
+| -------------------------- | -------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `VITE_STYTCH_PUBLIC_TOKEN` | Yes      | -       | Stytch public token for client-side authentication                                                                                                                                    |
+| `VITE_API_URL`             | Yes      | `/api`  | Base URL for the PatchNotes API. Set as a GitHub Actions variable (`VITE_API_URL`) for production builds. Local devbox: `http://notes-api.devbox.home.arpa/api` (set in `.env.local`) |
 
 ## Local Development (.envrc)
 

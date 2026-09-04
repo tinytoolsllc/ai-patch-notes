@@ -1,34 +1,25 @@
-import { type InputHTMLAttributes, forwardRef } from 'react'
+import { type InputHTMLAttributes, forwardRef } from "react";
 
-interface CheckboxProps extends Omit<
-  InputHTMLAttributes<HTMLInputElement>,
-  'type'
-> {
-  label?: string
-  description?: string
+interface CheckboxProps extends Omit<InputHTMLAttributes<HTMLInputElement>, "type"> {
+  label?: string;
+  description?: string;
 }
 
 export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
-  ({ label, description, className = '', id, ...props }, ref) => {
-    const inputId = id || label?.toLowerCase().replace(/\s+/g, '-')
+  ({ label, description, className = "", id, ...props }, ref) => {
+    const inputId = id || label?.toLowerCase().replace(/\s+/g, "-");
 
     return (
       <label
         htmlFor={inputId}
         className={`
           group flex items-start gap-3 cursor-pointer select-none
-          ${props.disabled ? 'opacity-50 cursor-not-allowed' : ''}
+          ${props.disabled ? "opacity-50 cursor-not-allowed" : ""}
           ${className}
         `}
       >
         <div className="relative flex-shrink-0 mt-0.5">
-          <input
-            ref={ref}
-            type="checkbox"
-            id={inputId}
-            className="peer sr-only"
-            {...props}
-          />
+          <input ref={ref} type="checkbox" id={inputId} className="peer sr-only" {...props} />
           <div
             className={`
               w-5 h-5 rounded-md border-2 transition-all duration-200 ease-out
@@ -60,20 +51,16 @@ export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
         {(label || description) && (
           <div className="flex flex-col gap-0.5 min-w-0">
             {label && (
-              <span className="text-sm font-medium text-text-primary leading-tight">
-                {label}
-              </span>
+              <span className="text-sm font-medium text-text-primary leading-tight">{label}</span>
             )}
             {description && (
-              <span className="text-xs text-text-tertiary leading-tight">
-                {description}
-              </span>
+              <span className="text-xs text-text-tertiary leading-tight">{description}</span>
             )}
           </div>
         )}
       </label>
-    )
-  }
-)
+    );
+  },
+);
 
-Checkbox.displayName = 'Checkbox'
+Checkbox.displayName = "Checkbox";

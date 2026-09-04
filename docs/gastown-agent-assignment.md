@@ -32,6 +32,7 @@ Maps infrastructure roles to agent aliases. Use this to control which model hand
 ```
 
 Typical mapping strategy:
+
 - **mayor, polecat**: High-capability models (Opus) since they do complex reasoning and code generation
 - **witness, deacon, dog**: Cheaper/faster models (Haiku, Sonnet) since they handle coordination, health checks, and plugin dispatch
 - **refinery**: Mid-tier model (Sonnet) for merge decisions and code review

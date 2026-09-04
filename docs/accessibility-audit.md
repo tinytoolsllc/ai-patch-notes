@@ -76,6 +76,7 @@ Spacing: 4px between dots (required: 24px safe area)
 ## Passing Audits
 
 All other accessibility checks passed, including:
+
 - `<html>` has valid `lang` attribute
 - Images have `alt` text
 - Links have descriptive text

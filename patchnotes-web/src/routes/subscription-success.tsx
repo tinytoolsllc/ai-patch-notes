@@ -1,20 +1,20 @@
-/* eslint-disable react-refresh/only-export-components */
-import { createFileRoute, Link } from '@tanstack/react-router'
-import { useEffect } from 'react'
-import { CheckCircle } from 'lucide-react'
-import { AppHeader, Container, Button, Card } from '../components/ui'
-import { useSubscriptionStore } from '../stores/subscriptionStore'
+/* oxlint-disable react/only-export-components */
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { useEffect } from "react";
+import { CheckCircle } from "lucide-react";
+import { AppHeader, Container, Button, Card } from "../components/ui";
+import { useSubscriptionStore } from "../stores/subscriptionStore";
 
 function SubscriptionSuccess() {
-  const { checkSubscription } = useSubscriptionStore()
+  const { checkSubscription } = useSubscriptionStore();
 
   // Refresh subscription status on mount
   useEffect(
     function refreshSubscriptionStatus() {
-      checkSubscription()
+      void checkSubscription();
     },
-    [checkSubscription]
-  )
+    [checkSubscription],
+  );
 
   return (
     <div className="min-h-screen bg-surface-secondary">
@@ -32,8 +32,8 @@ function SubscriptionSuccess() {
             </h1>
 
             <p className="text-text-secondary mb-8">
-              Thank you for subscribing. You now have access to unlimited
-              package tracking and all Pro features.
+              Thank you for subscribing. You now have access to unlimited package tracking and all
+              Pro features.
             </p>
 
             <Link to="/">
@@ -43,9 +43,9 @@ function SubscriptionSuccess() {
         </Container>
       </main>
     </div>
-  )
+  );
 }
 
-export const Route = createFileRoute('/subscription-success')({
+export const Route = createFileRoute("/subscription-success")({
   component: SubscriptionSuccess,
-})
+});

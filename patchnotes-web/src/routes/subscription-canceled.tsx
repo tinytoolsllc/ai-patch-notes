@@ -1,7 +1,7 @@
-/* eslint-disable react-refresh/only-export-components */
-import { createFileRoute, Link } from '@tanstack/react-router'
-import { XCircle } from 'lucide-react'
-import { AppHeader, Container, Button, Card } from '../components/ui'
+/* oxlint-disable react/only-export-components */
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { XCircle } from "lucide-react";
+import { AppHeader, Container, Button, Card } from "../components/ui";
 
 function SubscriptionCanceled() {
   return (
@@ -15,13 +15,11 @@ function SubscriptionCanceled() {
               <XCircle className="w-8 h-8 text-amber-600 dark:text-amber-400" />
             </div>
 
-            <h1 className="text-2xl font-bold text-text-primary mb-3">
-              Checkout Canceled
-            </h1>
+            <h1 className="text-2xl font-bold text-text-primary mb-3">Checkout Canceled</h1>
 
             <p className="text-text-secondary mb-8">
-              No worries! Your subscription was not created. You can upgrade to
-              Pro anytime when you're ready.
+              No worries! Your subscription was not created. You can upgrade to Pro anytime when
+              you're ready.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
@@ -36,9 +34,9 @@ function SubscriptionCanceled() {
         </Container>
       </main>
     </div>
-  )
+  );
 }
 
-export const Route = createFileRoute('/subscription-canceled')({
+export const Route = createFileRoute("/subscription-canceled")({
   component: SubscriptionCanceled,
-})
+});

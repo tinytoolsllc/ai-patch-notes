@@ -1,6 +1,6 @@
-import { createLazyFileRoute } from '@tanstack/react-router'
-import { WatchlistPage } from '../pages/WatchlistPage'
+import { createLazyFileRoute } from "@tanstack/react-router";
+import { WatchlistPage } from "../pages/WatchlistPage";
 
-export const Route = createLazyFileRoute('/watchlist')({
+export const Route = createLazyFileRoute("/watchlist")({
   component: WatchlistPage,
-})
+});

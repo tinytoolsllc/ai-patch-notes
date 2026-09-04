@@ -259,12 +259,12 @@ The `functionTimeout` is set to 10 minutes (the Consumption plan maximum). If sy
 
 The timer trigger uses a **6-field NCrontab expression** (`{second} {minute} {hour} {day} {month} {day-of-week}`):
 
-| Schedule | Expression | Description |
-|----------|-----------|-------------|
-| Every 6 hours | `0 0 */6 * * *` | Midnight, 6am, noon, 6pm UTC |
-| Every hour | `0 0 * * * *` | Top of every hour |
-| Twice daily | `0 0 6,18 * * *` | 6am and 6pm UTC |
-| Once daily (3am) | `0 0 3 * * *` | 3:00 AM UTC |
+| Schedule         | Expression       | Description                  |
+| ---------------- | ---------------- | ---------------------------- |
+| Every 6 hours    | `0 0 */6 * * *`  | Midnight, 6am, noon, 6pm UTC |
+| Every hour       | `0 0 * * * *`    | Top of every hour            |
+| Twice daily      | `0 0 6,18 * * *` | 6am and 6pm UTC              |
+| Once daily (3am) | `0 0 3 * * *`    | 3:00 AM UTC                  |
 
 The schedule is configured in `SyncTimerFunction.cs` via the `TimerTrigger` attribute. To change it without redeploying, use an app setting:
 
@@ -297,7 +297,7 @@ build-sync:
     - name: Setup .NET
       uses: actions/setup-dotnet@v5
       with:
-        dotnet-version: '10.0.x'
+        dotnet-version: "10.0.x"
 
     - name: Publish Function
       run: dotnet publish PatchNotes.Functions/PatchNotes.Functions.csproj --configuration Release --output ./publish/functions

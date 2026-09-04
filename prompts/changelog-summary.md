@@ -75,19 +75,24 @@ Format:
 For Vite 8.0.0-beta:
 
 > ## TL;DR
+>
 > Rolldown (Rust-based build bundler) beta sheds legacy behavior so builds are more predictable.
 >
 > ## Breaking
+>
 > - Removed import.meta.hot.accept fallback (hot module reload API) and inlineDynamicImport (legacy dynamic import option).
 > - Removed experimental.enableNativePlugin resolver option (native plugin toggle).
 >
 > ## New
+>
 > - Manifest now lists CSS entry-point assets (build output map).
 > - Hooks are now separate per environment (plugin lifecycle callbacks).
 >
 > ## Fixes Worth Knowing
+>
 > - CSS asset paths and relative `new URL` mapping now resolve correctly (relative asset URLs).
 >
 > ## Before You Upgrade
+>
 > - Update HMR accept calls to explicit module paths.
 > - Remove `inlineDynamicImport` and `experimental.enableNativePlugin` from config.

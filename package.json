@@ -1,17 +1,26 @@
 {
   "private": true,
   "scripts": {
+    "lint": "oxlint",
+    "format": "oxfmt",
+    "format:check": "oxfmt --check",
     "verify": "node scripts/verify.mjs"
   },
+  "devDependencies": {
+    "@tanstack/eslint-plugin-router": "^1.162.0",
+    "oxfmt": "^0.66.0",
+    "oxlint": "^1.81.0",
+    "oxlint-tsgolint": "^7.0.2001"
+  },
   "devEngines": {
+    "packageManager": {
+      "name": "pnpm",
+      "version": "10.28.0"
+    },
     "runtime": {
       "name": "node",
       "version": ">=22",
       "onFail": "error"
-    },
-    "packageManager": {
-      "name": "pnpm",
-      "version": "10.28.0"
     }
   },
   "pnpm": {

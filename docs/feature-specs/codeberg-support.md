@@ -10,14 +10,14 @@ PatchNotes currently only supports GitHub-hosted repositories. Codeberg is a gro
 
 Codeberg runs Forgejo (a Gitea hard-fork). Its REST API lives at `https://codeberg.org/api/v1/` and closely mirrors the Gitea API. Key details for release ingestion:
 
-| Aspect | Detail |
-|--------|--------|
-| **List releases** | `GET /api/v1/repos/{owner}/{repo}/releases` |
-| **Pagination** | `page` (1-indexed) + `limit` (default 30, max 50). `Link` header + `X-Total-Count` |
-| **Auth (public repos)** | Not required |
-| **Auth (private/drafts)** | `Authorization: token <pat>` |
-| **Rate limit** | ~2000 req / 5 min (HAProxy-level, no `X-RateLimit-*` headers) |
-| **Release fields** | `id`, `tag_name`, `name`, `body`, `draft`, `prerelease`, `published_at`, `assets[]`, `author` |
+| Aspect                    | Detail                                                                                        |
+| ------------------------- | --------------------------------------------------------------------------------------------- |
+| **List releases**         | `GET /api/v1/repos/{owner}/{repo}/releases`                                                   |
+| **Pagination**            | `page` (1-indexed) + `limit` (default 30, max 50). `Link` header + `X-Total-Count`            |
+| **Auth (public repos)**   | Not required                                                                                  |
+| **Auth (private/drafts)** | `Authorization: token <pat>`                                                                  |
+| **Rate limit**            | ~2000 req / 5 min (HAProxy-level, no `X-RateLimit-*` headers)                                 |
+| **Release fields**        | `id`, `tag_name`, `name`, `body`, `draft`, `prerelease`, `published_at`, `assets[]`, `author` |
 
 The release object is structurally similar to GitHub's — `tag_name`, `name`, `body`, `draft`, `prerelease`, `published_at` all map directly.
 
@@ -131,15 +131,15 @@ Key implementation notes:
 Codeberg response → `ForgeRelease` mapping:
 
 | Codeberg field | ForgeRelease field |
-|---|---|
-| `id` | `Id` |
-| `tag_name` | `TagName` |
-| `name` | `Name` |
-| `body` | `Body` |
-| `draft` | `Draft` |
-| `prerelease` | `Prerelease` |
-| `published_at` | `PublishedAt` |
-| `html_url` | `HtmlUrl` |
+| -------------- | ------------------ |
+| `id`           | `Id`               |
+| `tag_name`     | `TagName`          |
+| `name`         | `Name`             |
+| `body`         | `Body`             |
+| `draft`        | `Draft`            |
+| `prerelease`   | `Prerelease`       |
+| `published_at` | `PublishedAt`      |
+| `html_url`     | `HtmlUrl`          |
 
 #### 2c. Configuration
 
@@ -148,7 +148,7 @@ Codeberg response → `ForgeRelease` mapping:
 {
   "Codeberg": {
     "BaseUrl": "https://codeberg.org/api/v1",
-    "Token": ""  // optional, for private repos
+    "Token": "" // optional, for private repos
   }
 }
 ```
@@ -159,16 +159,17 @@ Codeberg response → `ForgeRelease` mapping:
 
 Extend or replace `GitHubUrlParser` to detect the forge from a URL:
 
-| URL pattern | Detected forge |
-|---|---|
-| `github.com/{owner}/{repo}` | GitHub |
-| `codeberg.org/{owner}/{repo}` | Codeberg |
+| URL pattern                   | Detected forge |
+| ----------------------------- | -------------- |
+| `github.com/{owner}/{repo}`   | GitHub         |
+| `codeberg.org/{owner}/{repo}` | Codeberg       |
 
 This is used when adding packages via the admin UI or API. The parser returns `(ForgeType, Owner, Repo)`.
 
 #### 3b. Update Add-Package Flow
 
 The `POST /api/packages` endpoint (and any admin UI) should:
+
 1. Accept a repository URL (not just GitHub owner/repo).
 2. Use `ForgeUrlParser` to detect forge type.
 3. Populate `ForgeType`, `ForgeOwner`, `ForgeRepo` on the new `Package`.

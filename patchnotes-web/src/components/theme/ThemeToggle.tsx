@@ -1,15 +1,15 @@
-import { Sun, Moon } from 'lucide-react'
-import { useTheme } from './useTheme'
-import { Tooltip } from '../ui'
+import { Sun, Moon } from "lucide-react";
+import { useTheme } from "./useTheme";
+import { Tooltip } from "../ui";
 
 export function ThemeToggle() {
-  const { resolvedTheme, setTheme } = useTheme()
+  const { resolvedTheme, setTheme } = useTheme();
 
   const handleToggle = () => {
-    setTheme(resolvedTheme === 'light' ? 'dark' : 'light')
-  }
+    setTheme(resolvedTheme === "light" ? "dark" : "light");
+  };
 
-  const label = `Switch to ${resolvedTheme === 'light' ? 'dark' : 'light'} mode`
+  const label = `Switch to ${resolvedTheme === "light" ? "dark" : "light"} mode`;
 
   return (
     <Tooltip label={label}>
@@ -23,22 +23,22 @@ export function ThemeToggle() {
       >
         <Sun
           className={`absolute h-5 w-5 transition-all duration-300 ${
-            resolvedTheme === 'light'
-              ? 'rotate-0 scale-100 opacity-100'
-              : 'rotate-90 scale-0 opacity-0'
+            resolvedTheme === "light"
+              ? "rotate-0 scale-100 opacity-100"
+              : "rotate-90 scale-0 opacity-0"
           }`}
           strokeWidth={1.5}
         />
 
         <Moon
           className={`absolute h-5 w-5 transition-all duration-300 ${
-            resolvedTheme === 'dark'
-              ? 'rotate-0 scale-100 opacity-100'
-              : '-rotate-90 scale-0 opacity-0'
+            resolvedTheme === "dark"
+              ? "rotate-0 scale-100 opacity-100"
+              : "-rotate-90 scale-0 opacity-0"
           }`}
           strokeWidth={1.5}
         />
       </button>
     </Tooltip>
-  )
+  );
 }

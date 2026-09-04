@@ -8,35 +8,35 @@ import { PrismaClient } from "../../generated/prisma/client.js";
 let prisma: PrismaClient;
 
 function parseAdoConnectionString(connectionString: string): Record<string, string> {
-    const params: Record<string, string> = {};
-    for (const part of connectionString.split(";")) {
-        const idx = part.indexOf("=");
-        if (idx === -1) continue;
-        params[part.substring(0, idx).trim().toLowerCase()] = part.substring(idx + 1).trim();
-    }
-    return params;
+  const params: Record<string, string> = {};
+  for (const part of connectionString.split(";")) {
+    const idx = part.indexOf("=");
+    if (idx === -1) continue;
+    params[part.substring(0, idx).trim().toLowerCase()] = part.substring(idx + 1).trim();
+  }
+  return params;
 }
 
 export function getPrismaClient(): PrismaClient {
-    if (!prisma) {
-        const connectionString = process.env.DATABASE_URL;
-        if (!connectionString) {
-            throw new Error("DATABASE_URL environment variable is required");
-        }
-
-        const p = parseAdoConnectionString(connectionString);
-        const adapter = new PrismaMssql({
-            server: p["server"],
-            database: p["database"],
-            user: p["user id"],
-            password: p["password"],
-            options: {
-                encrypt: p["encrypt"]?.toLowerCase() === "true",
-                trustServerCertificate: p["trustservercertificate"]?.toLowerCase() === "true",
-            },
-        });
-
-        prisma = new PrismaClient({ adapter });
+  if (!prisma) {
+    const connectionString = process.env.DATABASE_URL;
+    if (!connectionString) {
+      throw new Error("DATABASE_URL environment variable is required");
     }
-    return prisma;
+
+    const p = parseAdoConnectionString(connectionString);
+    const adapter = new PrismaMssql({
+      server: p["server"],
+      database: p["database"],
+      user: p["user id"],
+      password: p["password"],
+      options: {
+        encrypt: p["encrypt"]?.toLowerCase() === "true",
+        trustServerCertificate: p["trustservercertificate"]?.toLowerCase() === "true",
+      },
+    });
+
+    prisma = new PrismaClient({ adapter });
+  }
+  return prisma;
 }

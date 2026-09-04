@@ -15,6 +15,7 @@ The backend endpoint (`GitHubSearchRoutes.cs`) is a pure passthrough — validat
 Add an Azure Functions managed API to the SWA that handles GitHub search directly, with an in-memory response cache. This eliminates the .NET backend from the search path entirely.
 
 New flow:
+
 ```
 Client → SWA managed function /api/github-search (cache hit? return)
                                                   (cache miss? → GitHub API → cache + return)
@@ -96,12 +97,14 @@ app.http("github-search", {
       return { status: 502, jsonBody: { error: "GitHub search failed" } };
     }
 
-    const json = await response.json() as { items?: Array<{
-      owner: { login: string };
-      name: string;
-      description: string | null;
-      stargazers_count: number;
-    }> };
+    const json = (await response.json()) as {
+      items?: Array<{
+        owner: { login: string };
+        name: string;
+        description: string | null;
+        stargazers_count: number;
+      }>;
+    };
 
     const results = (json.items ?? []).map((r) => ({
       owner: r.owner.login,
@@ -120,6 +123,7 @@ app.http("github-search", {
 ### Configuration Changes
 
 **`patchnotes-web/public/staticwebapp.config.json`** — add API runtime:
+
 ```json
 {
   "navigationFallback": {
@@ -133,11 +137,13 @@ app.http("github-search", {
 ```
 
 **`.github/workflows/deploy.yml`** — point `api_location` to the new folder:
+
 ```yaml
 api_location: patchnotes-web/api
 ```
 
 **Azure Portal / CLI** — add `GITHUB_PAT` app setting:
+
 ```bash
 az staticwebapp appsettings set --name <app-name> --setting-names "GITHUB_PAT=ghp_..."
 ```
@@ -155,12 +161,14 @@ export function useGithubSearch(query: string) {
     queryFn: async ({ signal }) => {
       const res = await fetch(`/api/github-search?q=${encodeURIComponent(query)}`, { signal });
       if (!res.ok) throw new Error("GitHub search failed");
-      return res.json() as Promise<Array<{
-        owner: string;
-        repo: string;
-        description: string | null;
-        starCount: number;
-      }>>;
+      return res.json() as Promise<
+        Array<{
+          owner: string;
+          repo: string;
+          description: string | null;
+          starCount: number;
+        }>
+      >;
     },
     enabled: query.length >= 2,
     staleTime: 60_000,
@@ -185,6 +193,7 @@ Once the SWA function is live:
 ### Cold Starts
 
 SWA managed functions run on the Consumption plan. Cold starts can be 15-30 seconds on the first request after idle. Mitigations:
+
 - The frontend already has loading states and the 60s React Query staleTime helps
 - Consider increasing `staleTime` to 5 minutes to match the server cache TTL
 - For most users, the function will be warm since others will have already triggered it

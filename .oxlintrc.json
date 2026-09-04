@@ -1,0 +1,39 @@
+{
+  "plugins": ["react", "react-hooks", "typescript", "import"],
+  "jsPlugins": ["@tanstack/eslint-plugin-router"],
+  "options": {
+    "typeAware": true,
+    "reportUnusedDisableDirectives": "error"
+  },
+  "rules": {
+    "react-hooks/rules-of-hooks": "error",
+    "react-hooks/exhaustive-deps": "error",
+    "no-restricted-imports": [
+      "error",
+      {
+        "patterns": [
+          {
+            "group": ["*/api/generated/*", "!*/api/generated/model", "!*/api/generated/model/*"],
+            "message": "Import from api/hooks.ts instead of generated code directly. Only type imports from generated/model/ are allowed."
+          }
+        ]
+      }
+    ],
+    "react/only-export-components": "warn",
+    "@tanstack/router/create-route-property-order": "warn",
+    "@tanstack/router/route-param-names": "error"
+  },
+  "ignorePatterns": [
+    "**/dist",
+    "patchnotes-web/src/api/generated",
+    "patchnotes-web/src/routeTree.gen.ts"
+  ],
+  "overrides": [
+    {
+      "files": ["patchnotes-email/src/lib/templateRenderer.ts"],
+      "rules": {
+        "typescript/no-implied-eval": "off"
+      }
+    }
+  ]
+}

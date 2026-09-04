@@ -11,6 +11,7 @@ To actually reset releases, you must navigate to `/admin/reset` and use the "Res
 ### Suggested fix
 
 Either:
+
 - Add a "Reset Releases" button to the health page (using `useResetReleases` from hooks)
 - Or add a link from the health page to `/admin/reset`
 - Rename the health page "Reset" button to "Re-enable Sync" to clarify its purpose

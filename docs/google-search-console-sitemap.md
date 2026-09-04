@@ -26,10 +26,12 @@ Sitemap: https://api.myreleasenotes.ai/sitemap.xml
 ## Verification
 
 After submitting, Google Search Console will show:
+
 - **Status**: Success / Couldn't fetch / Has errors
 - **Discovered URLs**: number of URLs found in the sitemap
 
 If the status shows an error, check:
+
 - `curl -I https://api.myreleasenotes.ai/sitemap.xml` returns `200` with `Content-Type: application/xml`
 - The XML is valid (no malformed tags or encoding issues)
 - CORS headers allow Google's crawler (the endpoint doesn't require auth, so this should work)

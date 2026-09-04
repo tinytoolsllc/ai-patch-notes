@@ -1,9 +1,9 @@
 interface LogoProps {
-  size?: number
-  className?: string
+  size?: number;
+  className?: string;
 }
 
-export function Logo({ size = 40, className = '' }: LogoProps) {
+export function Logo({ size = 40, className = "" }: LogoProps) {
   return (
     <svg
       width={size}
@@ -25,30 +25,10 @@ export function Logo({ size = 40, className = '' }: LogoProps) {
         strokeWidth="2"
       />
       {/* Spiral binding dots */}
-      <circle
-        cx="18"
-        cy="8"
-        r="2"
-        className="fill-brand-600 dark:fill-brand-400"
-      />
-      <circle
-        cx="28"
-        cy="8"
-        r="2"
-        className="fill-brand-600 dark:fill-brand-400"
-      />
-      <circle
-        cx="38"
-        cy="8"
-        r="2"
-        className="fill-brand-600 dark:fill-brand-400"
-      />
-      <circle
-        cx="48"
-        cy="8"
-        r="2"
-        className="fill-brand-600 dark:fill-brand-400"
-      />
+      <circle cx="18" cy="8" r="2" className="fill-brand-600 dark:fill-brand-400" />
+      <circle cx="28" cy="8" r="2" className="fill-brand-600 dark:fill-brand-400" />
+      <circle cx="38" cy="8" r="2" className="fill-brand-600 dark:fill-brand-400" />
+      <circle cx="48" cy="8" r="2" className="fill-brand-600 dark:fill-brand-400" />
       {/* 3D Box - front face */}
       <path
         d="M24 30L32 26L40 30L40 40L32 44L24 40Z"
@@ -92,5 +72,5 @@ export function Logo({ size = 40, className = '' }: LogoProps) {
         strokeLinecap="round"
       />
     </svg>
-  )
+  );
 }
