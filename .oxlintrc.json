@@ -1,5 +1,6 @@
 {
   "plugins": ["react", "react-hooks", "typescript", "import"],
+  "jsPlugins": ["@tanstack/eslint-plugin-router"],
   "options": {
     "typeAware": true,
     "reportUnusedDisableDirectives": "error"
@@ -18,7 +19,9 @@
         ]
       }
     ],
-    "react/only-export-components": "warn"
+    "react/only-export-components": "warn",
+    "@tanstack/router/create-route-property-order": "warn",
+    "@tanstack/router/route-param-names": "error"
   },
   "ignorePatterns": [
     "**/dist",

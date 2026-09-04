@@ -9,7 +9,7 @@
     "clean": "rimraf dist",
     "prestart": "pnpm clean && pnpm build",
     "start": "func start",
-    "lint": "oxlint src",
+    "lint": "oxlint",
     "test": "vitest run",
     "db:pull": "prisma db pull",
     "db:generate": "prisma generate",
