@@ -46,10 +46,11 @@ const steps = [
   },
   {
     // oxlint is configured at the repo root and covers both packages, so one
-    // root run replaces what used to be two eslint runs. --type-aware is what
-    // brings in tsgolint; a plain run reports nothing on this codebase, so
-    // dropping that flag would silently make this check meaningless.
-    name: "repo: lint (oxlint --type-aware)",
+    // root run replaces what used to be two eslint runs. Type-aware linting
+    // (tsgolint) is switched on via `options.typeAware` in .oxlintrc.json
+    // rather than a CLI flag, so it cannot be dropped by editing a script --
+    // which matters, because a non-type-aware run reports nothing here.
+    name: "repo: lint (oxlint)",
     cmd: "pnpm",
     args: ["lint"],
     cwd: repoRoot,

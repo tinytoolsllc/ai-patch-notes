@@ -1,6 +1,7 @@
 {
   "plugins": ["react", "react-hooks", "typescript", "import"],
   "options": {
+    "typeAware": true,
     "reportUnusedDisableDirectives": "error"
   },
   "rules": {

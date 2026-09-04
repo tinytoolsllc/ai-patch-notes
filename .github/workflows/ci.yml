@@ -119,7 +119,8 @@ jobs:
           }
 
       # oxlint is configured at the repo root and covers both packages, so this
-      # runs from there. --type-aware enables tsgolint's type-checked rules.
+      # runs from there. Type-aware linting is enabled via options.typeAware in
+      # .oxlintrc.json, not a flag here.
       - name: Lint
         run: pnpm lint
         working-directory: ${{ github.workspace }}
