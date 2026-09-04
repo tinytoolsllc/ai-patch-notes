@@ -10,7 +10,9 @@ import { nanoid } from "../lib/nanoid.js";
 
 const DIGEST_WINDOW_DAYS = 7;
 
-export async function sendDigest(myTimer: Timer, context: InvocationContext): Promise<void> {
+// The timer binding is positional and required by the Functions runtime even
+// though the handler does not read it; the underscore marks it intentionally unused.
+export async function sendDigest(_myTimer: Timer, context: InvocationContext): Promise<void> {
   const startedAt = Date.now();
   context.log("sendDigest triggered at", new Date().toISOString());
 
