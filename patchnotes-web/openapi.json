@@ -6,7 +6,7 @@
   },
   "servers": [
     {
-      "url": "http://localhost:5000/"
+      "url": "http://localhost:5199/"
     }
   ],
   "paths": {
@@ -1030,6 +1030,82 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/api/admin/summaries": {
+      "get": {
+        "tags": [
+          "AdminSummaries"
+        ],
+        "operationId": "GetAdminSummaries",
+        "parameters": [
+          {
+            "name": "packageId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/admin/summaries/queue": {
+      "get": {
+        "tags": [
+          "AdminSummaries"
+        ],
+        "operationId": "GetSummaryQueue",
+        "parameters": [
+          {
+            "name": "outOfWindowOnly",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
           }
         }
       }
@@ -2291,6 +2367,9 @@
     },
     {
       "name": "Feed"
+    },
+    {
+      "name": "AdminSummaries"
     },
     {
       "name": "EmailTemplates"
