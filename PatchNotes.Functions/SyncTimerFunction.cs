@@ -59,6 +59,24 @@ public class SyncTimerFunction(
                 ["isPastDue"] = timerInfo.IsPastDue.ToString(),
             });
 
+            // Emitted separately from SyncReleasesCompleted so the backlog can be queried and
+            // alerted on without unpacking a run summary. What matters is the trend: a queue that
+            // climbs run after run means summaries are failing faster than they are produced,
+            // which no per-run counter reveals. This is the signal that was missing when the AI
+            // provider's quota ran out and the backlog grew unnoticed for fifteen hours.
+            telemetryClient.TrackEvent("SummaryQueueDepth", new Dictionary<string, string>
+            {
+                ["queuedPackages"] = result.QueuedPackages.ToString(),
+                ["staleReleases"] = result.StaleReleases.ToString(),
+                ["emptySummaries"] = result.EmptySummaries.ToString(),
+                ["oldestQueuedAt"] = result.OldestQueuedAt?.ToString("O") ?? "",
+                ["oldestQueuedHours"] = result.OldestQueuedAt is { } oldest
+                    ? (DateTimeOffset.UtcNow - oldest).TotalHours.ToString("F1")
+                    : "",
+                ["summariesGenerated"] = result.SummariesGenerated.ToString(),
+                ["summaryErrors"] = result.SummaryErrors.Count.ToString(),
+            });
+
             foreach (var error in result.SyncErrors)
             {
                 logger.LogError("Sync error for {Package}: {Error}", error.PackageName, error.Message);
