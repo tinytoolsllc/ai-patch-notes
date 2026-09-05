@@ -6,7 +6,7 @@
   },
   "servers": [
     {
-      "url": "http://localhost:5213/"
+      "url": "http://localhost:5211/"
     }
   ],
   "paths": {
@@ -747,6 +747,40 @@
             }
           }
         }
+      },
+      "post": {
+        "tags": [
+          "AdminWatchlistTemplates"
+        ],
+        "operationId": "CreateWatchlistTemplate",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateTemplateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminTemplateDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "409": {
+            "description": "Conflict"
+          }
+        }
       }
     },
     "/api/watchlist": {
@@ -1291,6 +1325,125 @@
         }
       }
     },
+    "/api/watchlist/templates/{id}": {
+      "patch": {
+        "tags": [
+          "AdminWatchlistTemplates"
+        ],
+        "operationId": "UpdateWatchlistTemplate",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "maxLength": 21,
+              "minLength": 21,
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateTemplateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminTemplateDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "AdminWatchlistTemplates"
+        ],
+        "operationId": "DeleteWatchlistTemplate",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "maxLength": 21,
+              "minLength": 21,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
+    "/api/watchlist/templates/{id}/packages": {
+      "put": {
+        "tags": [
+          "AdminWatchlistTemplates"
+        ],
+        "operationId": "SetWatchlistTemplatePackages",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "maxLength": 21,
+              "minLength": 21,
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetTemplatePackagesRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SetTemplatePackagesResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
     "/api/admin/summaries": {
       "get": {
         "tags": [
@@ -1638,6 +1791,71 @@
           }
         }
       },
+      "AdminTemplateDto": {
+        "required": [
+          "id",
+          "name",
+          "description",
+          "packages"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "sortOrder": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "packageCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "packages": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AdminTemplatePackageDto"
+            }
+          }
+        }
+      },
+      "AdminTemplatePackageDto": {
+        "required": [
+          "packageId",
+          "name",
+          "githubOwner",
+          "githubRepo"
+        ],
+        "type": "object",
+        "properties": {
+          "packageId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "githubOwner": {
+            "type": "string"
+          },
+          "githubRepo": {
+            "type": "string"
+          }
+        }
+      },
       "AdminUserDetailDto": {
         "required": [
           "id",
@@ -1865,6 +2083,27 @@
               "null",
               "string"
             ]
+          }
+        }
+      },
+      "CreateTemplateRequest": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "description": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "sortOrder": {
+            "type": "integer",
+            "format": "int32"
           }
         }
       },
@@ -2727,6 +2966,35 @@
           }
         }
       },
+      "SetTemplatePackagesRequest": {
+        "type": "object",
+        "properties": {
+          "packageIds": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "SetTemplatePackagesResult": {
+        "required": [
+          "templateId"
+        ],
+        "type": "object",
+        "properties": {
+          "templateId": {
+            "type": "string"
+          },
+          "packageCount": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
       "SetWatchlistRequest": {
         "required": [
           "packageIds"
@@ -2867,6 +3135,27 @@
           }
         }
       },
+      "UpdateTemplateRequest": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "description": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "sortOrder": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
       "UpdateUserRequest": {
         "required": [
           "name"
@@ -2975,6 +3264,10 @@
           "description": {
             "type": "string"
           },
+          "sortOrder": {
+            "type": "integer",
+            "format": "int32"
+          },
           "packages": {
             "type": "array",
             "items": {
@@ -3006,6 +3299,9 @@
     },
     {
       "name": "Watchlist"
+    },
+    {
+      "name": "AdminWatchlistTemplates"
     },
     {
       "name": "GitHubSearch"

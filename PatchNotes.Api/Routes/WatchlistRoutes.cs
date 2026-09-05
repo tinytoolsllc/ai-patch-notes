@@ -35,6 +35,7 @@ public static class WatchlistRoutes
                     .ToList();
                 return new WatchlistTemplateDto
                 {
+                    SortOrder = t.SortOrder,
                     Id = t.Id,
                     Name = t.Name,
                     Description = t.Description,
@@ -461,6 +462,13 @@ public class WatchlistTemplateDto
     public required string Id { get; set; }
     public required string Name { get; set; }
     public required string Description { get; set; }
+
+    /// <summary>
+    /// Display order. The list is already returned in this order, but the value itself is needed by
+    /// anything that edits templates, since PATCH takes an absolute sortOrder rather than a move.
+    /// </summary>
+    public int SortOrder { get; set; }
+
     public string[] Packages { get; set; } = [];
     public string[] PackageIds { get; set; } = [];
 }

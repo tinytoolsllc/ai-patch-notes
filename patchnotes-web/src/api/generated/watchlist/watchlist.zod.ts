@@ -11,6 +11,7 @@ export const GetWatchlistTemplatesResponseItem = zod.object({
   "id": zod.string(),
   "name": zod.string(),
   "description": zod.string(),
+  "sortOrder": zod.int().optional(),
   "packages": zod.array(zod.string()).optional(),
   "packageIds": zod.array(zod.string()).optional()
 })
