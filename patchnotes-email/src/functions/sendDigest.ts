@@ -122,26 +122,55 @@ export async function sendDigest(_myTimer: Timer, context: InvocationContext): P
         const releases = watch.Packages.Releases;
         if (releases.length === 0) continue;
 
-        // Releases should be ordered desc by PublishedAt from the query (line 54),
-        // but sort by Tag as a safety net in case the query shape changes.
-        const sorted = [...releases].sort((a, b) =>
-          b.Tag.localeCompare(a.Tag, undefined, { numeric: true }),
-        );
-        const latestRelease = sorted[0];
-        const oldestRelease = sorted[sorted.length - 1];
-        const matchingSummary = watch.Packages.ReleaseSummaries.find(
-          (s) =>
-            s.MajorVersion === latestRelease.MajorVersion &&
-            s.IsPrerelease === latestRelease.IsPrerelease,
-        );
+        // Group by release train before building anything. Without this, a package that shipped
+        // v15.4.0 and v16.0.0 in the same week produced a single row spanning both, reporting the
+        // range "v15.4.0 → v16.0.0" as though it were one continuous line of work, and attaching
+        // only the newer train's summary — the older train's summary was silently dropped. It also
+        // mixed prereleases in with stable, so an "-rc.1" tag could sort ahead of its own release
+        // and supply the summary for it.
+        //
+        // Summaries are stored per (MajorVersion, IsPrerelease), and the web feed groups the same
+        // way, so this is what makes the email agree with the app.
+        const trains = new Map<string, typeof releases>();
+        for (const release of releases) {
+          const key = `${release.MajorVersion}:${release.IsPrerelease}`;
+          const existing = trains.get(key);
+          if (existing) {
+            existing.push(release);
+          } else {
+            trains.set(key, [release]);
+          }
+        }
 
-        packages.push({
-          packageName: watch.Packages.Name,
-          releaseCount: releases.length,
-          latestVersion: latestRelease.Tag,
-          oldestVersion: oldestRelease.Tag,
-          summary: matchingSummary?.Summary ?? "",
-        });
+        // Map iteration follows insertion order, and the query returns releases newest-first, so
+        // trains come out newest-first too.
+        for (const trainReleases of trains.values()) {
+          // Sorting by tag is safe within a train: every member shares a major version and
+          // prerelease flag, so this orders minor and patch numbers without stable and prerelease
+          // tags competing.
+          const sorted = [...trainReleases].sort((a, b) =>
+            b.Tag.localeCompare(a.Tag, undefined, { numeric: true }),
+          );
+          const latestRelease = sorted[0];
+          const oldestRelease = sorted[sorted.length - 1];
+
+          const matchingSummary = watch.Packages.ReleaseSummaries.find(
+            (s) =>
+              s.MajorVersion === latestRelease.MajorVersion &&
+              s.IsPrerelease === latestRelease.IsPrerelease,
+          );
+
+          packages.push({
+            packageName: watch.Packages.Name,
+            releaseCount: trainReleases.length,
+            latestVersion: latestRelease.Tag,
+            oldestVersion: oldestRelease.Tag,
+            // An empty string here reads as "this release had nothing worth saying". Saying so
+            // outright is honest, and it is what subscribers saw during the 2026-09-03 AI quota
+            // outage, when every digest went out with blank summaries and no indication why.
+            summary: matchingSummary?.Summary || "Summary Unavailable",
+          });
+        }
       }
 
       if (packages.length === 0) {
