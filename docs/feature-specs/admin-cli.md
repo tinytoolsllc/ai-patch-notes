@@ -15,8 +15,9 @@ Neither works well for quick operational tasks or for AI agents that need to per
 
 - Expose existing admin operations as CLI commands
 - Provide a single tool for package, sync, and user management
-- Support both interactive and scriptable (non-interactive, JSON output) usage
-- Handle authentication in a way that works for humans, CI, and AI agents
+- Support both interactive and scriptable use (`--json`, `--quiet`, meaningful exit codes) so an
+  agent can drive it under the signed-in user's own credentials
+- Handle authentication for a human at a terminal, without putting a long-lived secret on disk
 - Avoid introducing security holes in the process
 
 ## Non-Goals
@@ -24,6 +25,14 @@ Neither works well for quick operational tasks or for AI agents that need to per
 - Replacing the web UI for end users
 - Building a general-purpose API client
 - Adding new admin capabilities (the CLI wraps what already exists)
+- **Machine-to-machine access.** An earlier version of this spec used Stytch M2M as the only auth
+  path, with `admin:read`/`admin:write` scopes and a `client_secret` on disk. Every candidate caller
+  turned out to be better served elsewhere: queue depth belongs in App Insights as a custom event
+  from the sync function, where it also yields a time series rather than a point-in-time read; a log
+  watcher reads App Insights with `az` and files issues with `gh`, touching no endpoint here; and a
+  CI health check largely duplicates the deploy job's existing smoke checks. Monitoring and alerting
+  are a separate concern with better tools. Revisit only if something genuinely needs to call
+  `/api/admin/*` unattended.
 
 ## Authentication
 
@@ -34,64 +43,257 @@ This is the area that needs the most care. The current auth model is browser-cen
 - **Sync CLI**: No auth at all (direct DB access, runs on trusted infrastructure)
 - **Webhooks**: Signature verification (Stripe/Stytch secrets)
 
-None of these work well for a CLI tool. Use **Stytch M2M** (machine-to-machine) authentication to keep all auth in one system and avoid building custom key infrastructure.
+None of these work well for a CLI tool. Use **Stytch Connected Apps**, which makes this application
+its own OAuth 2.0 authorization server. All auth stays in one system and there is no custom key
+infrastructure to build.
 
-### How Stytch M2M works
+Two grants, in priority order:
 
-Stytch M2M uses the standard OAuth 2.0 client_credentials flow:
+| Caller                          | Grant                               | Secret on disk | Status               |
+| ------------------------------- | ----------------------------------- | -------------- | -------------------- |
+| You, at a terminal              | Authorization Code + PKCE (browser) | none           | default              |
+| You, over SSH or in a container | Device code (RFC 8628)              | none           | build only if needed |
 
-1. **Create an M2M client** in the Stytch dashboard (or via API). Each client gets a `client_id` and `client_secret`. The secret is shown once at creation time.
-2. **Obtain a token**: The CLI exchanges `client_id` + `client_secret` for a short-lived JWT (1 hour default) via Stytch's public token endpoint.
-3. **Send the token**: CLI sends `Authorization: Bearer <jwt>` on API requests.
-4. **Validate server-side**: The API validates the JWT locally against Stytch's JWKS. No Stytch API call needed for validation — it's standard JWT verification.
+**The loopback flow is the default and is all that is needed to reach a working CLI.** The device
+flow covers the same human on a machine with no browser; Stytch does not implement it, so it has to
+be built, and should be built only once SSH port forwarding has been ruled out.
+
+Both are user flows. There is no machine-to-machine path — see [Non-Goals](#non-goals) — so **no
+client secret exists anywhere in this design.**
+
+### Interactive sign-in
+
+Standard Authorization Code with PKCE over a loopback redirect (RFC 8252) — the same shape as
+`gh auth login`. The CLI is a **public client**: Stytch issues no secret for it, the auth strategy is
+`none`, and PKCE is what makes that safe.
+
+1. The CLI generates a `code_verifier` and derives `code_challenge = S256(verifier)`, then binds an
+   HTTP listener on `127.0.0.1:0` so the OS assigns a free port.
+2. It opens the browser to the web app's authorize route with `client_id`, the loopback
+   `redirect_uri`, `response_type=code`, `code_challenge`, `code_challenge_method=S256`, a random
+   `state`, and `scope=offline_access`.
+3. The user is already signed in, so they see a consent screen — Stytch's `<IdentityProvider />`
+   component — and approve.
+4. The browser redirects to `http://127.0.0.1:<port>/callback?code=...&state=...`.
+5. The CLI's listener captures the code, verifies `state`, and serves a small "you can close this
+   tab" page. Nothing is copied by hand.
+6. The CLI exchanges the code for an access token and refresh token, passing `code_verifier`.
+7. The API validates the bearer token locally via `IntrospectTokenLocal()` — JWKS, no Stytch call
+   per request.
 
 ```
-CLI                         Stytch                      API
- |                            |                          |
- |-- client_credentials ----->|                          |
- |<-------- JWT (1hr) -------|                          |
- |                            |                          |
- |------------- Bearer JWT --------------------------->|
- |                            |       validate JWT      |
- |                            |       via JWKS (local)  |
- |<--------------------------------------------- 200 --|
+CLI                    Browser              Stytch / Web App            API
+ |                        |                        |                     |
+ |-- open authorize URL ->|                        |                     |
+ |                        |-- sign in + consent -->|                     |
+ |                        |<-- 302 to 127.0.0.1 ---|                     |
+ |<-- code (loopback) ----|                        |                     |
+ |------------ code + code_verifier ------------->|                     |
+ |<----------- access + refresh token -------------|                     |
+ |                                                                       |
+ |----------------------- Bearer token ------------------------------->|
+ |                                             introspect locally        |
+ |<-------------------------------------------------------------- 200 --|
 ```
 
-### Scopes
+Availability is already in place: `@stytch/react@20.0.5`, the version in the lockfile, exports
+`IdentityProvider` from the consumer SDK. No upgrade is required.
 
-Stytch M2M has native scope support. Scopes are assigned when creating the M2M client and embedded in the JWT `scope` claim.
+**Redirect URL registration.** Register `http://127.0.0.1/callback` on the public client with the
+**port omitted**. Stytch reads a missing port as "any port", which is what allows the CLI to bind a
+free port at runtime rather than colliding on a hard-coded one.
 
-Two scopes:
+### Authorization for the interactive flow
 
-- `admin:read` — all GET endpoints under `/api/admin/*`
-- `admin:write` — all mutating endpoints under `/api/admin/*` (POST, PATCH, PUT, DELETE)
+**No scopes at all.** The access token identifies the signed-in user, so the existing
+`patch_notes_admin` role check in `RouteUtils.CreateAdminFilter()` applies unchanged.
 
-Scope-to-endpoint mapping:
+This is a real simplification over a scope-based model:
 
-| Scope         | Endpoints                                                                                                                                                                                                                                                                              |
-| ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `admin:read`  | `GET /api/admin/packages/health`, `GET /api/admin/users`, `GET /api/admin/users/{id}`, `GET /api/admin/releases`, `GET /api/admin/summaries`, `GET /api/admin/digest-emails`, `GET /api/admin/webhook-events`, `GET /api/admin/email-templates`, `GET /api/admin/email-templates/{id}` |
-| `admin:write` | All POST/PATCH/PUT/DELETE under `/api/admin/*` (reset-sync, disable-sync, trigger-sync, reset-summaries, reset-releases, summaries/regenerate-all, sync/trigger-all, watchlist-template CRUD, email-template update/test)                                                              |
+- Nothing to keep in sync between Stytch scope definitions and route-level checks
+- Revocation is revoking a session, not rotating a shared secret
+- The audit trail names a person rather than a robot identity
 
-An M2M client with `admin:write` implicitly has `admin:read` — the admin filter checks `admin:write` for mutating methods and `admin:read` for GET.
+### CLI-side token management
 
-M2M auth is **not** accepted on non-admin routes. User, watchlist, subscription, and feed endpoints remain session-cookie-only. See the `CreateM2MAuthFilter()` section below.
+- `auth login` runs the PKCE browser flow above. There is no prompt for a secret because there is no
+  secret.
+- Tokens go in the OS keychain where one is available, falling back to
+  `~/.config/patchnotes/credentials.json` at mode `600`.
+- The refresh token (from `scope=offline_access`) is used to obtain a new access token silently, so a
+  normal session never re-opens the browser.
+- `auth status` reports the signed-in user and token expiry; `auth logout` clears stored tokens.
 
-### M2M client setup
+Two implementation details that are easy to get wrong and matter:
 
-Create M2M clients for each use case:
+- Bind the listener to `127.0.0.1`, not `0.0.0.0`. The latter makes the callback reachable from
+  anywhere on the network.
+- Use `S256`, never `plain`.
 
-| Client             | Scopes                   | Purpose                 |
-| ------------------ | ------------------------ | ----------------------- |
-| `paul-cli`         | `admin:read admin:write` | Personal admin CLI      |
-| `logwatcher-agent` | `admin:read admin:write` | LogWatcher issue filing |
-| `ci-readonly`      | `admin:read`             | CI health checks        |
+### Device flow, for terminals without a browser (RFC 8628)
 
-Create via Stytch dashboard or API. The `client_secret` is returned once — store it securely.
+The loopback flow above needs a browser on the _same machine_ as the CLI. Over SSH, inside a
+container, or on a headless box it cannot work — there is nothing to open, and `127.0.0.1` on the
+remote host is not the laptop the user is sitting at.
+
+**Try the cheap fix first.** SSH port forwarding makes the loopback flow work unchanged:
+
+```
+ssh -L 8976:127.0.0.1:8976 remote-host    # then run the CLI with a fixed port
+```
+
+VS Code Remote and the JetBrains gateway already forward loopback ports automatically, so in those
+environments nothing is needed. Build the device flow only if a real case survives that.
+
+#### Stytch does not implement this grant
+
+Checked against the [Connected App token endpoint](https://stytch.com/docs/api/connected-app-token):
+it accepts `authorization_code` and `refresh_token` only. There is no
+`urn:ietf:params:oauth:grant-type:device_code`, and Connected Apps is the authorization server here,
+so this cannot be switched on — it has to be built.
+
+The design below keeps **Stytch as the only token issuer**. The API gains device-flow endpoints, but
+it never mints a token, never holds a signing key, and never sees an access token. What it brokers is
+an authorization code, which is useless to anyone who does not hold the PKCE verifier — and only the
+CLI does.
+
+#### Flow
+
+```
+CLI (remote)              API                     Browser (laptop)         Stytch
+ |                         |                            |                    |
+ |-- POST device/code ---->|                            |                    |
+ |   + code_challenge      |                            |                    |
+ |<-- user_code,          -|                            |                    |
+ |    device_code,         |                            |                    |
+ |    verification_uri,    |                            |                    |
+ |    interval             |                            |                    |
+ |                         |                            |                    |
+ |   [displays user_code, starts polling]               |                    |
+ |                         |<-- opens verification_uri -|                    |
+ |                         |    signs in + enters code  |                    |
+ |                         |--- authorize (challenge) ------------------->   |
+ |                         |<-- redirect with code ----------------------    |
+ |                         |   [stores code against device_code]         |
+ |-- POST device/token --->|                            |                    |
+ |   + device_code         |                            |                    |
+ |<-- authorization code --|                            |                    |
+ |                         |                            |                    |
+ |------------- code + code_verifier ------------------------------------>   |
+ |<------------ access + refresh token -----------------------------------   |
+```
+
+The CLI performs the token exchange itself, with the verifier it generated in step one. The API is a
+relay for the authorization code and nothing more.
+
+#### Endpoints
+
+| Endpoint                         | Method | Auth    | Purpose                                       |
+| -------------------------------- | ------ | ------- | --------------------------------------------- |
+| `POST /api/cli/device/code`      | POST   | none    | Start a device authorization                  |
+| `POST /api/cli/device/token`     | POST   | none    | Poll for the authorization code               |
+| `GET /api/cli/device/callback`   | GET    | none    | Stytch redirect target; binds code to request |
+| `POST /api/admin/device/approve` | POST   | session | Called by the web page once the user approves |
+
+`POST /api/cli/device/code` takes `client_id` and `code_challenge`, and returns `device_code`,
+`user_code`, `verification_uri`, `expires_in` and `interval`, per RFC 8628 §3.2.
+
+`POST /api/cli/device/token` takes `device_code` and returns RFC 8628 §3.5 errors while pending:
+`authorization_pending`, `slow_down`, `expired_token`, `access_denied`. On success it returns the
+authorization code once, then invalidates it.
+
+#### Web page
+
+A route in `patchnotes-web` at the `verification_uri` — a short path worth typing, `/device`. The
+user is signed in already or signs in normally; they enter the `user_code`, see what is being
+authorized, and approve. On approval the page triggers the Connected Apps authorization with the
+CLI's `code_challenge` and the API callback as `redirect_uri`.
+
+Register that callback as a second redirect URL on the public client, alongside the loopback one.
+
+#### Storage
+
+One table, or a distributed cache entry, keyed by `device_code`:
+
+| Field            | Note                                                     |
+| ---------------- | -------------------------------------------------------- |
+| `device_code`    | `IdGenerator.NewId()` — the polling credential           |
+| `user_code`      | `IdGenerator.NewId()` — what the user types              |
+| `code_challenge` | passed straight through to Stytch; never used by the API |
+| `status`         | `pending` / `approved` / `denied` / `expired`            |
+| `auth_code`      | populated at callback, cleared on first successful poll  |
+| `expires_at`     | 10 minutes                                               |
+| `approved_by`    | user ID, for the audit trail                             |
+
+Both come from `IdGenerator.NewId()` in `PatchNotes.Data` — the same generator behind every entity
+ID. It is already CSPRNG-backed (`RandomNumberGenerator.Fill`) over a 64-character alphabet at length
+21, which is ~126 bits: far more than RFC 8628 asks of a user code, and no new randomness code to
+review.
+
+The trade-off is that 21 mixed-case characters including `_` and `-` are tedious to read off one
+screen and type into another. If that turns out to matter, give `IdGenerator` a size-and-alphabet
+overload and call it with shorter arguments — one generator with parameters, rather than a second
+bespoke alphabet living in the device-flow code.
+
+#### Security
+
+These endpoints are unauthenticated by necessity, which makes the details load-bearing:
+
+- **Rate limit `device/token` per `device_code`.** Honour the `interval`, and return `slow_down` and
+  increase it when a client polls faster.
+- **Rate limit `user_code` submission per session and per IP.** Brute force is the obvious attack on
+  this endpoint. At full `IdGenerator` length guessing is not realistic, but the rate limit is what
+  keeps that true if the code is ever shortened for usability.
+- **Single use.** The authorization code is returned exactly once and cleared. A second poll gets
+  `expired_token`.
+- **Short TTL.** Ten minutes, and expiry is enforced on read as well as by a sweep.
+- **Show what is being approved.** The approval page names the client and warns if the user did not
+  initiate it — device flow's real-world failure mode is phishing a user into approving someone
+  else's terminal.
+- **No tokens at rest.** The API stores an authorization code bound to a challenge it cannot solve.
+  If the table leaks, the codes in it are unusable without the CLI's verifier.
+
+#### Cost
+
+One table (both migration contexts), four endpoints, one web route, and the polling loop in the CLI.
+Meaningfully more than the loopback flow, which is why it is not the default and why the SSH
+forwarding workaround is worth ruling out first.
+
+### Trade-offs
+
+**Accepted:**
+
+- The browser flow needs a browser on the same machine. Over SSH or in a container, forward the
+  loopback port, or build the device flow above.
+- If Stytch is down, no new tokens can be issued; cached access tokens keep working until expiry.
+- Client management happens in the Stytch dashboard, not in the CLI.
+
+**Avoided:**
+
+- No custom `ApiKey` table, no migration, no key hashing, no bootstrap problem
+- No custom auth middleware — standard bearer validation only
+- No credential lifecycle to build; Stytch handles rotation, revocation and expiry
+- For the interactive path specifically: no secret to store, leak, or rotate at all
+
+### Cost
+
+Nothing. The authorization code and refresh token flows are part of Connected Apps, and the CLI
+holds a long-lived refresh token, so a working session costs no per-request Stytch calls and no
+metered token issuance.
+
+### Security considerations
+
+- **Credential storage**: access and refresh tokens only, in the OS keychain where available,
+  otherwise a `600` file. No client secret exists anywhere in this design.
+- **Revocation**: revoke the Stytch session or the app's consent. Issued access tokens remain valid
+  until expiry (max 1 hour).
+- **CSRF**: the `state` parameter is generated per login and verified on the callback.
+- **Audit logging**: log the authenticated user ID on each admin request to Application Insights.
+- **Never log tokens.** Log only the user ID, for traceability.
 
 ### Server-side changes
 
-The API currently resolves authenticated browser requests in `RouteUtils.CreateAuthFilter()` by validating the `stytch_session` cookie via a Stytch API call on every request. Add JWT Bearer validation as a second auth path for admin route groups via a new `CreateM2MAuthFilter()`. The JWT is validated locally against Stytch's JWKS — no Stytch API call needed per request.
+The API currently resolves authenticated browser requests in `RouteUtils.CreateAuthFilter()` by validating the `stytch_session` cookie via a Stytch API call on every request. Add Bearer token validation as a second auth path for admin route groups. The token is verified locally against Stytch's JWKS, so this path costs no Stytch API call per request.
 
 #### 1. Add JWT Bearer authentication in Program.cs
 
@@ -136,7 +338,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 Note: the JWKS URL path for B2C is `/v1/sessions/jwks/{projectId}` (not `/v1/b2b/sessions/jwks/`).
 
-Also add a CSRF bypass for Bearer-authenticated requests in `CsrfMiddleware`. Machine clients don't send `Origin` or `Sec-Fetch-Site` headers:
+Also add a CSRF bypass for Bearer-authenticated requests in `CsrfMiddleware`. The CLI doesn't send `Origin` or `Sec-Fetch-Site` headers, and a bearer token is not attached by a browser, so CSRF does not apply:
 
 ```csharp
 // In CsrfMiddleware.InvokeAsync, after the webhook bypass:
@@ -150,39 +352,40 @@ if (authHeader?.StartsWith("Bearer ") == true)
 
 This is safe because Bearer tokens are not automatically attached by browsers (unlike cookies), so CSRF protection is not needed for token-authenticated requests.
 
-#### 2. Add CreateM2MAuthFilter() for admin routes only
+#### 2. Add CreateBearerAuthFilter() for admin routes only
 
-Do **not** modify the existing `CreateAuthFilter()`. Instead, add a separate filter that accepts M2M JWTs. This filter is only applied to `/api/admin/*` routes, so user, watchlist, and subscription endpoints remain session-cookie-only.
+Do **not** modify the existing `CreateAuthFilter()`. Instead, add a separate filter that also accepts Bearer tokens. It applies only to `/api/admin/*` routes, so user, watchlist and subscription endpoints remain session-cookie-only.
+
+The filter records how the caller authenticated in `httpContext.Items["AuthMethod"]` — `"session"` or `"bearer"` — which is useful for audit logging, though nothing downstream branches on it.
 
 ```csharp
 /// <summary>
-/// Auth filter that accepts either a Stytch session cookie (existing)
-/// or an M2M Bearer JWT. Only apply to admin route groups.
+/// Auth filter that accepts a Stytch session cookie (existing) or a
+/// Connected Apps Bearer token. Admin routes only.
 /// </summary>
 public static Func<EndpointFilterFactoryContext, EndpointFilterDelegate, EndpointFilterDelegate>
-    CreateM2MAuthFilter()
+    CreateBearerAuthFilter()
 {
     return (context, next) => async invocationContext =>
     {
         var httpContext = invocationContext.HttpContext;
 
-        // Path 1: M2M JWT via Authorization header
+        // Path 1: Bearer token from the CLI
         var authHeader = httpContext.Request.Headers.Authorization.FirstOrDefault();
         if (authHeader?.StartsWith("Bearer ") == true)
         {
             var result = await httpContext.AuthenticateAsync(
                 JwtBearerDefaults.AuthenticationScheme);
-            if (result.Succeeded)
-            {
-                var sub = result.Principal.FindFirstValue(ClaimTypes.NameIdentifier);
-                var scope = result.Principal.FindFirstValue("scope") ?? "";
-                httpContext.Items["M2MClientId"] = sub;
-                httpContext.Items["M2MScopes"] = scope.Split(' ',
-                    StringSplitOptions.RemoveEmptyEntries);
-                httpContext.Items["AuthMethod"] = "m2m";
-                return await next(invocationContext);
-            }
-            return Results.Unauthorized();
+            if (!result.Succeeded)
+                return Results.Unauthorized();
+
+            // The token identifies a user, so populate the same items the
+            // session path does. CreateAdminFilter() then works unchanged.
+            httpContext.Items["StytchUserId"] =
+                result.Principal.FindFirstValue(ClaimTypes.NameIdentifier);
+            httpContext.Items["AuthMethod"] = "bearer";
+
+            return await next(invocationContext);
         }
 
         // Path 2: fall through to Stytch session cookie (existing behavior)
@@ -208,94 +411,26 @@ public static Func<EndpointFilterFactoryContext, EndpointFilterDelegate, Endpoin
 }
 ```
 
-Admin route groups use `CreateM2MAuthFilter()` instead of `CreateAuthFilter()`:
+Whatever resolves the `patch_notes_admin` role from a user ID today needs to work for a Bearer
+caller too. If the role currently comes off the `StytchSession` object rather than a lookup by user
+ID, that lookup is the one piece of real work in this filter.
+
+Admin route groups use `CreateBearerAuthFilter()` instead of `CreateAuthFilter()`:
 
 ```csharp
 // In PackageRoutes.cs (and other admin route files):
 var adminPackages = app.MapGroup("/api/admin/packages")
-    .AddEndpointFilterFactory(RouteUtils.CreateM2MAuthFilter())
+    .AddEndpointFilterFactory(RouteUtils.CreateBearerAuthFilter())
     .AddEndpointFilterFactory(RouteUtils.CreateAdminFilter());
 ```
 
 Non-admin authenticated routes (`/api/users/me`, `/api/watchlist`, `/api/subscription/*`) continue using the existing `CreateAuthFilter()` unchanged — they only accept session cookies.
 
-#### 3. Update CreateAdminFilter() for scope checking
+#### 3. CreateAdminFilter() needs no changes
 
-```csharp
-public static Func<EndpointFilterFactoryContext, EndpointFilterDelegate, EndpointFilterDelegate>
-    CreateAdminFilter()
-{
-    return (context, next) => async invocationContext =>
-    {
-        var httpContext = invocationContext.HttpContext;
-        var authMethod = httpContext.Items["AuthMethod"] as string;
-
-        if (authMethod == "m2m")
-        {
-            var scopes = httpContext.Items["M2MScopes"] as string[] ?? [];
-            var requiredScope = IsReadOnlyRequest(httpContext)
-                ? "admin:read"
-                : "admin:write";
-
-            if (!scopes.Contains(requiredScope) && !scopes.Contains("admin:write"))
-                return Results.Json(
-                    new ApiError($"Forbidden: missing {requiredScope} scope"),
-                    statusCode: StatusCodes.Status403Forbidden);
-
-            return await next(invocationContext);
-        }
-
-        // Existing session-based admin check
-        var session = httpContext.Items["StytchSession"] as StytchSessionResult;
-        if (session == null || !session.IsAdmin)
-            return Results.Json(new ApiError("Forbidden"),
-                statusCode: StatusCodes.Status403Forbidden);
-
-        return await next(invocationContext);
-    };
-}
-
-private static bool IsReadOnlyRequest(HttpContext ctx) =>
-    HttpMethods.IsGet(ctx.Request.Method) ||
-    HttpMethods.IsHead(ctx.Request.Method);
-```
-
-This checks `admin:read` for GET requests and `admin:write` for mutating requests. An `admin:write` scope implicitly grants `admin:read`.
-
-### CLI-side token management
-
-The CLI handles the client_credentials exchange and caches the token:
-
-- On `auth login`: prompt for `client_id` and `client_secret`, exchange for a token, store all three in `~/.config/patchnotes/credentials.json` (600 permissions)
-- On subsequent commands: use the cached token if still valid (check `exp` claim), otherwise refresh using the stored credentials
-- Token lifetime is 1 hour, so most interactive sessions won't need a refresh
-- For CI/agents: support `PATCHNOTES_CLIENT_ID` and `PATCHNOTES_CLIENT_SECRET` env vars. The CLI exchanges them for a token on each invocation (no caching needed in ephemeral environments).
-
-### Trade-offs
-
-**Accepted:**
-
-- If Stytch is down, the CLI cannot obtain new tokens (existing cached tokens still work for up to 1 hour)
-- Each token request adds ~100-200ms latency (once per session, not per command)
-- M2M client management happens in the Stytch dashboard, not in the CLI itself
-
-**Avoided:**
-
-- No custom `ApiKey` table, no migration, no key hashing, no bootstrap problem
-- No custom auth middleware — standard JWT validation only
-- No credential lifecycle to build (rotation, revocation, expiry all handled by Stytch)
-
-### Cost
-
-Stytch free tier includes 1,000 M2M tokens per month. With token caching (1 hour lifetime), even heavy CLI usage would consume a small fraction of that. The LogWatcher at 24 runs/day = ~720 tokens/month if it refreshes every time (and it can cache too).
-
-### Security considerations
-
-- **Credential storage**: `~/.config/patchnotes/credentials.json` with 600 permissions. Contains `client_id`, `client_secret`, and cached token.
-- **Secret rotation**: Rotate via Stytch dashboard. The CLI's `auth login` command re-prompts for new credentials.
-- **Revocation**: Delete or deactivate the M2M client in Stytch. Existing tokens remain valid until expiry (max 1 hour).
-- **Audit logging**: Log the M2M client ID (from JWT `sub` claim) on each API request to Application Insights.
-- **Never log the `client_secret` or full JWT**. Log only the client ID for traceability.
+Both paths above put a Stytch user ID in `httpContext.Items["StytchUserId"]`, so the existing
+`patch_notes_admin` role check applies to a CLI caller exactly as it does to a browser. There is no
+scope model, no second authorization path, and nothing to keep in sync.
 
 ## Admin API Surface
 
@@ -305,7 +440,7 @@ Design rule: the PatchNotes CLI only talks to `/api/admin/*` endpoints on the Pa
 
 ### Existing admin endpoints (no changes needed)
 
-These are already implemented and just need to accept M2M JWT auth alongside session cookies:
+These are already implemented and just need to accept Bearer tokens alongside session cookies:
 
 | Endpoint                                   | Method | CLI command                    |
 | ------------------------------------------ | ------ | ------------------------------ |
@@ -326,13 +461,13 @@ These are already implemented and just need to accept M2M JWT auth alongside ses
 
 Add admin-path package management endpoints for all CLI package operations. Existing non-admin routes can remain for current web/session flows, but the CLI does not call them.
 
-| Endpoint                          | Method | Scope         | Purpose                                  |
-| --------------------------------- | ------ | ------------- | ---------------------------------------- |
-| `GET /api/admin/packages/{id}`    | GET    | `admin:read`  | Get package detail for admin/CLI usage   |
-| `POST /api/admin/packages`        | POST   | `admin:write` | Add a package by GitHub owner/repo       |
-| `PATCH /api/admin/packages/{id}`  | PATCH  | `admin:write` | Update package metadata/mapping          |
-| `DELETE /api/admin/packages/{id}` | DELETE | `admin:write` | Delete a tracked package                 |
-| `GET /api/admin/github/search`    | GET    | `admin:read`  | Search GitHub repositories for add flows |
+| Endpoint                          | Method | Purpose                                  |
+| --------------------------------- | ------ | ---------------------------------------- |
+| `GET /api/admin/packages/{id}`    | GET    | Get package detail for admin/CLI usage   |
+| `POST /api/admin/packages`        | POST   | Add a package by GitHub owner/repo       |
+| `PATCH /api/admin/packages/{id}`  | PATCH  | Update package metadata/mapping          |
+| `DELETE /api/admin/packages/{id}` | DELETE | Delete a tracked package                 |
+| `GET /api/admin/github/search`    | GET    | Search GitHub repositories for add flows |
 
 Request body:
 
@@ -348,7 +483,7 @@ Request body:
 
 Only `githubOwner` and `githubRepo` are required. `name` defaults to `owner/repo` if omitted. `npmName` is optional (some tracked repos aren't npm packages).
 
-`GET /api/admin/github/search` mirrors the current `/api/github/search?q=...` behavior but lives under `/api/admin/*` so it can use `CreateM2MAuthFilter()` and `admin:read`.
+`GET /api/admin/github/search` mirrors the current `/api/github/search?q=...` behavior but lives under `/api/admin/*` so it goes through `CreateBearerAuthFilter()` with the rest of the admin surface.
 
 `GET /api/admin/packages/{id}` can reuse the same underlying query logic as the current `GET /api/packages/{id}` route, but it is a separate endpoint with a separate contract for CLI/admin usage.
 
@@ -356,10 +491,10 @@ Only `githubOwner` and `githubRepo` are required. `name` defaults to `owner/repo
 
 No admin user endpoints exist today. All current user endpoints are `/api/users/me` (self-service).
 
-| Endpoint                    | Method | Scope        | Purpose                                   |
-| --------------------------- | ------ | ------------ | ----------------------------------------- |
-| `GET /api/admin/users`      | GET    | `admin:read` | List users with pagination                |
-| `GET /api/admin/users/{id}` | GET    | `admin:read` | User detail with subscription + watchlist |
+| Endpoint                    | Method | Purpose                                   |
+| --------------------------- | ------ | ----------------------------------------- |
+| `GET /api/admin/users`      | GET    | List users with pagination                |
+| `GET /api/admin/users/{id}` | GET    | User detail with subscription + watchlist |
 
 `GET /api/admin/users` response shape:
 
@@ -393,9 +528,9 @@ Query params: `?page=1&pageSize=50&search=<email or name>&pro=true|false&sort=cr
 
 Read-only access already exists via public endpoints. Add an admin list with broader filters:
 
-| Endpoint                  | Method | Scope        | Purpose                            |
-| ------------------------- | ------ | ------------ | ---------------------------------- |
-| `GET /api/admin/releases` | GET    | `admin:read` | Query releases across all packages |
+| Endpoint                  | Method | Purpose                            |
+| ------------------------- | ------ | ---------------------------------- |
+| `GET /api/admin/releases` | GET    | Query releases across all packages |
 
 Query params: `?packageId=<id>&stale=true|false&prerelease=true|false&since=<datetime>&page=1&pageSize=50`
 
@@ -405,10 +540,10 @@ This is useful for answering "which releases are stale?" or "what was synced in 
 
 The public `/api/summaries` endpoint returns summaries grouped by package. Add an admin view for operational queries:
 
-| Endpoint                                   | Method | Scope         | Purpose                                               |
-| ------------------------------------------ | ------ | ------------- | ----------------------------------------------------- |
-| `GET /api/admin/summaries`                 | GET    | `admin:read`  | Query summaries with operational metadata             |
-| `POST /api/admin/summaries/regenerate-all` | POST   | `admin:write` | Mark all releases stale, triggering full regeneration |
+| Endpoint                                   | Method | Purpose                                               |
+| ------------------------------------------ | ------ | ----------------------------------------------------- |
+| `GET /api/admin/summaries`                 | GET    | Query summaries with operational metadata             |
+| `POST /api/admin/summaries/regenerate-all` | POST   | Mark all releases stale, triggering full regeneration |
 
 `GET /api/admin/summaries` query params: `?packageId=<id>&page=1&pageSize=50`
 
@@ -416,13 +551,70 @@ Response includes `generatedAt`, `updatedAt`, and the count of stale releases pe
 
 `POST /api/admin/summaries/regenerate-all` marks every release as `SummaryStale = true` and deletes all `ReleaseSummary` rows. The next sync cycle picks up the regeneration work.
 
+##### Summarization queue
+
+The "queue" is not a table — it is whatever `SummaryGenerationService.GenerateAllSummariesAsync`
+selects on each run:
+
+- releases with `SummaryStale = true`, and
+- `ReleaseSummary` rows whose `Summary` is null or empty
+
+Both are unioned into a distinct list of package IDs, and every one of those packages gets a
+group-summary regeneration attempt. Nothing bounds how long an entry stays in that set: a group
+that keeps failing is retried on every sync run, indefinitely. The only escape hatch today is the
+`HttpRequestException` 400 handler, which clears `SummaryStale` explicitly to "break the infinite
+retry loop".
+
+That became a real problem on 2026-09-03, when the AI provider's free tier hit its quota and began
+returning 429. Because 429 falls into the generic `catch (Exception)` branch, nothing was cleared,
+the queue only grew, and per-3h call volume climbed 8 → 16 → 39 → 73 → 101 while every single call
+failed. There was no way to see the queue depth without querying the database directly, and no way
+to drain it.
+
+| Endpoint                            | Method | Purpose                          |
+| ----------------------------------- | ------ | -------------------------------- |
+| `GET /api/admin/summaries/queue`    | GET    | Inspect what is pending, and why |
+| `DELETE /api/admin/summaries/queue` | DELETE | Drain entries from the queue     |
+
+`GET /api/admin/summaries/queue` returns, per queued package:
+
+- `packageId`, `packageName`
+- `reason` — `stale-release` or `empty-summary` (a package can be queued for both)
+- `staleReleaseCount`, and the `PublishedAt` of the oldest and newest stale release
+- `queuedSince` — the oldest `FetchedAt` among its stale releases, which is how long this package
+  has been failing to summarize
+- `outOfWindow` — true when every stale release is older than `SummaryConstants.SummaryWindow`
+  (7 days) behind that group's newest release
+
+`outOfWindow` is the useful one. `GenerateGroupSummaryAsync` computes
+`cutoff = newest.PublishedAt - SummaryWindow` and only sends releases at or after the cutoff to the
+model, so a release further back than that can never influence the summary text. It still carries
+`SummaryStale = true` and still keeps its package queued, but it can never be the reason a summary
+changes. Those entries are pure cost.
+
+Summary counters at the top of the response: total queued packages, total stale releases, count
+queued only for `out-of-window` releases, and age of the oldest entry.
+
+`DELETE /api/admin/summaries/queue` takes a filter so draining is deliberate rather than a blunt
+reset:
+
+- `?scope=out-of-window` — clear `SummaryStale` only on releases that can no longer affect any
+  summary. Safe by construction: nothing that would have changed the output is dropped.
+- `?scope=package&packageId=<id>` — drain one package
+- `?scope=all` — clear every `SummaryStale` flag and delete empty `ReleaseSummary` rows
+
+Note this is the inverse of `regenerate-all`, and the two should not be confused:
+`regenerate-all` _fills_ the queue, `DELETE .../queue` _empties_ it. Draining does not delete
+existing summaries; it only stops pending work from being retried. Anything drained will re-enter
+the queue naturally the next time that package publishes a release.
+
 #### Sent Digest Emails
 
 No endpoints exist for this table. Add read-only admin access:
 
-| Endpoint                       | Method | Scope        | Purpose                   |
-| ------------------------------ | ------ | ------------ | ------------------------- |
-| `GET /api/admin/digest-emails` | GET    | `admin:read` | Query sent digest history |
+| Endpoint                       | Method | Purpose                   |
+| ------------------------------ | ------ | ------------------------- |
+| `GET /api/admin/digest-emails` | GET    | Query sent digest history |
 
 Query params: `?userId=<id>&status=sent|failed|pending&since=<datetime>&page=1&pageSize=50`
 
@@ -453,21 +645,21 @@ The `htmlBody` field is excluded from list responses (it's large). Include it on
 
 The web app can keep using public template read access. The CLI uses admin endpoints only, so add an admin list endpoint alongside the write operations:
 
-| Endpoint                                           | Method | Scope         | Purpose                                      |
-| -------------------------------------------------- | ------ | ------------- | -------------------------------------------- |
-| `GET /api/admin/watchlist-templates`               | GET    | `admin:read`  | List watchlist templates for admin/CLI usage |
-| `POST /api/admin/watchlist-templates`              | POST   | `admin:write` | Create a new template                        |
-| `PATCH /api/admin/watchlist-templates/{id}`        | PATCH  | `admin:write` | Update template name/description/sort order  |
-| `DELETE /api/admin/watchlist-templates/{id}`       | DELETE | `admin:write` | Delete a template                            |
-| `PUT /api/admin/watchlist-templates/{id}/packages` | PUT    | `admin:write` | Replace template's package list              |
+| Endpoint                                           | Method | Purpose                                      |
+| -------------------------------------------------- | ------ | -------------------------------------------- |
+| `GET /api/admin/watchlist-templates`               | GET    | List watchlist templates for admin/CLI usage |
+| `POST /api/admin/watchlist-templates`              | POST   | Create a new template                        |
+| `PATCH /api/admin/watchlist-templates/{id}`        | PATCH  | Update template name/description/sort order  |
+| `DELETE /api/admin/watchlist-templates/{id}`       | DELETE | Delete a template                            |
+| `PUT /api/admin/watchlist-templates/{id}/packages` | PUT    | Replace template's package list              |
 
 #### Processed Webhook Events
 
 Read-only access for debugging webhook issues:
 
-| Endpoint                        | Method | Scope        | Purpose                        |
-| ------------------------------- | ------ | ------------ | ------------------------------ |
-| `GET /api/admin/webhook-events` | GET    | `admin:read` | Query processed webhook events |
+| Endpoint                        | Method | Purpose                        |
+| ------------------------------- | ------ | ------------------------------ |
+| `GET /api/admin/webhook-events` | GET    | Query processed webhook events |
 
 Query params: `?since=<datetime>&page=1&pageSize=50`
 
@@ -477,34 +669,36 @@ This is a diagnostic endpoint — useful for answering "did we process that Stri
 
 The existing trigger endpoint works per-package. Add a bulk trigger:
 
-| Endpoint                           | Method | Scope         | Purpose                               |
-| ---------------------------------- | ------ | ------------- | ------------------------------------- |
-| `POST /api/admin/sync/trigger-all` | POST   | `admin:write` | Trigger sync for all enabled packages |
+| Endpoint                           | Method | Purpose                               |
+| ---------------------------------- | ------ | ------------------------------------- |
+| `POST /api/admin/sync/trigger-all` | POST   | Trigger sync for all enabled packages |
 
 ### Summary: all new endpoints
 
-| Endpoint                                           | Method | Scope         |
-| -------------------------------------------------- | ------ | ------------- |
-| `GET /api/admin/packages/{id}`                     | GET    | `admin:read`  |
-| `POST /api/admin/packages`                         | POST   | `admin:write` |
-| `PATCH /api/admin/packages/{id}`                   | PATCH  | `admin:write` |
-| `DELETE /api/admin/packages/{id}`                  | DELETE | `admin:write` |
-| `GET /api/admin/github/search`                     | GET    | `admin:read`  |
-| `GET /api/admin/users`                             | GET    | `admin:read`  |
-| `GET /api/admin/users/{id}`                        | GET    | `admin:read`  |
-| `GET /api/admin/releases`                          | GET    | `admin:read`  |
-| `GET /api/admin/summaries`                         | GET    | `admin:read`  |
-| `POST /api/admin/summaries/regenerate-all`         | POST   | `admin:write` |
-| `GET /api/admin/digest-emails`                     | GET    | `admin:read`  |
-| `GET /api/admin/watchlist-templates`               | GET    | `admin:read`  |
-| `POST /api/admin/watchlist-templates`              | POST   | `admin:write` |
-| `PATCH /api/admin/watchlist-templates/{id}`        | PATCH  | `admin:write` |
-| `DELETE /api/admin/watchlist-templates/{id}`       | DELETE | `admin:write` |
-| `PUT /api/admin/watchlist-templates/{id}/packages` | PUT    | `admin:write` |
-| `GET /api/admin/webhook-events`                    | GET    | `admin:read`  |
-| `POST /api/admin/sync/trigger-all`                 | POST   | `admin:write` |
+| Endpoint                                           | Method |
+| -------------------------------------------------- | ------ |
+| `GET /api/admin/packages/{id}`                     | GET    |
+| `POST /api/admin/packages`                         | POST   |
+| `PATCH /api/admin/packages/{id}`                   | PATCH  |
+| `DELETE /api/admin/packages/{id}`                  | DELETE |
+| `GET /api/admin/github/search`                     | GET    |
+| `GET /api/admin/users`                             | GET    |
+| `GET /api/admin/users/{id}`                        | GET    |
+| `GET /api/admin/releases`                          | GET    |
+| `GET /api/admin/summaries`                         | GET    |
+| `POST /api/admin/summaries/regenerate-all`         | POST   |
+| `GET /api/admin/summaries/queue`                   | GET    |
+| `DELETE /api/admin/summaries/queue`                | DELETE |
+| `GET /api/admin/digest-emails`                     | GET    |
+| `GET /api/admin/watchlist-templates`               | GET    |
+| `POST /api/admin/watchlist-templates`              | POST   |
+| `PATCH /api/admin/watchlist-templates/{id}`        | PATCH  |
+| `DELETE /api/admin/watchlist-templates/{id}`       | DELETE |
+| `PUT /api/admin/watchlist-templates/{id}/packages` | PUT    |
+| `GET /api/admin/webhook-events`                    | GET    |
+| `POST /api/admin/sync/trigger-all`                 | POST   |
 
-All new endpoints live under `/api/admin/` and use `CreateM2MAuthFilter()` + `CreateAdminFilter()`. The scope check (`admin:read` vs `admin:write`) is handled by `CreateAdminFilter()` based on the HTTP method.
+All new endpoints live under `/api/admin/` and use `CreateBearerAuthFilter()` + `CreateAdminFilter()` — the same `patch_notes_admin` role check that guards the admin UI today, whether the caller arrives with a session cookie or a bearer token.
 
 ### Pagination convention
 
@@ -536,9 +730,9 @@ patchnotes <command> <subcommand> [options]
 ### Commands
 
 ```
-patchnotes auth login             -- Prompt for M2M client_id/secret, exchange for token, store
-patchnotes auth status            -- Show current auth (client ID, scopes, token expiry)
-patchnotes auth logout            -- Remove stored credentials and cached token
+patchnotes auth login             -- Open browser, approve access, store tokens (no secret)
+patchnotes auth status            -- Show current auth (signed-in user, token expiry)
+patchnotes auth logout            -- Remove stored tokens
 
 patchnotes packages list          -- List all packages with sync health
 patchnotes packages show <id>     -- Package details
@@ -556,6 +750,11 @@ patchnotes sync trigger-all       -- Trigger sync for all enabled packages
 patchnotes summaries list [--package-id <id>]  -- List summaries with operational metadata
 patchnotes summaries reset <id>                -- Mark releases stale for one package
 patchnotes summaries regenerate-all            -- Reset and regenerate all summaries
+patchnotes summaries queue                     -- Show the summarization backlog and why each entry is queued
+patchnotes summaries queue --out-of-window     -- Only entries that can no longer affect any summary
+patchnotes summaries drain --out-of-window     -- Clear entries that can never change output (safe)
+patchnotes summaries drain --package-id <id>   -- Drain one package
+patchnotes summaries drain --all               -- Clear the whole backlog (does not delete summaries)
 
 patchnotes releases list [--package-id <id>] [--stale] [--since <date>] [--limit 50]
 patchnotes releases reset <package-id>  -- Delete releases + summaries, re-fetch
@@ -597,24 +796,21 @@ The CLI is an API client, not a second application with its own DB connection. T
 
 ### Configuration
 
+Tokens live in the OS keychain where one is available. The fallback file holds no secret beyond the
+tokens themselves — there is no client secret to store:
+
 ```
-~/.config/patchnotes/credentials.json
+~/.config/patchnotes/credentials.json     # mode 600
 {
   "apiUrl": "https://api.myreleasenotes.ai",
-  "clientId": "m2m-client-...",
-  "clientSecret": "...",
-  "cachedToken": "eyJ...",
-  "tokenExpiresAt": "2026-04-08T14:00:00Z"
+  "accessToken": "eyJ...",
+  "refreshToken": "...",
+  "expiresAt": "2026-04-08T14:00:00Z"
 }
 ```
 
-Override with environment variables:
-
-- `PATCHNOTES_API_URL`
-- `PATCHNOTES_CLIENT_ID`
-- `PATCHNOTES_CLIENT_SECRET`
-
-Environment variables take precedence over the config file. When env vars are set, the CLI exchanges them for a fresh token on each invocation (no caching needed in CI/agent environments).
+Override the API URL with `PATCHNOTES_API_URL`, which is useful against a local API. The
+`client_id` is not configurable — it is a build constant, since a public client ID is not a secret.
 
 ## Project structure
 
@@ -637,10 +833,11 @@ PatchNotes.Cli/
       ...
   ApiClient/
     PatchNotesApiClient.cs      -- Typed HTTP client wrapping the API
-    M2MAuthHandler.cs           -- DelegatingHandler: attach Bearer token, refresh if expired
+    BearerAuthHandler.cs        -- DelegatingHandler: attach access token, refresh if expired
+    PkceLoginFlow.cs            -- Loopback listener, PKCE challenge, state verification
   Config/
     CliConfig.cs                -- Config file + env var resolution
-    CredentialStore.cs          -- Read/write credentials file + cached token
+    TokenStore.cs               -- OS keychain, falling back to a 600 credentials file
   Output/
     TableFormatter.cs           -- Human-readable table output
     JsonFormatter.cs            -- --json output
@@ -650,36 +847,53 @@ PatchNotes.Cli/
 
 ### Phase 1: Auth infrastructure
 
+Register a **public** client in Stytch first (redirect `http://127.0.0.1/callback`, port omitted).
+No secret is issued and none is needed anywhere in this design.
+
+Web:
+
+- Mount Stytch's `<IdentityProvider />` on an authorize route in `patchnotes-web`. The CLI cannot
+  authenticate against the API alone; the browser half of the flow has to live somewhere.
+
 Server-side:
 
-- Add JWT Bearer authentication alongside existing Stytch session auth
+- Add Bearer token validation alongside existing Stytch session auth
 - Configure JWKS validation against Stytch's endpoint
-- Add `RouteUtils.CreateM2MAuthFilter()` for `/api/admin/*` route groups
-- Update `CreateAdminFilter()` to enforce `admin:read` vs `admin:write`
+- Add `RouteUtils.CreateBearerAuthFilter()` for `/api/admin/*` route groups
+- Leave `CreateAdminFilter()`'s role check as-is — an interactive token carries a user, so it needs
+  no scope handling
 - Add a CSRF bypass for Bearer-authenticated requests
-- Create M2M clients in Stytch dashboard for initial testing
 
 CLI:
 
-- Scaffold `PatchNotes.Cli` project with `System.CommandLine`
+- Scaffold `PatchNotes.Cli` project with `System.CommandLine`, added to `PatchNotes.slnx`
+- Implement the PKCE loopback flow: `code_verifier`/`code_challenge`, a `127.0.0.1:0` listener,
+  `state` verification
 - Implement `auth login`, `auth status`, `auth logout`
-- Implement credential storage and token caching (`M2MAuthHandler`)
+- Implement token storage (OS keychain, falling back to a `600` file) and silent refresh
 
 ### Phase 2: Read-only commands
 
 - `packages list`, `packages show`, `packages search`
 - `sync status`
 - `summaries list`
+- `summaries queue`
 - `releases list`
 - `users list`, `users show`
 
 These are low-risk, read-only, and immediately useful for diagnostics.
+
+`summaries queue` is worth pulling to the front of this phase. During the 2026-09-03 AI quota
+outage the queue grew unbounded for roughly fifteen hours with no way to observe it short of
+querying production directly, and the first useful question — "how much of this backlog is even
+capable of producing a summary?" — had no answer. It is read-only and depends on nothing else here.
 
 ### Phase 3: Write commands
 
 - `packages add`, `packages update`, `packages delete`
 - `sync trigger`, `sync reset`, `sync disable`, `sync trigger-all`
 - `summaries reset`, `summaries regenerate-all`
+- `summaries drain` (start with `--out-of-window`, which cannot discard useful work)
 - `releases reset`
 - `email send-test`
 
@@ -690,12 +904,27 @@ These are low-risk, read-only, and immediately useful for diagnostics.
 - Non-zero exit codes for errors with machine-readable error JSON
 - Consider a `patchnotes exec <natural-language>` command that maps to the right subcommand (uses Ollama) — optional, nice-to-have
 
+### Phase 5: Device flow (only if needed)
+
+Skip unless someone is actually blocked running the CLI over SSH or in a container, and SSH port
+forwarding has not solved it.
+
+- Device authorization table plus migrations for both contexts
+- `POST /api/cli/device/code`, `POST /api/cli/device/token`, `GET /api/cli/device/callback`
+- `POST /api/admin/device/approve`, called by the web page
+- `/device` route in `patchnotes-web` for entering the user code and approving
+- Second redirect URL registered on the public client, for the API callback
+- Polling loop in the CLI honouring `interval` and `slow_down`
+- Rate limits on code submission and polling, which are the whole security story here
+
 ## Open questions
+
+0. **Do we need the device flow?** The loopback flow needs a browser on the same machine, which fails over SSH and in containers. Stytch does not implement RFC 8628, so it would be built here — the design is in [Device flow](#device-flow-for-terminals-without-a-browser-rfc-8628) and costs a table, four endpoints and a web route. Recommendation: try `ssh -L` port forwarding first, which makes the loopback flow work with no new code, and build the device flow only if a case survives that.
 
 1. **Should the CLI be distributed?** As a dotnet tool (`dotnet tool install patchnotes-cli`), a standalone binary, or just built from source? Recommendation: start as a project in the solution, built from source. Package later if there's demand.
 
 2. **Should PatchNotes.Sync be merged into the CLI?** The Sync CLI already handles `--seed`, `--init`, and sync operations. Recommendation: keep them separate for now. Sync does direct DB operations on trusted infrastructure; the CLI is an API client that works from anywhere.
 
-3. **Stytch M2M token lifetime**: Default is 1 hour. Is that sufficient for long-running agent sessions, or should we request longer-lived tokens? Recommendation: 1 hour is fine — the CLI refreshes automatically using stored credentials.
+3. **Token lifetime**: Access tokens default to 1 hour. Recommendation: leave it. The CLI stores a refresh token (`scope=offline_access`) and renews silently, so the browser only re-opens when the refresh token itself expires.
 
 4. **JWKS caching**: How aggressively should the API cache Stytch's JWKS? Recommendation: use the standard `JwtBearerHandler` defaults (automatic caching with background refresh). No custom caching needed.
