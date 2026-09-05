@@ -29,6 +29,26 @@ export const GetPackagesResponse = zod.object({
   "offset": zod.int().optional()
 })
 
+export const CreatePackageBody = zod.object({
+  "owner": zod.string().nullish(),
+  "repo": zod.string().nullish(),
+  "name": zod.string().nullish(),
+  "npmName": zod.string().nullish(),
+  "tagPrefix": zod.string().nullish()
+})
+
+export const CreatePackageResponse = zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "url": zod.string().nullish(),
+  "npmName": zod.string().nullish(),
+  "githubOwner": zod.string(),
+  "githubRepo": zod.string(),
+  "tagPrefix": zod.string().nullish(),
+  "lastFetchedAt": zod.iso.datetime({"offset":true}).nullish(),
+  "createdAt": zod.iso.datetime({"offset":true}).optional()
+})
+
 export const getPackagePathIdMin = 21;
 export const getPackagePathIdMax = 21;
 

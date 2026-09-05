@@ -24,6 +24,7 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  CreatePackageRequest,
   GetPackageReleasesParams,
   GetPackagesByOwnerParams,
   GetPackagesParams,
@@ -171,7 +172,102 @@ export function useGetPackages<TData = Awaited<ReturnType<typeof getPackages>>, 
 
 
 
-export type getPackageResponse200 = {
+export type createPackageResponse201 = {
+  data: PackageDto
+  status: 201
+}
+
+export type createPackageResponse400 = {
+  data: void
+  status: 400
+}
+
+export type createPackageResponse409 = {
+  data: void
+  status: 409
+}
+
+export type createPackageResponseSuccess = (createPackageResponse201) & {
+  headers: Headers;
+};
+export type createPackageResponseError = (createPackageResponse400 | createPackageResponse409) & {
+  headers: Headers;
+};
+
+export type createPackageResponse = (createPackageResponseSuccess | createPackageResponseError)
+
+export const getCreatePackageUrl = () => {
+
+
+
+
+  return `/api/packages`
+}
+
+export const createPackage = async (createPackageRequest: CreatePackageRequest, options?: Parameters<typeof customFetch>[1]): Promise<createPackageResponse> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Array.isArray(h)) return Object.fromEntries(h);
+    return h;
+  };
+return customFetch<createPackageResponse>(getCreatePackageUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(createPackageRequest)
+  }
+);}
+
+
+
+
+
+export const getCreatePackageMutationOptions = <TError = void,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createPackage>>, TError,CreatePackageMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createPackage>>, TError,CreatePackageMutationVariables, TContext> => {
+
+const mutationKey = ['createPackage'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createPackage>>, CreatePackageMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  createPackage(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreatePackageMutationResult = NonNullable<Awaited<ReturnType<typeof createPackage>>>
+    export type CreatePackageMutationBody = CreatePackageRequest
+    export type CreatePackageMutationError = void
+    export type CreatePackageMutationVariables = {data: CreatePackageRequest}
+
+    export const useCreatePackage = <TError = void,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createPackage>>, TError,CreatePackageMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof createPackage>>,
+        TError,
+        CreatePackageMutationVariables,
+        TContext
+      > => {
+      return useMutation(getCreatePackageMutationOptions(options), queryClient);
+    }
+    export type getPackageResponse200 = {
   data: PackageDetailDto
   status: 200
 }
