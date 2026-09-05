@@ -27,6 +27,12 @@ public record PipelineResult
     public int GroupsSkipped { get; internal set; }
     public List<SummaryGenerationError> SummaryErrors { get; } = [];
 
+    /// <summary>The AI API refused with 429 and summary generation stopped early this run.</summary>
+    public bool RateLimited { get; internal set; }
+
+    /// <summary>Packages the consumer read but did not attempt, because it had already stopped.</summary>
+    public int PackagesSkippedAfterRateLimit { get; internal set; }
+
     // Written by SyncPipeline.RunAsync after both tasks complete — a snapshot of what is still
     // waiting for a summary once this run finished. Growth across runs means summaries are failing
     // faster than they are being produced, which is invisible from the per-run counters above.

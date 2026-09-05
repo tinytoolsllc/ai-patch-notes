@@ -188,20 +188,47 @@ public class SyncPipeline
         await using var scope = _scopeFactory.CreateAsyncScope();
         var summaryService = scope.ServiceProvider.GetRequiredService<SummaryGenerationService>();
 
+        var skippedAfterRateLimit = 0;
+
         await foreach (var packageId in reader.ReadAllAsync(ct))
         {
+            // Once the AI API starts refusing, every further call this run is refused too. Keep
+            // reading so the producer is never blocked on a bounded channel, but stop calling out.
+            // The packages skipped here keep SummaryStale = true and are picked up next run.
+            if (result.RateLimited)
+            {
+                skippedAfterRateLimit++;
+                continue;
+            }
+
             try
             {
                 var summaryResult = await summaryService.GenerateGroupSummariesAsync(packageId, ct);
                 result.SummariesGenerated += summaryResult.SummariesGenerated;
                 result.GroupsSkipped += summaryResult.GroupsSkipped;
                 result.SummaryErrors.AddRange(summaryResult.Errors);
+
+                if (summaryResult.RateLimited)
+                {
+                    result.RateLimited = true;
+                    _logger.LogWarning(
+                        "AI API is rate limiting. Skipping summary generation for the rest of this run; "
+                            + "affected packages stay queued.");
+                }
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Failed to generate summaries for package {PackageId}", packageId);
                 result.SummaryErrors.Add(new SummaryGenerationError(packageId, 0, false, ex.Message));
             }
+        }
+
+        result.PackagesSkippedAfterRateLimit = skippedAfterRateLimit;
+
+        if (skippedAfterRateLimit > 0)
+        {
+            _logger.LogWarning(
+                "Skipped {Count} packages after the AI API began rate limiting", skippedAfterRateLimit);
         }
 
         _logger.LogDebug("Pipeline: consumer finished");

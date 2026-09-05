@@ -75,7 +75,17 @@ public class SyncTimerFunction(
                     : "",
                 ["summariesGenerated"] = result.SummariesGenerated.ToString(),
                 ["summaryErrors"] = result.SummaryErrors.Count.ToString(),
+                ["rateLimited"] = result.RateLimited.ToString(),
+                ["packagesSkippedAfterRateLimit"] = result.PackagesSkippedAfterRateLimit.ToString(),
             });
+
+            if (result.RateLimited)
+            {
+                logger.LogWarning(
+                    "Summary generation stopped early: the AI API is rate limiting. "
+                        + "{Skipped} packages were skipped and remain queued.",
+                    result.PackagesSkippedAfterRateLimit);
+            }
 
             foreach (var error in result.SyncErrors)
             {

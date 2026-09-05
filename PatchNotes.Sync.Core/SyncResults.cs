@@ -54,6 +54,17 @@ public record SummaryGenerationResult
     public int GroupsSkipped { get; internal set; }
     public List<SummaryGenerationError> Errors { get; } = [];
 
+    /// <summary>
+    /// The AI provider refused with 429. Every further call this run will be refused too, so callers
+    /// should stop rather than work through the rest of the backlog against a closed door.
+    /// </summary>
+    /// <remarks>
+    /// Deliberately distinct from a normal error: the work is still valid and stays queued. Releases
+    /// keep <c>SummaryStale = true</c> so they are retried once quota returns, unlike the 400 path,
+    /// which clears the flag because a rejected payload will never succeed.
+    /// </remarks>
+    public bool RateLimited { get; internal set; }
+
     public bool Success => Errors.Count == 0;
 }
 
