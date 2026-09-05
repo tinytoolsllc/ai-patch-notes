@@ -84,6 +84,30 @@ public class SummaryGenerationService
         {
             cancellationToken.ThrowIfCancellationRequested();
 
+            var key = (group.MajorVersion, group.IsPrerelease);
+
+            // Drop releases that can no longer influence this group's summary. Only releases within
+            // SummaryWindow of the group's newest reach the model, so anything further back than
+            // StaleReleaseCutoff keeps the package queued for a regeneration that would produce the
+            // same text. Guarded on the group already having a usable summary, so a group that has
+            // never been summarized is never quietly skipped.
+            if (existingSummaries.TryGetValue(key, out var current)
+                && !string.IsNullOrEmpty(current.Summary))
+            {
+                var groupNewest = group.Releases.Max(r => r.PublishedAt);
+                var staleCutoff = groupNewest - SummaryConstants.StaleReleaseCutoff;
+
+                foreach (var release in group.Releases
+                    .Where(r => r.SummaryStale && r.PublishedAt < staleCutoff))
+                {
+                    _logger.LogDebug(
+                        "Clearing stale flag on {Tag} for package {PackageId}: {Age} behind the group's "
+                            + "newest release, so it cannot affect the summary",
+                        release.Tag, packageId, groupNewest - release.PublishedAt);
+                    release.SummaryStale = false;
+                }
+            }
+
             // Regenerate if the group has stale releases or had a previously failed summary
             var hasStaleReleases = group.Releases.Any(r => r.SummaryStale);
             if (!hasStaleReleases && !orphanedKeys.Contains((group.MajorVersion, group.IsPrerelease)))
@@ -103,7 +127,6 @@ public class SummaryGenerationService
                 }
 
                 // Upsert ReleaseSummary
-                var key = (group.MajorVersion, group.IsPrerelease);
                 if (existingSummaries.TryGetValue(key, out var existing))
                 {
                     existing.Summary = summary;
