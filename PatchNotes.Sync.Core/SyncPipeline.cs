@@ -42,7 +42,64 @@ public class SyncPipeline
 
         await Task.WhenAll(producerTask, consumerTask);
 
+        await MeasureQueueAsync(result, ct);
+
         return result;
+    }
+
+    /// <summary>
+    /// Records what is still waiting for a summary after this run, so the backlog is visible as a
+    /// time series rather than only at the moment someone thinks to look.
+    /// </summary>
+    /// <remarks>
+    /// This mirrors the selection in <see cref="SummaryGenerationService.GenerateAllSummariesAsync"/>:
+    /// a package is queued if it has a stale release or an empty summary row. Nothing here retries or
+    /// mutates; it only counts.
+    ///
+    /// A failure to measure must not fail the sync. The run has already done its real work by this
+    /// point, and losing one telemetry data point is not worth throwing away a successful pass.
+    /// </remarks>
+    private async Task MeasureQueueAsync(PipelineResult result, CancellationToken ct)
+    {
+        try
+        {
+            await using var scope = _scopeFactory.CreateAsyncScope();
+            var db = scope.ServiceProvider.GetRequiredService<PatchNotesDbContext>();
+
+            var stalePackageIds = db.Releases
+                .Where(r => r.SummaryStale)
+                .Select(r => r.PackageId);
+
+            var emptySummaryPackageIds = db.ReleaseSummaries
+                .Where(s => s.Summary == null || s.Summary == "")
+                .Select(s => s.PackageId);
+
+            result.QueuedPackages = await stalePackageIds
+                .Union(emptySummaryPackageIds)
+                .Distinct()
+                .CountAsync(ct);
+
+            result.StaleReleases = await db.Releases.CountAsync(r => r.SummaryStale, ct);
+
+            result.EmptySummaries = await db.ReleaseSummaries
+                .CountAsync(s => s.Summary == null || s.Summary == "", ct);
+
+            result.OldestQueuedAt = await db.Releases
+                .Where(r => r.SummaryStale)
+                .OrderBy(r => r.FetchedAt)
+                .Select(r => (DateTimeOffset?)r.FetchedAt)
+                .FirstOrDefaultAsync(ct);
+
+            _logger.LogInformation(
+                "Summary queue after run: {QueuedPackages} packages, {StaleReleases} stale releases, "
+                    + "{EmptySummaries} empty summaries, oldest queued {OldestQueuedAt}",
+                result.QueuedPackages, result.StaleReleases, result.EmptySummaries,
+                result.OldestQueuedAt);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Failed to measure the summary queue; sync itself was unaffected");
+        }
     }
 
     private async Task ProduceAsync(
