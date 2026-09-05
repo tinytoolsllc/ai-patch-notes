@@ -60,3 +60,5 @@ state.json
 
 # Allow .claude/commands/ to be tracked
 !.claude/commands/
+# Playwright CLI output (may contain credentials)
+.playwright-cli/
