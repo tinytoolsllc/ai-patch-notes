@@ -269,6 +269,73 @@ public static class PackageRoutes
         .Produces(StatusCodes.Status404NotFound)
         .WithName("GetPackageByOwnerRepo");
 
+        // POST /api/packages — start tracking a repository.
+        //
+        // Until now a package could only come into existence as a side effect of a user adding it
+        // to their watchlist. That makes it impossible to track something nobody watches yet, which
+        // is exactly what an operator needs when seeding or fixing up the catalogue.
+        //
+        // The shape matches the watchlist path deliberately: same duplicate check on
+        // (owner, repo), same defaults, so a package created here is indistinguishable from one
+        // created there.
+        //
+        // It sits on /api/packages next to PATCH and DELETE rather than under /api/admin, because
+        // this is CRUD on the package resource. /api/admin/packages is for operational actions --
+        // health, reset-sync, disable-sync -- and splitting create away from update and delete
+        // would leave one resource addressed by two paths.
+        group.MapPost("/", async (CreatePackageRequest request, PatchNotesDbContext db) =>
+        {
+            var owner = request.Owner?.Trim() ?? "";
+            var repo = request.Repo?.Trim() ?? "";
+
+            if (!RouteUtils.IsValidGitHubSegment(owner) || !RouteUtils.IsValidGitHubSegment(repo))
+            {
+                return Results.BadRequest(new ApiError("Invalid owner or repo name"));
+            }
+
+            var existing = await db.Packages
+                .FirstOrDefaultAsync(p => p.GithubOwner == owner && p.GithubRepo == repo);
+
+            if (existing != null)
+            {
+                return Results.Conflict(new ApiError(
+                    $"Package {owner}/{repo} is already tracked (id {existing.Id})"));
+            }
+
+            var package = new Package
+            {
+                Name = string.IsNullOrWhiteSpace(request.Name) ? repo : request.Name.Trim(),
+                Url = $"https://github.com/{owner}/{repo}",
+                GithubOwner = owner,
+                GithubRepo = repo,
+                NpmName = string.IsNullOrWhiteSpace(request.NpmName) ? null : request.NpmName.Trim(),
+                TagPrefix = string.IsNullOrWhiteSpace(request.TagPrefix) ? null : request.TagPrefix.Trim(),
+            };
+
+            db.Packages.Add(package);
+            await db.SaveChangesAsync();
+
+            // LastFetchedAt stays null, which is how the sync job recognises a package it has never
+            // seen. No sync is triggered here; the next scheduled run picks it up.
+            return Results.Created($"/api/packages/{package.Id}", new PackageDto
+            {
+                Id = package.Id,
+                Name = package.Name,
+                Url = package.Url,
+                NpmName = package.NpmName,
+                GithubOwner = package.GithubOwner,
+                GithubRepo = package.GithubRepo,
+                TagPrefix = package.TagPrefix,
+                LastFetchedAt = package.LastFetchedAt,
+            });
+        })
+        .AddEndpointFilterFactory(requireAuth)
+        .AddEndpointFilterFactory(requireAdmin)
+        .Produces<PackageDto>(StatusCodes.Status201Created)
+        .Produces(StatusCodes.Status400BadRequest)
+        .Produces(StatusCodes.Status409Conflict)
+        .WithName("CreatePackage");
+
         // PATCH /api/packages/{id} - Update package GitHub mapping (by nanoid)
         group.MapPatch("/{id:length(21)}", async (string id, UpdatePackageRequest request, PatchNotesDbContext db) =>
         {
@@ -646,4 +713,19 @@ public class PackageHealthDto
     public string? LastFailureMessage { get; set; }
     public bool IsSyncDisabled { get; set; }
     public DateTimeOffset? LastFetchedAt { get; set; }
+}
+
+public class CreatePackageRequest
+{
+    public string? Owner { get; set; }
+    public string? Repo { get; set; }
+
+    /// <summary>Display name. Defaults to the repository name.</summary>
+    public string? Name { get; set; }
+
+    /// <summary>npm package name, when it differs from the repository.</summary>
+    public string? NpmName { get; set; }
+
+    /// <summary>Tag prefix to strip when parsing versions, for repos that publish many products.</summary>
+    public string? TagPrefix { get; set; }
 }

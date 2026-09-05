@@ -6,7 +6,7 @@
   },
   "servers": [
     {
-      "url": "http://localhost:5201/"
+      "url": "http://localhost:5209/"
     }
   ],
   "paths": {
@@ -44,6 +44,40 @@
                 }
               }
             }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Packages"
+        ],
+        "operationId": "CreatePackage",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePackageRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PackageDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "409": {
+            "description": "Conflict"
           }
         }
       }
@@ -1034,6 +1068,29 @@
         }
       }
     },
+    "/api/admin/sync/trigger-all": {
+      "post": {
+        "tags": [
+          "AdminSync"
+        ],
+        "operationId": "TriggerAllSync",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TriggerAllResult"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service Unavailable"
+          }
+        }
+      }
+    },
     "/api/admin/summaries": {
       "get": {
         "tags": [
@@ -1357,6 +1414,41 @@
             "items": {
               "type": "string"
             }
+          }
+        }
+      },
+      "CreatePackageRequest": {
+        "type": "object",
+        "properties": {
+          "owner": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "repo": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "name": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "npmName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "tagPrefix": {
+            "type": [
+              "null",
+              "string"
+            ]
           }
         }
       },
@@ -2178,6 +2270,19 @@
           }
         }
       },
+      "TriggerAllResult": {
+        "type": "object",
+        "properties": {
+          "packagesQueued": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "packagesSkipped": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
       "UpdateEmailPreferencesRequest": {
         "required": [
           "emailDigestEnabled",
@@ -2416,6 +2521,9 @@
     },
     {
       "name": "Feed"
+    },
+    {
+      "name": "AdminSync"
     },
     {
       "name": "AdminSummaries"

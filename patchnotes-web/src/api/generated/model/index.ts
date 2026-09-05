@@ -8,6 +8,7 @@
 export * from './addFromGitHubResponse';
 export * from './applyWatchlistTemplateRequest';
 export * from './applyWatchlistTemplateResponse';
+export * from './createPackageRequest';
 export * from './drainSummaryQueueParams';
 export * from './emailPreferencesDto';
 export * from './emailTemplateDto';
@@ -46,6 +47,7 @@ export * from './searchGitHubRepositoriesUserParams';
 export * from './sendTestEmailRequest';
 export * from './setWatchlistRequest';
 export * from './subscriptionStatusDto';
+export * from './triggerAllResult';
 export * from './updateEmailPreferencesRequest';
 export * from './updateEmailTemplateRequest';
 export * from './updatePackageRequest';
