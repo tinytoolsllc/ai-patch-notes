@@ -150,6 +150,7 @@ app.MapFeedRoutes();
 app.MapStytchWebhook();
 app.MapStripeWebhook();
 app.MapAdminSyncRoutes();
+app.MapAdminReadRoutes();
 app.MapAdminSummaryRoutes();
 app.MapEmailTemplateRoutes();
 app.MapSitemapRoutes();

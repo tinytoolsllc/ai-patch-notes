@@ -6,7 +6,7 @@
   },
   "servers": [
     {
-      "url": "http://localhost:5209/"
+      "url": "http://localhost:5213/"
     }
   ],
   "paths": {
@@ -1091,6 +1091,206 @@
         }
       }
     },
+    "/api/admin/users": {
+      "get": {
+        "tags": [
+          "AdminUsers"
+        ],
+        "operationId": "GetAdminUsers",
+        "parameters": [
+          {
+            "name": "search",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "pro",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedResponseOfAdminUserDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/users/{id}": {
+      "get": {
+        "tags": [
+          "AdminUsers"
+        ],
+        "operationId": "GetAdminUser",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "maxLength": 21,
+              "minLength": 21,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminUserDetailDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
+    "/api/admin/digest-emails": {
+      "get": {
+        "tags": [
+          "AdminDigestEmails"
+        ],
+        "operationId": "GetAdminDigestEmails",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "since",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedResponseOfAdminDigestEmailDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/webhook-events": {
+      "get": {
+        "tags": [
+          "AdminWebhookEvents"
+        ],
+        "operationId": "GetAdminWebhookEvents",
+        "parameters": [
+          {
+            "name": "since",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedResponseOfAdminWebhookEventDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/admin/summaries": {
       "get": {
         "tags": [
@@ -1392,6 +1592,222 @@
         "properties": {
           "packageId": {
             "type": "string"
+          }
+        }
+      },
+      "AdminDigestEmailDto": {
+        "required": [
+          "id",
+          "userId",
+          "recipientEmail",
+          "subject",
+          "status"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "userId": {
+            "type": "string"
+          },
+          "recipientEmail": {
+            "type": "string"
+          },
+          "subject": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "resendEmailId": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "errorMessage": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "sentAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "AdminUserDetailDto": {
+        "required": [
+          "id",
+          "stytchUserId",
+          "watchlist"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "email": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "name": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "stytchUserId": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastLoginAt": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
+          },
+          "subscriptionStatus": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "subscriptionExpiresAt": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
+          },
+          "stripeCustomerId": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "stripeSubscriptionId": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "emailDigestEnabled": {
+            "type": "boolean"
+          },
+          "digestDay": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "digestHour": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "emailWelcomeSent": {
+            "type": "boolean"
+          },
+          "watchlist": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AdminUserWatchlistItemDto"
+            }
+          }
+        }
+      },
+      "AdminUserDto": {
+        "required": [
+          "id"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "email": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "name": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastLoginAt": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
+          },
+          "subscriptionStatus": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "emailDigestEnabled": {
+            "type": "boolean"
+          },
+          "watchlistCount": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "AdminUserWatchlistItemDto": {
+        "required": [
+          "packageId",
+          "packageName",
+          "githubOwner",
+          "githubRepo"
+        ],
+        "type": "object",
+        "properties": {
+          "packageId": {
+            "type": "string"
+          },
+          "packageName": {
+            "type": "string"
+          },
+          "githubOwner": {
+            "type": "string"
+          },
+          "githubRepo": {
+            "type": "string"
+          }
+        }
+      },
+      "AdminWebhookEventDto": {
+        "required": [
+          "eventId"
+        ],
+        "type": "object",
+        "properties": {
+          "eventId": {
+            "type": "string"
+          },
+          "processedAt": {
+            "type": "string",
+            "format": "date-time"
           }
         }
       },
@@ -2025,6 +2441,84 @@
           }
         }
       },
+      "PaginatedResponseOfAdminDigestEmailDto": {
+        "required": [
+          "items"
+        ],
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AdminDigestEmailDto"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "limit": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "offset": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "PaginatedResponseOfAdminUserDto": {
+        "required": [
+          "items"
+        ],
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AdminUserDto"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "limit": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "offset": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "PaginatedResponseOfAdminWebhookEventDto": {
+        "required": [
+          "items"
+        ],
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AdminWebhookEventDto"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "limit": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "offset": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
       "PaginatedResponseOfOwnerPackageDto": {
         "required": [
           "items"
@@ -2524,6 +3018,15 @@
     },
     {
       "name": "AdminSync"
+    },
+    {
+      "name": "AdminUsers"
+    },
+    {
+      "name": "AdminDigestEmails"
+    },
+    {
+      "name": "AdminWebhookEvents"
     },
     {
       "name": "AdminSummaries"

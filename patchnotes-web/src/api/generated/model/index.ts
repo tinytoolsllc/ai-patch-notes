@@ -6,6 +6,11 @@
  */
 
 export * from './addFromGitHubResponse';
+export * from './adminDigestEmailDto';
+export * from './adminUserDetailDto';
+export * from './adminUserDto';
+export * from './adminUserWatchlistItemDto';
+export * from './adminWebhookEventDto';
 export * from './applyWatchlistTemplateRequest';
 export * from './applyWatchlistTemplateResponse';
 export * from './createPackageRequest';
@@ -15,7 +20,10 @@ export * from './emailTemplateDto';
 export * from './feedGroupDto';
 export * from './feedReleaseDto';
 export * from './feedResponseDto';
+export * from './getAdminDigestEmailsParams';
 export * from './getAdminSummariesParams';
+export * from './getAdminUsersParams';
+export * from './getAdminWebhookEventsParams';
 export * from './getFeedParams';
 export * from './getPackageReleasesParams';
 export * from './getPackagesByOwnerParams';
@@ -34,6 +42,9 @@ export * from './packageDto';
 export * from './packageHealthDto';
 export * from './packageReleaseDto';
 export * from './packageReleasePackageDto';
+export * from './paginatedResponseOfAdminDigestEmailDto';
+export * from './paginatedResponseOfAdminUserDto';
+export * from './paginatedResponseOfAdminWebhookEventDto';
 export * from './paginatedResponseOfOwnerPackageDto';
 export * from './paginatedResponseOfPackageDto';
 export * from './paginatedResponseOfPackageReleaseDto';
