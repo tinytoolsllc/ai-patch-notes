@@ -147,6 +147,24 @@ public class SummaryGenerationService
                 result.Errors.Add(new SummaryGenerationError(
                     packageId, group.MajorVersion, group.IsPrerelease, ex.Message));
             }
+            catch (HttpRequestException ex)
+                when (ex.StatusCode == System.Net.HttpStatusCode.TooManyRequests)
+            {
+                // Quota or rate limit. Unlike the 400 above this is not the payload's fault, so the
+                // releases stay stale and will be retried once quota returns. What must not happen is
+                // grinding through the rest of the backlog: every remaining call this run will be
+                // refused as well, and each one burns an attempt against the limit that is already
+                // exhausted. Stop here and let the caller stop too.
+                _logger.LogWarning(ex,
+                    "AI API returned 429 for package {PackageId} v{MajorVersion} (prerelease={IsPrerelease}). "
+                        + "Stopping summary generation for this run; releases stay queued.",
+                    packageId, group.MajorVersion, group.IsPrerelease);
+
+                result.RateLimited = true;
+                result.Errors.Add(new SummaryGenerationError(
+                    packageId, group.MajorVersion, group.IsPrerelease, ex.Message));
+                break;
+            }
             catch (Exception ex)
             {
                 _logger.LogError(ex,
@@ -199,6 +217,17 @@ public class SummaryGenerationService
             aggregateResult.SummariesGenerated += result.SummariesGenerated;
             aggregateResult.GroupsSkipped += result.GroupsSkipped;
             aggregateResult.Errors.AddRange(result.Errors);
+
+            if (result.RateLimited)
+            {
+                aggregateResult.RateLimited = true;
+                _logger.LogWarning(
+                    "Stopping after {Generated} summaries: the AI API is rate limiting. "
+                        + "{Remaining} packages remain queued for the next run.",
+                    aggregateResult.SummariesGenerated,
+                    packageIds.Count - packageIds.IndexOf(packageId) - 1);
+                break;
+            }
         }
 
         return aggregateResult;

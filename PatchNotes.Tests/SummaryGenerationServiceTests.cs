@@ -234,6 +234,91 @@ public class SummaryGenerationServiceTests : IDisposable
         releases.Should().AllSatisfy(r => r.SummaryStale.Should().BeFalse());
     }
 
+
+    [Fact]
+    public async Task GenerateGroupSummariesAsync_GivenTooManyRequests_LeavesReleasesStaleAndFlagsRateLimited()
+    {
+        var package = await CreatePackage();
+        await AddRelease(package.Id, "v1.0.0", "Release 1", "Features");
+
+        _mockAiClient
+            .Setup(x => x.SummarizeReleaseNotesAsync(
+                It.IsAny<string>(), It.IsAny<IReadOnlyList<ReleaseInput>>(), It.IsAny<CancellationToken>()))
+            .ThrowsAsync(new HttpRequestException(
+                "Too Many Requests", null, System.Net.HttpStatusCode.TooManyRequests));
+
+        var result = await _service.GenerateGroupSummariesAsync(package.Id);
+
+        result.SummariesGenerated.Should().Be(0);
+        result.RateLimited.Should().BeTrue();
+        result.Errors.Should().HaveCount(1);
+
+        // Unlike the 400 path, the work is still valid — it stays queued for when quota returns.
+        var releases = await _db.Releases
+            .Where(r => r.PackageId == package.Id)
+            .ToListAsync();
+        releases.Should().AllSatisfy(r => r.SummaryStale.Should().BeTrue());
+    }
+
+    [Fact]
+    public async Task GenerateGroupSummariesAsync_GivenTooManyRequests_StopsAfterTheFirstRefusal()
+    {
+        // Two major versions means two groups, so without the early stop this package alone would
+        // make a second call against a limit that is already exhausted.
+        var package = await CreatePackage();
+        await AddRelease(package.Id, "v1.0.0", "Release 1", "Features");
+        await AddRelease(package.Id, "v2.0.0", "Release 2", "More features");
+
+        _mockAiClient
+            .Setup(x => x.SummarizeReleaseNotesAsync(
+                It.IsAny<string>(), It.IsAny<IReadOnlyList<ReleaseInput>>(), It.IsAny<CancellationToken>()))
+            .ThrowsAsync(new HttpRequestException(
+                "Too Many Requests", null, System.Net.HttpStatusCode.TooManyRequests));
+
+        var result = await _service.GenerateGroupSummariesAsync(package.Id);
+
+        result.RateLimited.Should().BeTrue();
+        result.Errors.Should().HaveCount(1);
+
+        _mockAiClient.Verify(
+            x => x.SummarizeReleaseNotesAsync(
+                It.IsAny<string>(), It.IsAny<IReadOnlyList<ReleaseInput>>(), It.IsAny<CancellationToken>()),
+            Times.Once);
+    }
+
+    [Fact]
+    public async Task GenerateAllSummariesAsync_GivenTooManyRequests_StopsWithoutTouchingRemainingPackages()
+    {
+        // Three queued packages, all refused. The old behaviour attempted every one of them on every
+        // run, which is how a backlog of failing summaries turns into a flood of refused requests.
+        var first = await CreatePackage("pkg-a");
+        var second = await CreatePackage("pkg-b");
+        var third = await CreatePackage("pkg-c");
+        await AddRelease(first.Id, "v1.0.0", "A", "Body");
+        await AddRelease(second.Id, "v1.0.0", "B", "Body");
+        await AddRelease(third.Id, "v1.0.0", "C", "Body");
+
+        _mockAiClient
+            .Setup(x => x.SummarizeReleaseNotesAsync(
+                It.IsAny<string>(), It.IsAny<IReadOnlyList<ReleaseInput>>(), It.IsAny<CancellationToken>()))
+            .ThrowsAsync(new HttpRequestException(
+                "Too Many Requests", null, System.Net.HttpStatusCode.TooManyRequests));
+
+        var result = await _service.GenerateAllSummariesAsync();
+
+        result.RateLimited.Should().BeTrue();
+
+        // One call total, not one per package.
+        _mockAiClient.Verify(
+            x => x.SummarizeReleaseNotesAsync(
+                It.IsAny<string>(), It.IsAny<IReadOnlyList<ReleaseInput>>(), It.IsAny<CancellationToken>()),
+            Times.Once);
+
+        // Everything stays queued, including the packages never attempted.
+        var stale = await _db.Releases.CountAsync(r => r.SummaryStale);
+        stale.Should().Be(3);
+    }
+
     [Fact]
     public async Task GenerateGroupSummariesAsync_GivenTransientError_LeavesReleasesStaleForRetry()
     {
