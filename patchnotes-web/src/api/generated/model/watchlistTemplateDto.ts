@@ -9,6 +9,7 @@ export interface WatchlistTemplateDto {
   id: string;
   name: string;
   description: string;
+  sortOrder?: number;
   packages?: string[];
   packageIds?: string[];
 }

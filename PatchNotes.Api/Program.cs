@@ -151,6 +151,7 @@ app.MapStytchWebhook();
 app.MapStripeWebhook();
 app.MapAdminSyncRoutes();
 app.MapAdminReadRoutes();
+app.MapAdminWatchlistTemplateRoutes();
 app.MapAdminSummaryRoutes();
 app.MapEmailTemplateRoutes();
 app.MapSitemapRoutes();
