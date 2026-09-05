@@ -23,3 +23,16 @@ export const GetSummaryQueueQueryParams = zod.object({
 
 export const GetSummaryQueueResponse = zod.unknown()
 
+export const DrainSummaryQueueQueryParams = zod.object({
+  "scope": zod.string().optional(),
+  "packageId": zod.string().optional()
+})
+
+export const DrainSummaryQueueResponse = zod.unknown()
+
+export const RegenerateAllSummariesQueryParams = zod.object({
+  "confirm": zod.boolean().optional()
+})
+
+export const RegenerateAllSummariesResponse = zod.unknown()
+

@@ -8,6 +8,7 @@
 export * from './addFromGitHubResponse';
 export * from './applyWatchlistTemplateRequest';
 export * from './applyWatchlistTemplateResponse';
+export * from './drainSummaryQueueParams';
 export * from './emailPreferencesDto';
 export * from './emailTemplateDto';
 export * from './feedGroupDto';
@@ -38,6 +39,7 @@ export * from './paginatedResponseOfPackageReleaseDto';
 export * from './paginatedResponseOfReleaseDto';
 export * from './previewTemplateRequest';
 export * from './previewTemplateRequestProps';
+export * from './regenerateAllSummariesParams';
 export * from './releaseDto';
 export * from './releasePackageDto';
 export * from './searchGitHubRepositoriesUserParams';

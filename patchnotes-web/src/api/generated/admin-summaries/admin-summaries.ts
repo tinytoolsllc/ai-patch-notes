@@ -5,23 +5,29 @@
  * OpenAPI spec version: 1.0.0
  */
 import {
+  useMutation,
   useQuery
 } from '@tanstack/react-query';
 import type {
   DataTag,
   DefinedInitialDataOptions,
   DefinedUseQueryResult,
+  MutationFunction,
   QueryClient,
   QueryFunction,
   QueryKey,
   UndefinedInitialDataOptions,
+  UseMutationOptions,
+  UseMutationResult,
   UseQueryOptions,
   UseQueryResult
 } from '@tanstack/react-query';
 
 import type {
+  DrainSummaryQueueParams,
   GetAdminSummariesParams,
-  GetSummaryQueueParams
+  GetSummaryQueueParams,
+  RegenerateAllSummariesParams
 } from '../model';
 
 import { customFetch } from '../../custom-fetch';
@@ -272,3 +278,171 @@ export function useGetSummaryQueue<TData = Awaited<ReturnType<typeof getSummaryQ
 
 
 
+export type drainSummaryQueueResponse200 = {
+  data: void
+  status: 200
+}
+
+export type drainSummaryQueueResponseSuccess = (drainSummaryQueueResponse200) & {
+  headers: Headers;
+};
+;
+
+export type drainSummaryQueueResponse = (drainSummaryQueueResponseSuccess)
+
+export const getDrainSummaryQueueUrl = (params?: DrainSummaryQueueParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/admin/summaries/queue?${stringifiedParams}` : `/api/admin/summaries/queue`
+}
+
+export const drainSummaryQueue = async (params?: DrainSummaryQueueParams, options?: Parameters<typeof customFetch>[1]): Promise<drainSummaryQueueResponse> => {
+
+  return customFetch<drainSummaryQueueResponse>(getDrainSummaryQueueUrl(params),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+
+export const getDrainSummaryQueueMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof drainSummaryQueue>>, TError,DrainSummaryQueueMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof drainSummaryQueue>>, TError,DrainSummaryQueueMutationVariables, TContext> => {
+
+const mutationKey = ['drainSummaryQueue'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof drainSummaryQueue>>, DrainSummaryQueueMutationVariables> = (props) => {
+          const {params} = props ?? {};
+
+          return  drainSummaryQueue(params,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DrainSummaryQueueMutationResult = NonNullable<Awaited<ReturnType<typeof drainSummaryQueue>>>
+
+    export type DrainSummaryQueueMutationError = unknown
+    export type DrainSummaryQueueMutationVariables = {params?: DrainSummaryQueueParams}
+
+    export const useDrainSummaryQueue = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof drainSummaryQueue>>, TError,DrainSummaryQueueMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof drainSummaryQueue>>,
+        TError,
+        DrainSummaryQueueMutationVariables,
+        TContext
+      > => {
+      return useMutation(getDrainSummaryQueueMutationOptions(options), queryClient);
+    }
+    export type regenerateAllSummariesResponse200 = {
+  data: void
+  status: 200
+}
+
+export type regenerateAllSummariesResponseSuccess = (regenerateAllSummariesResponse200) & {
+  headers: Headers;
+};
+;
+
+export type regenerateAllSummariesResponse = (regenerateAllSummariesResponseSuccess)
+
+export const getRegenerateAllSummariesUrl = (params?: RegenerateAllSummariesParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/admin/summaries/regenerate-all?${stringifiedParams}` : `/api/admin/summaries/regenerate-all`
+}
+
+export const regenerateAllSummaries = async (params?: RegenerateAllSummariesParams, options?: Parameters<typeof customFetch>[1]): Promise<regenerateAllSummariesResponse> => {
+
+  return customFetch<regenerateAllSummariesResponse>(getRegenerateAllSummariesUrl(params),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+
+export const getRegenerateAllSummariesMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof regenerateAllSummaries>>, TError,RegenerateAllSummariesMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof regenerateAllSummaries>>, TError,RegenerateAllSummariesMutationVariables, TContext> => {
+
+const mutationKey = ['regenerateAllSummaries'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof regenerateAllSummaries>>, RegenerateAllSummariesMutationVariables> = (props) => {
+          const {params} = props ?? {};
+
+          return  regenerateAllSummaries(params,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type RegenerateAllSummariesMutationResult = NonNullable<Awaited<ReturnType<typeof regenerateAllSummaries>>>
+
+    export type RegenerateAllSummariesMutationError = unknown
+    export type RegenerateAllSummariesMutationVariables = {params?: RegenerateAllSummariesParams}
+
+    export const useRegenerateAllSummaries = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof regenerateAllSummaries>>, TError,RegenerateAllSummariesMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof regenerateAllSummaries>>,
+        TError,
+        RegenerateAllSummariesMutationVariables,
+        TContext
+      > => {
+      return useMutation(getRegenerateAllSummariesMutationOptions(options), queryClient);
+    }

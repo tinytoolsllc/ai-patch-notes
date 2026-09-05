@@ -311,7 +311,230 @@ public class AdminSummaryApiTests : IAsyncLifetime
 
     #endregion
 
+    #region DELETE /api/admin/summaries/queue
+
+    [Fact]
+    public async Task DrainQueue_GivenNonAdminRequest_ReturnsForbidden()
+    {
+        var response = await _nonAdminClient.DeleteAsync("/api/admin/summaries/queue");
+
+        response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+    }
+
+    [Fact]
+    public async Task DrainQueue_DefaultsToOutOfWindow_AndLeavesLiveWorkQueued()
+    {
+        // The out-of-window release cannot reach the model; the recent one is live work. Draining
+        // must take the first and leave the second, or it would silently drop a real summary.
+        var now = DateTimeOffset.UtcNow;
+        await SeedAsync(db =>
+        {
+            var package = NewPackage("react");
+            db.Packages.Add(package);
+            db.Releases.Add(NewRelease(package.Id, "v1.0.0", 1, now.AddDays(-30), stale: true,
+                fetchedAt: now.AddDays(-30)));
+            db.Releases.Add(NewRelease(package.Id, "v1.9.0", 1, now.AddDays(-1), stale: true,
+                fetchedAt: now.AddDays(-1)));
+        });
+
+        var response = await _authClient.DeleteAsync("/api/admin/summaries/queue");
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var result = await response.Content.ReadFromJsonAsync<JsonElement>();
+        result.GetProperty("scope").GetString().Should().Be("out-of-window");
+        result.GetProperty("releasesCleared").GetInt32().Should().Be(1);
+
+        var stale = await StaleTagsAsync();
+        stale.Should().BeEquivalentTo(["v1.9.0"]);
+    }
+
+    [Fact]
+    public async Task DrainQueue_GivenOutOfWindow_DoesNotTouchAnotherVersionGroup()
+    {
+        // Same 30-day gap, but across major versions. v1.0.0 is still the newest of its own group,
+        // so it is live work and must survive the drain.
+        var now = DateTimeOffset.UtcNow;
+        await SeedAsync(db =>
+        {
+            var package = NewPackage("vue");
+            db.Packages.Add(package);
+            db.Releases.Add(NewRelease(package.Id, "v1.0.0", 1, now.AddDays(-30), stale: true,
+                fetchedAt: now.AddDays(-30)));
+            db.Releases.Add(NewRelease(package.Id, "v2.0.0", 2, now, stale: false, fetchedAt: now));
+        });
+
+        var response = await _authClient.DeleteAsync("/api/admin/summaries/queue");
+
+        var result = await response.Content.ReadFromJsonAsync<JsonElement>();
+        result.GetProperty("releasesCleared").GetInt32().Should().Be(0);
+        (await StaleTagsAsync()).Should().BeEquivalentTo(["v1.0.0"]);
+    }
+
+    [Fact]
+    public async Task DrainQueue_GivenScopePackage_ClearsOnlyThatPackage()
+    {
+        var now = DateTimeOffset.UtcNow;
+        string targetId = null!;
+        await SeedAsync(db =>
+        {
+            var target = NewPackage("target");
+            var other = NewPackage("other");
+            db.Packages.AddRange(target, other);
+            targetId = target.Id;
+
+            db.Releases.Add(NewRelease(target.Id, "v1.0.0", 1, now, stale: true, fetchedAt: now));
+            db.Releases.Add(NewRelease(other.Id, "v1.0.0", 1, now, stale: true, fetchedAt: now));
+        });
+
+        var response = await _authClient.DeleteAsync(
+            $"/api/admin/summaries/queue?scope=package&packageId={targetId}");
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var result = await response.Content.ReadFromJsonAsync<JsonElement>();
+        result.GetProperty("releasesCleared").GetInt32().Should().Be(1);
+
+        // The other package is untouched, even though its release is equally stale.
+        (await StaleTagsAsync()).Should().HaveCount(1);
+    }
+
+    [Fact]
+    public async Task DrainQueue_GivenScopePackageWithoutId_ReturnsBadRequest()
+    {
+        var response = await _authClient.DeleteAsync("/api/admin/summaries/queue?scope=package");
+
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+    }
+
+    [Fact]
+    public async Task DrainQueue_GivenUnknownScope_ReturnsBadRequest()
+    {
+        var response = await _authClient.DeleteAsync("/api/admin/summaries/queue?scope=everything");
+
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+    }
+
+    [Fact]
+    public async Task DrainQueue_GivenScopeAll_ClearsStaleAndRemovesEmptySummaries()
+    {
+        var now = DateTimeOffset.UtcNow;
+        await SeedAsync(db =>
+        {
+            var package = NewPackage("react");
+            db.Packages.Add(package);
+            db.Releases.Add(NewRelease(package.Id, "v1.0.0", 1, now, stale: true, fetchedAt: now));
+            db.ReleaseSummaries.Add(new ReleaseSummary
+            {
+                PackageId = package.Id, MajorVersion = 1, IsPrerelease = false,
+                Summary = "", GeneratedAt = now,
+            });
+            db.ReleaseSummaries.Add(new ReleaseSummary
+            {
+                PackageId = package.Id, MajorVersion = 2, IsPrerelease = false,
+                Summary = "A real summary.", GeneratedAt = now,
+            });
+        });
+
+        var response = await _authClient.DeleteAsync("/api/admin/summaries/queue?scope=all");
+
+        var result = await response.Content.ReadFromJsonAsync<JsonElement>();
+        result.GetProperty("releasesCleared").GetInt32().Should().Be(1);
+        result.GetProperty("emptySummariesDeleted").GetInt32().Should().Be(1);
+
+        (await StaleTagsAsync()).Should().BeEmpty();
+
+        // Draining never deletes a real summary — only the empty rows left by failed runs.
+        using var scope = _fixture.Services.CreateScope();
+        var db2 = scope.ServiceProvider.GetRequiredService<PatchNotesDbContext>();
+        db2.ReleaseSummaries.Count().Should().Be(1);
+    }
+
+    #endregion
+
+    #region POST /api/admin/summaries/regenerate-all
+
+    [Fact]
+    public async Task RegenerateAll_GivenNonAdminRequest_ReturnsForbidden()
+    {
+        var response = await _nonAdminClient.PostAsync(
+            "/api/admin/summaries/regenerate-all", null);
+
+        response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+    }
+
+    [Fact]
+    public async Task RegenerateAll_WithoutConfirm_ChangesNothingAndReportsTheBlastRadius()
+    {
+        var now = DateTimeOffset.UtcNow;
+        await SeedAsync(db =>
+        {
+            var package = NewPackage("react");
+            db.Packages.Add(package);
+            db.Releases.Add(NewRelease(package.Id, "v1.0.0", 1, now, stale: false, fetchedAt: now));
+            db.Releases.Add(NewRelease(package.Id, "v1.1.0", 1, now, stale: false, fetchedAt: now));
+            db.ReleaseSummaries.Add(new ReleaseSummary
+            {
+                PackageId = package.Id, MajorVersion = 1, IsPrerelease = false,
+                Summary = "Existing summary.", GeneratedAt = now,
+            });
+        });
+
+        var response = await _authClient.PostAsync("/api/admin/summaries/regenerate-all", null);
+
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        var result = await response.Content.ReadFromJsonAsync<JsonElement>();
+        result.GetProperty("confirmed").GetBoolean().Should().BeFalse();
+        result.GetProperty("summariesDeleted").GetInt32().Should().Be(1);
+        result.GetProperty("releasesMarkedStale").GetInt32().Should().Be(2);
+
+        // Nothing actually happened.
+        using var scope = _fixture.Services.CreateScope();
+        var db2 = scope.ServiceProvider.GetRequiredService<PatchNotesDbContext>();
+        db2.ReleaseSummaries.Count().Should().Be(1);
+        (await StaleTagsAsync()).Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task RegenerateAll_WithConfirm_DeletesSummariesAndQueuesEverything()
+    {
+        var now = DateTimeOffset.UtcNow;
+        await SeedAsync(db =>
+        {
+            var package = NewPackage("react");
+            db.Packages.Add(package);
+            db.Releases.Add(NewRelease(package.Id, "v1.0.0", 1, now, stale: false, fetchedAt: now));
+            db.ReleaseSummaries.Add(new ReleaseSummary
+            {
+                PackageId = package.Id, MajorVersion = 1, IsPrerelease = false,
+                Summary = "Existing summary.", GeneratedAt = now,
+            });
+        });
+
+        var response = await _authClient.PostAsync(
+            "/api/admin/summaries/regenerate-all?confirm=true", null);
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var result = await response.Content.ReadFromJsonAsync<JsonElement>();
+        result.GetProperty("confirmed").GetBoolean().Should().BeTrue();
+        result.GetProperty("summariesDeleted").GetInt32().Should().Be(1);
+
+        using var scope = _fixture.Services.CreateScope();
+        var db2 = scope.ServiceProvider.GetRequiredService<PatchNotesDbContext>();
+        db2.ReleaseSummaries.Count().Should().Be(0);
+        (await StaleTagsAsync()).Should().BeEquivalentTo(["v1.0.0"]);
+    }
+
+    #endregion
+
     #region Helpers
+
+    /// <summary>Tags of every release still flagged stale, for asserting what a drain left behind.</summary>
+    private async Task<List<string>> StaleTagsAsync()
+    {
+        using var scope = _fixture.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<PatchNotesDbContext>();
+        return await Task.FromResult(
+            db.Releases.Where(r => r.SummaryStale).Select(r => r.Tag).ToList());
+    }
 
     private async Task SeedAsync(Action<PatchNotesDbContext> seed)
     {
