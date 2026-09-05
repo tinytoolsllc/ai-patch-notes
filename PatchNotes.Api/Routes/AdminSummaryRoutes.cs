@@ -223,8 +223,184 @@ public static class AdminSummaryRoutes
         })
         .WithName("GetSummaryQueue");
 
+        // DELETE /api/admin/summaries/queue — drain pending work without generating anything.
+        //
+        // The inverse of regenerate-all: this empties the queue, that one fills it. Draining never
+        // deletes a summary; it only stops releases being retried. Anything drained re-enters the
+        // queue naturally the next time its package publishes a release.
+        group.MapDelete("/queue", async (string? scope, string? packageId, PatchNotesDbContext db) =>
+        {
+            var mode = string.IsNullOrWhiteSpace(scope) ? "out-of-window" : scope.ToLowerInvariant();
+
+            if (mode is not ("out-of-window" or "package" or "all"))
+            {
+                return Results.BadRequest(new
+                {
+                    error = "scope must be one of: out-of-window, package, all",
+                });
+            }
+
+            if (mode == "package" && string.IsNullOrWhiteSpace(packageId))
+            {
+                return Results.BadRequest(new { error = "packageId is required when scope=package" });
+            }
+
+            var releasesCleared = 0;
+            var emptySummariesDeleted = 0;
+
+            if (mode == "all")
+            {
+                var stale = await db.Releases.Where(r => r.SummaryStale).ToListAsync();
+                foreach (var release in stale)
+                {
+                    release.SummaryStale = false;
+                }
+                releasesCleared = stale.Count;
+
+                var empty = await db.ReleaseSummaries
+                    .Where(s => s.Summary == null || s.Summary == "")
+                    .ToListAsync();
+                db.ReleaseSummaries.RemoveRange(empty);
+                emptySummariesDeleted = empty.Count;
+            }
+            else if (mode == "package")
+            {
+                var candidates = await db.Releases
+                    .Where(r => r.SummaryStale && r.PackageId == packageId)
+                    .ToListAsync();
+
+                foreach (var release in candidates)
+                {
+                    release.SummaryStale = false;
+                }
+                releasesCleared = candidates.Count;
+            }
+            else
+            {
+                // out-of-window: only releases that cannot reach the model. Measured against each
+                // version group's newest release, which is why every release for the affected
+                // packages is loaded, not just the stale ones.
+                //
+                // This uses SummaryWindow rather than the wider StaleReleaseCutoff the sync job
+                // clears at, so a drain removes exactly the entries the queue endpoint reports as
+                // outOfWindow. A manual drain is allowed to be more aggressive than the automatic
+                // one; the two would otherwise disagree about what is drainable.
+                var candidates = await db.Releases.Where(r => r.SummaryStale).ToListAsync();
+                var affectedPackageIds = candidates.Select(r => r.PackageId).Distinct().ToList();
+
+                var allReleases = await db.Releases
+                    .AsNoTracking()
+                    .Where(r => affectedPackageIds.Contains(r.PackageId))
+                    .Select(r => new { r.PackageId, r.MajorVersion, r.IsPrerelease, r.PublishedAt })
+                    .ToListAsync();
+
+                foreach (var release in candidates)
+                {
+                    var groupNewest = allReleases
+                        .Where(o => o.PackageId == release.PackageId
+                            && o.MajorVersion == release.MajorVersion
+                            && o.IsPrerelease == release.IsPrerelease)
+                        .Max(o => o.PublishedAt);
+
+                    if (release.PublishedAt < groupNewest - SummaryConstants.SummaryWindow)
+                    {
+                        release.SummaryStale = false;
+                        releasesCleared++;
+                    }
+                }
+            }
+
+            await db.SaveChangesAsync();
+
+            return Results.Ok(new DrainQueueResult
+            {
+                Scope = mode,
+                ReleasesCleared = releasesCleared,
+                EmptySummariesDeleted = emptySummariesDeleted,
+            });
+        })
+        .WithName("DrainSummaryQueue");
+
+        // POST /api/admin/summaries/regenerate-all — delete every summary and re-queue everything.
+        //
+        // Requires ?confirm=true. Without it the endpoint reports what it would do and changes
+        // nothing.
+        //
+        // That guard is not ceremony. This deletes every ReleaseSummary and marks every release
+        // stale, so until generation catches up the site and every digest show no summary text at
+        // all. If the AI provider happens to be refusing — an exhausted quota, say — nothing
+        // regenerates and the summaries simply stay gone. Seeing the blast radius before causing
+        // it is the difference between a maintenance action and an outage.
+        group.MapPost("/regenerate-all", async (bool? confirm, PatchNotesDbContext db) =>
+        {
+            var summaryCount = await db.ReleaseSummaries.CountAsync();
+            var releaseCount = await db.Releases.CountAsync();
+            var alreadyStale = await db.Releases.CountAsync(r => r.SummaryStale);
+
+            if (confirm != true)
+            {
+                return Results.BadRequest(new RegenerateAllResult
+                {
+                    Confirmed = false,
+                    SummariesDeleted = summaryCount,
+                    ReleasesMarkedStale = releaseCount - alreadyStale,
+                    TotalReleases = releaseCount,
+                    Message = "Nothing changed. Re-send with confirm=true to proceed. Until "
+                        + "generation catches up, no summary text is shown anywhere.",
+                });
+            }
+
+            var summaries = await db.ReleaseSummaries.ToListAsync();
+            db.ReleaseSummaries.RemoveRange(summaries);
+
+            var releases = await db.Releases.Where(r => !r.SummaryStale).ToListAsync();
+            foreach (var release in releases)
+            {
+                release.SummaryStale = true;
+            }
+
+            await db.SaveChangesAsync();
+
+            return Results.Ok(new RegenerateAllResult
+            {
+                Confirmed = true,
+                SummariesDeleted = summaries.Count,
+                ReleasesMarkedStale = releases.Count,
+                TotalReleases = releaseCount,
+                Message = "Every summary was deleted and every release queued for regeneration.",
+            });
+        })
+        .WithName("RegenerateAllSummaries");
+
         return app;
     }
+}
+
+public class DrainQueueResult
+{
+    /// <summary>The scope that was applied: out-of-window, package, or all.</summary>
+    public required string Scope { get; set; }
+
+    /// <summary>Releases whose stale flag was cleared, so they are no longer queued.</summary>
+    public int ReleasesCleared { get; set; }
+
+    /// <summary>Empty summary rows removed. Only scope=all deletes these.</summary>
+    public int EmptySummariesDeleted { get; set; }
+}
+
+public class RegenerateAllResult
+{
+    /// <summary>False when this was a preview and nothing was changed.</summary>
+    public bool Confirmed { get; set; }
+
+    /// <summary>Summaries deleted, or that would be deleted on an unconfirmed call.</summary>
+    public int SummariesDeleted { get; set; }
+
+    /// <summary>Releases newly marked stale, excluding those already queued.</summary>
+    public int ReleasesMarkedStale { get; set; }
+
+    public int TotalReleases { get; set; }
+    public required string Message { get; set; }
 }
 
 public class AdminSummaryDto
