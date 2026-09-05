@@ -2,6 +2,13 @@
 
 > A command-line tool for managing the PatchNotes application, usable by humans and AI agents.
 
+**Status.** The admin API is complete — fifteen endpoints, built and tested. They work today with a
+browser session cookie, so the operations this document describes are already available; what
+remains is the CLI that makes them pleasant to use. See
+[Phase 0](#phase-0-admin-api--complete) for what shipped and
+[Summary: all new endpoints](#summary-all-new-endpoints) for the five proposals that were dropped
+because existing routes already served them.
+
 ## Motivation
 
 Admin operations currently require either:
@@ -459,33 +466,45 @@ These are already implemented and just need to accept Bearer tokens alongside se
 
 #### Packages and GitHub search
 
-Add admin-path package management endpoints for all CLI package operations. Existing non-admin routes can remain for current web/session flows, but the CLI does not call them.
+Only one package endpoint was missing, and it belongs on `/api/packages` beside the existing
+`PATCH` and `DELETE`, which already run behind the same auth and admin filters an admin route would
+apply. `/api/admin/packages` is for operational actions -- health, reset-sync, disable-sync,
+trigger-sync -- not CRUD.
 
-| Endpoint                          | Method | Purpose                                  |
-| --------------------------------- | ------ | ---------------------------------------- |
-| `GET /api/admin/packages/{id}`    | GET    | Get package detail for admin/CLI usage   |
-| `POST /api/admin/packages`        | POST   | Add a package by GitHub owner/repo       |
-| `PATCH /api/admin/packages/{id}`  | PATCH  | Update package metadata/mapping          |
-| `DELETE /api/admin/packages/{id}` | DELETE | Delete a tracked package                 |
-| `GET /api/admin/github/search`    | GET    | Search GitHub repositories for add flows |
+| Endpoint             | Method | Status | Purpose                            |
+| -------------------- | ------ | ------ | ---------------------------------- |
+| `POST /api/packages` | POST   | Built  | Start tracking a GitHub repository |
+
+Until this existed, a package could only be created as a side effect of a user adding it to their
+watchlist, so tracking something nobody watches yet was impossible.
 
 Request body:
 
 ```json
 {
-  "githubOwner": "facebook",
-  "githubRepo": "react",
+  "owner": "facebook",
+  "repo": "react",
   "name": "React",
   "npmName": "react",
-  "tagPrefix": null
+  "tagPrefix": "v"
 }
 ```
 
-Only `githubOwner` and `githubRepo` are required. `name` defaults to `owner/repo` if omitted. `npmName` is optional (some tracked repos aren't npm packages).
+Only `owner` and `repo` are required. `name` defaults to the repository name; `npmName` is optional,
+since some tracked repos are not npm packages; `tagPrefix` is for repositories that publish several
+products from one tag namespace.
 
-`GET /api/admin/github/search` mirrors the current `/api/github/search?q=...` behavior but lives under `/api/admin/*` so it goes through `CreateBearerAuthFilter()` with the rest of the admin surface.
+Returns `201` with the created package, `409` if that owner/repo is already tracked, and `400` for
+an invalid segment. `LastFetchedAt` is left null, which is how the sync job recognises a package it
+has never seen — creation does not trigger a sync, the next scheduled run picks it up.
 
-`GET /api/admin/packages/{id}` can reuse the same underlying query logic as the current `GET /api/packages/{id}` route, but it is a separate endpoint with a separate contract for CLI/admin usage.
+The duplicate check and defaults match the watchlist creation path exactly, so a package created
+either way is indistinguishable.
+
+**Not built, and why.** `GET`, `PATCH` and `DELETE` under `/api/admin/packages/{id}` were dropped:
+`PATCH /api/packages/{id}` and `DELETE /api/packages/{id}` are already gated with `requireAuth` +
+`requireAdmin`, and `GET /api/packages/{id}` is public. `GET /api/admin/github/search` was dropped
+for the same reason — `GET /api/github/search?q=...` already exists behind authentication.
 
 #### Users
 
@@ -515,26 +534,24 @@ No admin user endpoints exist today. All current user endpoints are `/api/users/
     }
   ],
   "total": 42,
-  "page": 1,
-  "pageSize": 50
+  "limit": 50,
+  "offset": 0
 }
 ```
 
-Query params: `?page=1&pageSize=50&search=<email or name>&pro=true|false&sort=createdAt|lastLoginAt`
+Query params: `?limit=50&offset=0&search=<email or name>&pro=true|false&sort=createdAt|lastLoginAt`
 
 `GET /api/admin/users/{id}` includes the full user record plus their watchlist packages and recent digest email history.
 
 #### Releases
 
-Read-only access already exists via public endpoints. Add an admin list with broader filters:
+**Not built.** `GET /api/releases` already serves paginated release queries, so an admin mirror
+would be a second path to the same data.
 
-| Endpoint                  | Method | Purpose                            |
-| ------------------------- | ------ | ---------------------------------- |
-| `GET /api/admin/releases` | GET    | Query releases across all packages |
-
-Query params: `?packageId=<id>&stale=true|false&prerelease=true|false&since=<datetime>&page=1&pageSize=50`
-
-This is useful for answering "which releases are stale?" or "what was synced in the last hour?" without knowing the package ID up front.
+The one filter it lacks is staleness — "which releases are still waiting for a summary?" — and that
+question is answered better by `GET /api/admin/summaries/queue`, which reports it per package along
+with why each entry is queued and whether it can still affect a summary at all. A `stale=true`
+filter on a flat release list would return rows without any of that context.
 
 #### Release Summaries
 
@@ -545,7 +562,7 @@ The public `/api/summaries` endpoint returns summaries grouped by package. Add a
 | `GET /api/admin/summaries`                 | GET    | Query summaries with operational metadata             |
 | `POST /api/admin/summaries/regenerate-all` | POST   | Mark all releases stale, triggering full regeneration |
 
-`GET /api/admin/summaries` query params: `?packageId=<id>&page=1&pageSize=50`
+`GET /api/admin/summaries` query params: `?packageId=<id>&limit=50&offset=0`
 
 Response includes `generatedAt`, `updatedAt`, and the count of stale releases per group — information the public endpoint doesn't expose.
 
@@ -592,6 +609,11 @@ model, so a release further back than that can never influence the summary text.
 `SummaryStale = true` and still keeps its package queued, but it can never be the reason a summary
 changes. Those entries are pure cost.
 
+Query params: `?outOfWindowOnly=true&limit=50&offset=0`. `outOfWindowOnly` narrows the list to
+packages whose stale releases are _all_ out of window — the ones a drain would empty entirely.
+The `DELETE` below works per release rather than per package, so it also trims out-of-window
+releases from packages that still have in-window work; both measure against `SummaryWindow`.
+
 Summary counters at the top of the response: total queued packages, total stale releases, count
 queued only for `out-of-window` releases, and age of the oldest entry.
 
@@ -616,7 +638,7 @@ No endpoints exist for this table. Add read-only admin access:
 | ------------------------------ | ------ | ------------------------- |
 | `GET /api/admin/digest-emails` | GET    | Query sent digest history |
 
-Query params: `?userId=<id>&status=sent|failed|pending&since=<datetime>&page=1&pageSize=50`
+Query params: `?userId=<id>&status=sent|failed|pending&since=<datetime>&limit=50&offset=0`
 
 Response shape:
 
@@ -634,8 +656,8 @@ Response shape:
     }
   ],
   "total": 120,
-  "page": 1,
-  "pageSize": 50
+  "limit": 50,
+  "offset": 0
 }
 ```
 
@@ -643,15 +665,27 @@ The `htmlBody` field is excluded from list responses (it's large). Include it on
 
 #### Watchlist Templates
 
-The web app can keep using public template read access. The CLI uses admin endpoints only, so add an admin list endpoint alongside the write operations:
+Management lives on the same path as the existing public read, not a parallel admin tree. The `GET`
+stays public because onboarding needs it; each mutation is admin-gated individually.
 
-| Endpoint                                           | Method | Purpose                                      |
-| -------------------------------------------------- | ------ | -------------------------------------------- |
-| `GET /api/admin/watchlist-templates`               | GET    | List watchlist templates for admin/CLI usage |
-| `POST /api/admin/watchlist-templates`              | POST   | Create a new template                        |
-| `PATCH /api/admin/watchlist-templates/{id}`        | PATCH  | Update template name/description/sort order  |
-| `DELETE /api/admin/watchlist-templates/{id}`       | DELETE | Delete a template                            |
-| `PUT /api/admin/watchlist-templates/{id}/packages` | PUT    | Replace template's package list              |
+| Endpoint                                     | Method | Status  | Purpose                         |
+| -------------------------------------------- | ------ | ------- | ------------------------------- |
+| `GET /api/watchlist/templates`               | GET    | Existed | Public list, now with sortOrder |
+| `POST /api/watchlist/templates`              | POST   | Built   | Create a template               |
+| `PATCH /api/watchlist/templates/{id}`        | PATCH  | Built   | Partial update                  |
+| `DELETE /api/watchlist/templates/{id}`       | DELETE | Built   | Delete a template               |
+| `PUT /api/watchlist/templates/{id}/packages` | PUT    | Built   | Replace the package list        |
+
+There is no separate admin list view. The public shape already carries the packages and their ids;
+the only thing it lacked was `SortOrder`, which anything editing templates needs because `PATCH`
+takes an absolute value rather than a move. That field is now returned, which is additive and leaves
+existing clients unaffected.
+
+`PATCH` only touches fields the request actually contains, so updating the sort order cannot blank
+the description. `PUT /{id}/packages` replaces membership wholesale and validates every id before
+writing anything, so one bad id cannot leave a template half-updated. `DELETE` removes the template
+and its membership rows but never the packages themselves -- a template is a curated list, not an
+owner, and users who already applied it keep their watchlist.
 
 #### Processed Webhook Events
 
@@ -661,7 +695,7 @@ Read-only access for debugging webhook issues:
 | ------------------------------- | ------ | ------------------------------ |
 | `GET /api/admin/webhook-events` | GET    | Query processed webhook events |
 
-Query params: `?since=<datetime>&page=1&pageSize=50`
+Query params: `?since=<datetime>&limit=50&offset=0`
 
 This is a diagnostic endpoint — useful for answering "did we process that Stripe webhook?" without querying the database directly.
 
@@ -675,47 +709,99 @@ The existing trigger endpoint works per-package. Add a bulk trigger:
 
 ### Summary: all new endpoints
 
-| Endpoint                                           | Method |
-| -------------------------------------------------- | ------ |
-| `GET /api/admin/packages/{id}`                     | GET    |
-| `POST /api/admin/packages`                         | POST   |
-| `PATCH /api/admin/packages/{id}`                   | PATCH  |
-| `DELETE /api/admin/packages/{id}`                  | DELETE |
-| `GET /api/admin/github/search`                     | GET    |
-| `GET /api/admin/users`                             | GET    |
-| `GET /api/admin/users/{id}`                        | GET    |
-| `GET /api/admin/releases`                          | GET    |
-| `GET /api/admin/summaries`                         | GET    |
-| `POST /api/admin/summaries/regenerate-all`         | POST   |
-| `GET /api/admin/summaries/queue`                   | GET    |
-| `DELETE /api/admin/summaries/queue`                | DELETE |
-| `GET /api/admin/digest-emails`                     | GET    |
-| `GET /api/admin/watchlist-templates`               | GET    |
-| `POST /api/admin/watchlist-templates`              | POST   |
-| `PATCH /api/admin/watchlist-templates/{id}`        | PATCH  |
-| `DELETE /api/admin/watchlist-templates/{id}`       | DELETE |
-| `PUT /api/admin/watchlist-templates/{id}/packages` | PUT    |
-| `GET /api/admin/webhook-events`                    | GET    |
-| `POST /api/admin/sync/trigger-all`                 | POST   |
+Fourteen endpoints were added and one existing endpoint extended. Five of the twenty originally
+listed were dropped, and five moved off `/api/admin/` — see below for both.
 
-All new endpoints live under `/api/admin/` and use `CreateBearerAuthFilter()` + `CreateAdminFilter()` — the same `patch_notes_admin` role check that guards the admin UI today, whether the caller arrives with a session cookie or a bearer token.
+| Endpoint                                     | Method | Status                           |
+| -------------------------------------------- | ------ | -------------------------------- |
+| `POST /api/packages`                         | POST   | Built                            |
+| `POST /api/admin/sync/trigger-all`           | POST   | Built                            |
+| `GET /api/admin/summaries`                   | GET    | Built                            |
+| `GET /api/admin/summaries/queue`             | GET    | Built                            |
+| `DELETE /api/admin/summaries/queue`          | DELETE | Built                            |
+| `POST /api/admin/summaries/regenerate-all`   | POST   | Built                            |
+| `GET /api/admin/users`                       | GET    | Built                            |
+| `GET /api/admin/users/{id}`                  | GET    | Built                            |
+| `GET /api/admin/digest-emails`               | GET    | Built                            |
+| `GET /api/admin/webhook-events`              | GET    | Built                            |
+| `POST /api/watchlist/templates`              | POST   | Built                            |
+| `PATCH /api/watchlist/templates/{id}`        | PATCH  | Built                            |
+| `DELETE /api/watchlist/templates/{id}`       | DELETE | Built                            |
+| `PUT /api/watchlist/templates/{id}/packages` | PUT    | Built                            |
+| `GET /api/watchlist/templates`               | GET    | Existed, now returns `sortOrder` |
+
+Every one uses `CreateAuthFilter()` + `CreateAdminFilter()` — the same `patch_notes_admin` role
+check that guards the admin UI today — except the template `GET`, which stays public because
+onboarding needs it.
+
+#### Where an endpoint lives
+
+`/api/admin/` is not "everything the CLI touches". The repository already draws a sharper line, and
+these endpoints follow it:
+
+- **`/api/<resource>`** — the resource itself. Reads may be public; mutations are admin-gated per
+  route. `POST /api/packages` sits beside the existing `PATCH` and `DELETE`; the template mutations
+  sit beside the existing `GET`.
+- **`/api/admin/<resource>`** — operational actions on a resource, and resources with no public face
+  at all. `packages/{id}/reset-sync`, `sync/trigger-all`, `summaries/queue`, `users`,
+  `digest-emails`, `webhook-events`.
+
+The rule that matters: **one resource, one path.** Creating a package under `/api/admin/packages`
+while updating and deleting it on `/api/packages` would have split a single resource across two
+paths, with create separated from update for no reason. The same applies to templates — management
+belongs with the read, not in a parallel tree.
+
+#### Dropped: five endpoints that already exist
+
+| Proposed                          | Already served by                                     |
+| --------------------------------- | ----------------------------------------------------- |
+| `GET /api/admin/packages/{id}`    | `GET /api/packages/{id}` — public                     |
+| `PATCH /api/admin/packages/{id}`  | `PATCH /api/packages/{id}` — **already admin-gated**  |
+| `DELETE /api/admin/packages/{id}` | `DELETE /api/packages/{id}` — **already admin-gated** |
+| `GET /api/admin/github/search`    | `GET /api/github/search` — authenticated              |
+| `GET /api/admin/releases`         | `GET /api/releases` — public, paginated               |
+
+The two package mutations are the telling ones: they already run behind exactly the filters an admin
+route would apply, so mirroring them would have created a second implementation of the same
+operation.
+
+These mirrors existed because of a constraint that no longer applies. Under the original M2M design
+the CLI held a machine identity with no user, M2M tokens were not accepted on non-admin routes, and
+so everything the CLI touched had to be duplicated under `/api/admin/`. With the CLI authenticating
+as the signed-in user it can call any endpoint that user is authorized for. Verified directly: a
+browser session cookie returns 200 from `/api/users/me`, `/api/watchlist` and
+`/api/admin/packages/health` alike.
+
+#### CSRF applies to every mutating call
+
+`CsrfMiddleware` exempts `GET`, `HEAD` and `OPTIONS`, and requires an `Origin` header matching
+`AllowedOrigins` on everything else. It runs **before** authentication, so a `POST` without `Origin`
+is refused as CSRF and never reaches the auth filter — an unauthenticated call returns 403, not 401.
+
+Anything driving this API from outside a browser must send `Origin` on every mutating request:
+
+```bash
+curl -X DELETE -b "stytch_session=$SESSION" \
+     -H "Origin: https://app.myreleasenotes.ai" \
+     "https://api.myreleasenotes.ai/api/admin/summaries/queue?scope=out-of-window"
+```
 
 ### Pagination convention
 
-The CLI only calls `/api/admin/*`, but not all admin endpoints share the same shape today. Existing admin endpoints keep their current response shapes and query params. New admin list endpoints use a consistent `page`/`pageSize` wrapper contract.
+The CLI calls both `/api/admin/*` and the admin-gated routes on `/api/<resource>`, and not all of them share the same shape today. Existing endpoints keep their current response shapes and query params. New list endpoints reuse the repository's existing `PaginatedResponse<T>` rather than introducing a second pagination contract alongside it.
 
-**New admin endpoints** use:
+**New list endpoints** return:
 
 ```json
 {
   "items": [...],
   "total": 42,
-  "page": 1,
-  "pageSize": 50
+  "limit": 50,
+  "offset": 0
 }
 ```
 
-Default `pageSize` is 50, max is 200. Consistent across all admin list endpoints so the CLI can use a single pagination helper.
+Default `limit` is 50, max is 200, clamped server-side. This is the shape `GET /api/packages` and `GET /api/releases` already return, so the CLI needs one pagination helper for the whole API rather than one per tree.
 
 ## CLI Design
 
@@ -845,7 +931,34 @@ PatchNotes.Cli/
 
 ## Implementation order
 
+### Phase 0: Admin API — **complete**
+
+All fifteen endpoints are built and tested, across five stacked pull requests. They are
+usable today with a browser session cookie; none of the auth work below is needed to call them.
+
+| Layer                    | Endpoints                                                                    |
+| ------------------------ | ---------------------------------------------------------------------------- |
+| Summaries, read          | `GET /summaries`, `GET /summaries/queue`                                     |
+| Summaries, write         | `DELETE /summaries/queue`, `POST /summaries/regenerate-all`                  |
+| Packages and sync        | `POST /packages`, `POST /sync/trigger-all`                                   |
+| Users, digests, webhooks | `GET /users`, `GET /users/{id}`, `GET /digest-emails`, `GET /webhook-events` |
+| Watchlist templates      | `GET`, `POST`, `PATCH`, `DELETE`, `PUT /{id}/packages`                       |
+
+Three behaviours are deliberate and worth carrying into the CLI design:
+
+- **`regenerate-all` requires `confirm=true`.** Unconfirmed it reports the blast radius and changes
+  nothing. It deletes every summary and re-queues everything, so if the AI provider is refusing —
+  an exhausted quota, say — the summaries do not come back. The CLI should prompt before passing
+  the flag.
+- **`trigger-all` is not the per-package trigger in a loop.** It only nudges enabled packages, and
+  reports how many it skipped. The per-package version additionally clears failure counters and
+  re-enables sync, which in bulk would resurrect every package deliberately disabled.
+- **`DELETE /summaries/queue` defaults to `scope=out-of-window`**, the only scope that cannot
+  discard useful work. `scope=all` exists but should never be the default in a client.
+
 ### Phase 1: Auth infrastructure
+
+Everything from here down is CLI ergonomics, not access. The API is already reachable.
 
 Register a **public** client in Stytch first (redirect `http://127.0.0.1/callback`, port omitted).
 No secret is issued and none is needed anywhere in this design.
