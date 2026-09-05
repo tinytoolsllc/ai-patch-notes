@@ -332,6 +332,129 @@ describe("sendDigest", () => {
     );
   });
 
+  it("splits release trains into separate entries with their own summaries", async () => {
+    // A package that ships v15.4.0 and v16.0.0 in the same week is two lines of work, not one
+    // range spanning both. Collapsing them also dropped the older train's summary entirely.
+    mockFindMany.mockResolvedValue([
+      {
+        Id: "user-trains",
+        Email: "a@test.com",
+        Name: "Alice",
+        Watchlists: [
+          {
+            Packages: {
+              Name: "my-lib",
+              Releases: [
+                { Tag: "v16.0.0", MajorVersion: 16, IsPrerelease: false },
+                { Tag: "v15.4.0", MajorVersion: 15, IsPrerelease: false },
+                { Tag: "v15.3.0", MajorVersion: 15, IsPrerelease: false },
+              ],
+              ReleaseSummaries: [
+                { Summary: "v16 summary", MajorVersion: 16, IsPrerelease: false },
+                { Summary: "v15 summary", MajorVersion: 15, IsPrerelease: false },
+              ],
+            },
+          },
+        ],
+      },
+    ]);
+    mockSend.mockResolvedValue({ data: { id: "resend-id-123" }, error: null });
+
+    await sendDigest(makeTimer(), makeContext());
+
+    expect(mockRenderTemplate).toHaveBeenCalledWith(
+      "<fake-jsx/>",
+      expect.objectContaining({
+        packages: [
+          expect.objectContaining({
+            packageName: "my-lib",
+            releaseCount: 1,
+            latestVersion: "v16.0.0",
+            oldestVersion: "v16.0.0",
+            summary: "v16 summary",
+          }),
+          expect.objectContaining({
+            packageName: "my-lib",
+            releaseCount: 2,
+            latestVersion: "v15.4.0",
+            oldestVersion: "v15.3.0",
+            summary: "v15 summary",
+          }),
+        ],
+      }),
+    );
+  });
+
+  it("keeps a prerelease separate from the stable release of the same major", async () => {
+    // Sorting by tag across a mixed set puts "v16.0.0-rc.1" after "v16.0.0", so the release
+    // candidate could be picked as the latest and supply the summary for the stable release.
+    mockFindMany.mockResolvedValue([
+      {
+        Id: "user-prerelease",
+        Email: "a@test.com",
+        Name: "Alice",
+        Watchlists: [
+          {
+            Packages: {
+              Name: "my-lib",
+              Releases: [
+                { Tag: "v16.0.0", MajorVersion: 16, IsPrerelease: false },
+                { Tag: "v16.0.0-rc.1", MajorVersion: 16, IsPrerelease: true },
+              ],
+              ReleaseSummaries: [
+                { Summary: "Stable summary", MajorVersion: 16, IsPrerelease: false },
+                { Summary: "Prerelease summary", MajorVersion: 16, IsPrerelease: true },
+              ],
+            },
+          },
+        ],
+      },
+    ]);
+    mockSend.mockResolvedValue({ data: { id: "resend-id-123" }, error: null });
+
+    await sendDigest(makeTimer(), makeContext());
+
+    const props = mockRenderTemplate.mock.calls[0][1] as {
+      packages: Array<{ latestVersion: string; summary: string }>;
+    };
+    expect(props.packages).toHaveLength(2);
+    expect(props.packages).toContainEqual(
+      expect.objectContaining({ latestVersion: "v16.0.0", summary: "Stable summary" }),
+    );
+    expect(props.packages).toContainEqual(
+      expect.objectContaining({ latestVersion: "v16.0.0-rc.1", summary: "Prerelease summary" }),
+    );
+  });
+
+  it("says so when a summary is missing rather than sending a blank one", async () => {
+    mockFindMany.mockResolvedValue([
+      {
+        Id: "user-nosummary",
+        Email: "a@test.com",
+        Name: "Alice",
+        Watchlists: [
+          {
+            Packages: {
+              Name: "my-lib",
+              Releases: [{ Tag: "v1.0.0", MajorVersion: 1, IsPrerelease: false }],
+              ReleaseSummaries: [],
+            },
+          },
+        ],
+      },
+    ]);
+    mockSend.mockResolvedValue({ data: { id: "resend-id-123" }, error: null });
+
+    await sendDigest(makeTimer(), makeContext());
+
+    expect(mockRenderTemplate).toHaveBeenCalledWith(
+      "<fake-jsx/>",
+      expect.objectContaining({
+        packages: [expect.objectContaining({ summary: "Summary Unavailable" })],
+      }),
+    );
+  });
+
   it("returns early when no template exists in DB", async () => {
     mockFindUnique.mockResolvedValue(null);
     mockFindMany.mockResolvedValue([
