@@ -103,6 +103,17 @@ public static class SubscriptionRoutes
                     { "stytch_user_id", stytchUserId },
                     { "app", "patchnotes" },
                 },
+                // Stripe does not copy the session's metadata onto the subscription it creates,
+                // so the tag is set again here. Without it the subscription and its invoices
+                // arrive at our webhook carrying nothing that identifies them as ours.
+                SubscriptionData = new SessionSubscriptionDataOptions
+                {
+                    Metadata = new Dictionary<string, string>
+                    {
+                        { "stytch_user_id", stytchUserId },
+                        { "app", "patchnotes" },
+                    },
+                },
             };
 
             // If user already has a Stripe customer ID, use it

@@ -52,20 +52,24 @@ public static class StripeWebhook
                 return Results.Ok(new { received = true, duplicate = true });
             }
 
-            // Filter events to only those for our app
-            if (stripeEvent.Data.Object is IHasMetadata objWithMetadata)
+            // Filter events to only those for our app. Two checks, because neither alone
+            // covers every event we handle:
+            //
+            //   - Metadata. Stripe never copies a Checkout Session's own metadata onto the
+            //     subscription it creates, so only sessions carried the "app" tag until
+            //     SubscriptionData.Metadata was added at checkout. Subscriptions created since
+            //     then carry it too, which makes them recognisable no matter what order Stripe
+            //     delivers the events in.
+            //   - Known customer. Invoices never carry the tag, and subscriptions created before
+            //     that change never will. Those are matched by the customer we already stored.
+            //
+            // Anything we cannot place is acknowledged and dropped.
+            if (!HasAppMetadata(stripeEvent.Data.Object)
+                && !await IsKnownCustomerAsync(stripeEvent.Data.Object, db))
             {
-                var metadata = objWithMetadata.Metadata;
-                if (metadata == null || !metadata.TryGetValue("app", out var appValue) || appValue != "patchnotes")
-                {
-                    // Not our event, ignore but acknowledge
-                    return Results.Ok(new { received = true, ignored = true });
-                }
-            }
-            else
-            {
-                // Unknown object type without metadata — skip to be safe
-                logger.LogWarning("Stripe event {EventType} data object does not support metadata, skipping", stripeEvent.Type);
+                logger.LogInformation(
+                    "Ignoring Stripe event {EventId} ({EventType}): not associated with this app",
+                    stripeEvent.Id, stripeEvent.Type);
                 return Results.Ok(new { received = true, ignored = true });
             }
 
@@ -124,15 +128,74 @@ public static class StripeWebhook
         return app;
     }
 
+    private const string AppMetadataKey = "app";
+    private const string AppMetadataValue = "patchnotes";
+
+    /// <summary>Metadata we set ourselves, on sessions and on subscriptions created at checkout.</summary>
+    private static bool HasAppMetadata(object? data) =>
+        data is IHasMetadata { Metadata: { } metadata }
+        && metadata.TryGetValue(AppMetadataKey, out var app)
+        && app == AppMetadataValue;
+
+    /// <summary>
+    /// The customer this event concerns, for the event types we handle. Stripe.net has no common
+    /// interface for it, so the types are listed explicitly; anything else is not ours to judge.
+    /// </summary>
+    private static string? GetCustomerId(object? data) => data switch
+    {
+        Stripe.Checkout.Session session => session.CustomerId,
+        Subscription subscription => subscription.CustomerId,
+        Invoice invoice => invoice.CustomerId,
+        _ => null,
+    };
+
+    private static async Task<bool> IsKnownCustomerAsync(object? data, PatchNotesDbContext db)
+    {
+        var customerId = GetCustomerId(data);
+        return !string.IsNullOrEmpty(customerId)
+            && await db.Users.AnyAsync(u => u.StripeCustomerId == customerId);
+    }
+
+    /// <summary>
+    /// Re-reads the subscription from Stripe. Snapshot payloads are eventually consistent and can
+    /// arrive out of order, so the payload identifies the subscription but never decides its state.
+    /// </summary>
+    private static Task<Subscription> FetchCurrentAsync(Subscription payload) =>
+        new SubscriptionService().GetAsync(payload.Id);
+
+    /// <summary>
+    /// True when the event concerns a subscription the user has already replaced. Re-fetching does
+    /// not catch this on its own: a cancelled subscription still reads back as cancelled, so a
+    /// delayed "deleted" for a previous subscription would cancel the current one.
+    /// </summary>
+    private static bool IsSupersededSubscription(User user, Subscription payload, ILogger logger)
+    {
+        if (string.IsNullOrEmpty(user.StripeSubscriptionId)
+            || user.StripeSubscriptionId == payload.Id)
+        {
+            return false;
+        }
+
+        logger.LogInformation(
+            "Ignoring event for superseded subscription {EventSubscriptionId}; user is on {CurrentSubscriptionId}",
+            payload.Id, user.StripeSubscriptionId);
+        return true;
+    }
+
     private static async Task HandleCheckoutSessionCompleted(Event stripeEvent, PatchNotesDbContext db, ILogger logger)
     {
         var session = stripeEvent.Data.Object as Stripe.Checkout.Session;
         if (session == null) return;
 
-        // Get the Stytch user ID from session metadata
-        if (!session.Metadata.TryGetValue("stytch_user_id", out var stytchUserId))
+        // Get the Stytch user ID from session metadata. Metadata is not guaranteed here: a
+        // session now reaches this handler when it merely belongs to a customer we know, so the
+        // null check the ownership filter used to provide has to live at the point of use.
+        if (session.Metadata is not { } metadata
+            || !metadata.TryGetValue("stytch_user_id", out var stytchUserId))
         {
-            logger.LogWarning("Checkout session completed but no stytch_user_id in metadata");
+            logger.LogWarning(
+                "Checkout session {SessionId} completed with no stytch_user_id in metadata",
+                session.Id);
             return;
         }
 
@@ -163,16 +226,18 @@ public static class StripeWebhook
 
     private static async Task HandleSubscriptionUpdated(Event stripeEvent, PatchNotesDbContext db, ILogger logger)
     {
-        var subscription = stripeEvent.Data.Object as Subscription;
-        if (subscription == null) return;
+        if (stripeEvent.Data.Object is not Subscription payload) return;
 
-        var user = await db.Users.FirstOrDefaultAsync(u => u.StripeCustomerId == subscription.CustomerId);
+        var user = await db.Users.FirstOrDefaultAsync(u => u.StripeCustomerId == payload.CustomerId);
         if (user == null)
         {
-            logger.LogWarning("User not found for Stripe customer: {CustomerId}", subscription.CustomerId);
+            logger.LogWarning("User not found for Stripe customer: {CustomerId}", payload.CustomerId);
             return;
         }
 
+        if (IsSupersededSubscription(user, payload, logger)) return;
+
+        var subscription = await FetchCurrentAsync(payload);
         user.StripeSubscriptionId = subscription.Id;
         user.SubscriptionStatus = subscription.Status;
         user.SubscriptionExpiresAt = subscription.Items.Data.FirstOrDefault()?.CurrentPeriodEnd;
@@ -183,16 +248,18 @@ public static class StripeWebhook
 
     private static async Task HandleSubscriptionDeleted(Event stripeEvent, PatchNotesDbContext db, ILogger logger)
     {
-        var subscription = stripeEvent.Data.Object as Subscription;
-        if (subscription == null) return;
+        if (stripeEvent.Data.Object is not Subscription payload) return;
 
-        var user = await db.Users.FirstOrDefaultAsync(u => u.StripeCustomerId == subscription.CustomerId);
+        var user = await db.Users.FirstOrDefaultAsync(u => u.StripeCustomerId == payload.CustomerId);
         if (user == null)
         {
-            logger.LogWarning("User not found for Stripe customer: {CustomerId}", subscription.CustomerId);
+            logger.LogWarning("User not found for Stripe customer: {CustomerId}", payload.CustomerId);
             return;
         }
 
+        if (IsSupersededSubscription(user, payload, logger)) return;
+
+        var subscription = await FetchCurrentAsync(payload);
         user.SubscriptionStatus = "canceled";
         // Keep the expiration date so user has access until end of paid period
         user.SubscriptionExpiresAt = subscription.Items.Data.FirstOrDefault()?.CurrentPeriodEnd;
