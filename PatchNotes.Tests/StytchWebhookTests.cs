@@ -192,6 +192,24 @@ public class StytchWebhookTests : IAsyncLifetime
     }
 
     [Fact]
+    public async Task HandleWebhook_RecordsTheEventTypeItProcessed()
+    {
+        // Stytch splits the type across object_type and action; the ledger joins them so the
+        // column reads the same way as Stripe's dotted event types.
+        var body = $$$"""{"action":"CREATE","id":"{{{PatchNotesApiFixture.TestUserId}}}","object_type":"user"}""";
+        var (id, ts, sig) = SignPayload(body);
+
+        var response = await _client.SendAsync(
+            CreateWebhookRequest(body, svixId: id, svixTimestamp: ts, svixSignature: sig));
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+
+        using var scope = _fixture.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<PatchNotesDbContext>();
+        db.ProcessedWebhookEvents.Single().EventType.Should().Be("user.CREATE");
+    }
+
+    [Fact]
     public async Task HandleWebhook_GivenUnhandledEventType_Returns200Ok()
     {
         var body = """{"action":"SOME_OTHER","id":"user-test-123","object_type":"organization"}""";

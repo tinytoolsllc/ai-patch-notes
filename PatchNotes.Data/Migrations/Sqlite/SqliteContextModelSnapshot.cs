@@ -15,7 +15,7 @@ namespace PatchNotes.Data.Migrations.Sqlite
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "10.0.4");
+            modelBuilder.HasAnnotation("ProductVersion", "10.0.11");
 
             modelBuilder.Entity("PatchNotes.Data.EmailTemplate", b =>
                 {
@@ -115,6 +115,10 @@ namespace PatchNotes.Data.Migrations.Sqlite
             modelBuilder.Entity("PatchNotes.Data.ProcessedWebhookEvent", b =>
                 {
                     b.Property<string>("EventId")
+                        .HasMaxLength(128)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("EventType")
                         .HasMaxLength(128)
                         .HasColumnType("TEXT");
 

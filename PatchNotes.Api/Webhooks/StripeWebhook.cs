@@ -108,6 +108,7 @@ public static class StripeWebhook
                     db.ProcessedWebhookEvents.Add(new ProcessedWebhookEvent
                     {
                         EventId = stripeEvent.Id,
+                        EventType = stripeEvent.Type,
                         ProcessedAt = DateTimeOffset.UtcNow
                     });
                     await db.SaveChangesAsync();
