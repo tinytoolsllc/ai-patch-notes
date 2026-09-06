@@ -156,8 +156,8 @@ public static class StripeWebhook
     /// Re-reads the subscription from Stripe. Snapshot payloads are eventually consistent, so the
     /// payload identifies the subscription but never decides its state.
     /// </summary>
-    private static Task<Subscription> FetchCurrentAsync(Subscription payload) =>
-        new SubscriptionService().GetAsync(payload.Id);
+    private static Task<Subscription> FetchCurrentAsync(string subscriptionId) =>
+        new SubscriptionService().GetAsync(subscriptionId);
 
     /// <summary>
     /// The user a subscription event concerns. The customer id is the usual route, but Stripe can
@@ -275,8 +275,7 @@ public static class StripeWebhook
         // Fetch the subscription to get status and period end
         if (!string.IsNullOrEmpty(session.SubscriptionId))
         {
-            var subscription = await new SubscriptionService().GetAsync(session.SubscriptionId);
-            ApplySubscription(user, subscription);
+            ApplySubscription(user, await FetchCurrentAsync(session.SubscriptionId));
         }
 
         await db.SaveChangesAsync();
@@ -296,7 +295,7 @@ public static class StripeWebhook
             return false;
         }
 
-        var subscription = await FetchCurrentAsync(payload);
+        var subscription = await FetchCurrentAsync(payload.Id);
         if (!ShouldAdopt(user, subscription, logger)) return false;
 
         // Reached via subscription metadata when checkout has not landed yet, so the customer id
@@ -384,9 +383,8 @@ public static class StripeWebhook
         if (!IsForCurrentSubscription(user, invoice, logger, "payment success")) return false;
 
         // Update subscription expiry on successful renewal payment
-        var invoiceSubscriptionId = invoice.Parent!.SubscriptionDetails!.SubscriptionId;
-        var subscription = await new SubscriptionService().GetAsync(invoiceSubscriptionId);
-        ApplySubscription(user, subscription);
+        ApplySubscription(
+            user, await FetchCurrentAsync(invoice.Parent!.SubscriptionDetails!.SubscriptionId));
 
         await db.SaveChangesAsync();
         logger.LogInformation("Payment succeeded for customer {CustomerId}, updated expiry to {ExpiresAt}", invoice.CustomerId, user.SubscriptionExpiresAt);
