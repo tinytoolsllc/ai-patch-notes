@@ -1,6 +1,7 @@
 using System.Data.Common;
 using System.Net;
 using Microsoft.AspNetCore.Hosting;
+using Stripe;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
@@ -98,6 +99,15 @@ public class PatchNotesApiFixture : WebApplicationFactory<Program>, IAsyncLifeti
     {
         // Force creation of the WebApplication and database
         using var scope = Services.CreateScope();
+
+        // Nothing under test may reach Stripe. SubscriptionService is constructed inline in the
+        // webhook handlers and cannot be faked, so the SDK is pointed at a closed loopback port:
+        // a regression that reintroduces a call then fails immediately and locally, instead of
+        // dialling api.stripe.com from CI and reporting a 503 in place of the real assertion.
+        // This runs after the host is built because Program.cs assigns StripeConfiguration.ApiKey,
+        // which discards any client set before it.
+        StripeConfiguration.StripeClient = new StripeClient(
+            "sk_test_placeholder", null, null, "http://127.0.0.1:1");
         var db = scope.ServiceProvider.GetRequiredService<PatchNotesDbContext>();
         await db.Database.EnsureCreatedAsync();
     }
