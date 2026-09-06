@@ -16,6 +16,7 @@ export const GetAdminWebhookEventsQueryParams = zod.object({
 export const GetAdminWebhookEventsResponse = zod.object({
   "items": zod.array(zod.object({
   "eventId": zod.string(),
+  "eventType": zod.string().nullish(),
   "processedAt": zod.iso.datetime({"offset":true}).optional()
 })),
   "total": zod.int().optional(),

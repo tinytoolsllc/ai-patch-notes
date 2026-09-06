@@ -253,6 +253,7 @@ public static class AdminReadRoutes
                 .Select(e => new AdminWebhookEventDto
                 {
                     EventId = e.EventId,
+                    EventType = e.EventType,
                     ProcessedAt = e.ProcessedAt,
                 })
                 .ToListAsync();
@@ -333,5 +334,9 @@ public class AdminDigestEmailDto
 public class AdminWebhookEventDto
 {
     public required string EventId { get; set; }
+
+    /// <summary>Null for rows recorded before the column existed; it cannot be backfilled.</summary>
+    public string? EventType { get; set; }
+
     public DateTimeOffset ProcessedAt { get; set; }
 }
