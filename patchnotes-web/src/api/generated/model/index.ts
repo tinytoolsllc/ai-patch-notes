@@ -63,7 +63,6 @@ export * from './setTemplatePackagesRequest';
 export * from './setTemplatePackagesResult';
 export * from './setWatchlistRequest';
 export * from './subscriptionStatusDto';
-export * from './triggerAllResult';
 export * from './updateEmailPreferencesRequest';
 export * from './updateEmailTemplateRequest';
 export * from './updatePackageRequest';

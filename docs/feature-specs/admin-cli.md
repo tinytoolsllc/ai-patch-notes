@@ -701,21 +701,35 @@ This is a diagnostic endpoint — useful for answering "did we process that Stri
 
 #### Sync Operations
 
-The existing trigger endpoint works per-package. Add a bulk trigger:
+**Not built.** A bulk trigger was specified and implemented, then removed: it could not do what its
+name claimed, and what it actually did was harmful.
 
-| Endpoint                           | Method | Purpose                               |
-| ---------------------------------- | ------ | ------------------------------------- |
-| `POST /api/admin/sync/trigger-all` | POST   | Trigger sync for all enabled packages |
+`LastFetchedAt` is read in exactly two places — `SyncService.cs` uses it as `since`, the early-stop
+bound that makes an incremental fetch stop after one page, and `SyncNewPackagesFunction` selects
+rows where it is null. Nothing selects packages _for_ the hourly sync by it; `SyncPipeline` and
+`SyncAllAsync` both take every package with `IsSyncDisabled == false`. So every enabled package was
+already being synced every hour, and "queue them for the next run" described work that was already
+scheduled.
+
+Nulling the column did have an effect, just not that one. It removed the early-stop bound
+catalogue-wide, turning the next run into a full re-pagination of every repository's entire release
+history for no new data, and handed that to one serial function with a ten-minute timeout. It also
+blanked the timestamp the admin health page reports, and the public package page treats a missing
+`LastFetchedAt` with no version groups as "syncing" — so every affected package showed a spinner and
+polled every 30 seconds until a sync completed. Nothing restored the old values.
+
+The per-package `POST /api/admin/packages/{id}/trigger-sync` remains, which is the case that
+actually comes up. A genuine catalogue-wide re-fetch is a maintenance operation, not an API call.
 
 ### Summary: all new endpoints
 
-Fourteen endpoints were added and one existing endpoint extended. Five of the twenty originally
-listed were dropped, and five moved off `/api/admin/` — see below for both.
+Thirteen endpoints were added and one existing endpoint extended. The rest of the original
+proposal was either already served by an existing route or turned out not to be worth building —
+see below. Five of what shipped moved off `/api/admin/`, for the reason in the next section.
 
 | Endpoint                                     | Method | Status                           |
 | -------------------------------------------- | ------ | -------------------------------- |
 | `POST /api/packages`                         | POST   | Built                            |
-| `POST /api/admin/sync/trigger-all`           | POST   | Built                            |
 | `GET /api/admin/summaries`                   | GET    | Built                            |
 | `GET /api/admin/summaries/queue`             | GET    | Built                            |
 | `DELETE /api/admin/summaries/queue`          | DELETE | Built                            |
@@ -743,7 +757,7 @@ these endpoints follow it:
   route. `POST /api/packages` sits beside the existing `PATCH` and `DELETE`; the template mutations
   sit beside the existing `GET`.
 - **`/api/admin/<resource>`** — operational actions on a resource, and resources with no public face
-  at all. `packages/{id}/reset-sync`, `sync/trigger-all`, `summaries/queue`, `users`,
+  at all. `packages/{id}/reset-sync`, `summaries/queue`, `users`,
   `digest-emails`, `webhook-events`.
 
 The rule that matters: **one resource, one path.** Creating a package under `/api/admin/packages`
@@ -831,7 +845,6 @@ patchnotes sync status            -- Sync health overview (failures, disabled)
 patchnotes sync trigger <id>      -- Queue package for immediate sync
 patchnotes sync reset <id>        -- Clear failure tracking, re-enable
 patchnotes sync disable <id>      -- Disable sync for a package
-patchnotes sync trigger-all       -- Trigger sync for all enabled packages
 
 patchnotes summaries list [--package-id <id>]  -- List summaries with operational metadata
 patchnotes summaries reset <id>                -- Mark releases stale for one package
@@ -940,19 +953,16 @@ usable today with a browser session cookie; none of the auth work below is neede
 | ------------------------ | ---------------------------------------------------------------------------- |
 | Summaries, read          | `GET /summaries`, `GET /summaries/queue`                                     |
 | Summaries, write         | `DELETE /summaries/queue`, `POST /summaries/regenerate-all`                  |
-| Packages and sync        | `POST /packages`, `POST /sync/trigger-all`                                   |
+| Packages                 | `POST /packages`                                                             |
 | Users, digests, webhooks | `GET /users`, `GET /users/{id}`, `GET /digest-emails`, `GET /webhook-events` |
 | Watchlist templates      | `GET`, `POST`, `PATCH`, `DELETE`, `PUT /{id}/packages`                       |
 
-Three behaviours are deliberate and worth carrying into the CLI design:
+Two behaviours are deliberate and worth carrying into the CLI design:
 
 - **`regenerate-all` requires `confirm=true`.** Unconfirmed it reports the blast radius and changes
   nothing. It deletes every summary and re-queues everything, so if the AI provider is refusing —
   an exhausted quota, say — the summaries do not come back. The CLI should prompt before passing
   the flag.
-- **`trigger-all` is not the per-package trigger in a loop.** It only nudges enabled packages, and
-  reports how many it skipped. The per-package version additionally clears failure counters and
-  re-enables sync, which in bulk would resurrect every package deliberately disabled.
 - **`DELETE /summaries/queue` defaults to `scope=out-of-window`**, the only scope that cannot
   discard useful work. `scope=all` exists but should never be the default in a client.
 
@@ -1004,7 +1014,7 @@ capable of producing a summary?" — had no answer. It is read-only and depends 
 ### Phase 3: Write commands
 
 - `packages add`, `packages update`, `packages delete`
-- `sync trigger`, `sync reset`, `sync disable`, `sync trigger-all`
+- `sync trigger`, `sync reset`, `sync disable`
 - `summaries reset`, `summaries regenerate-all`
 - `summaries drain` (start with `--out-of-window`, which cannot discard useful work)
 - `releases reset`

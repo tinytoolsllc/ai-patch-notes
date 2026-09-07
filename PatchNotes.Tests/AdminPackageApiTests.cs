@@ -3,12 +3,11 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.AspNetCore.Hosting;
 using PatchNotes.Data;
 
 namespace PatchNotes.Tests;
 
-public class AdminPackageAndSyncApiTests : IAsyncLifetime
+public class AdminPackageApiTests : IAsyncLifetime
 {
     private PatchNotesApiFixture _fixture = null!;
     private HttpClient _client = null!;
@@ -18,9 +17,6 @@ public class AdminPackageAndSyncApiTests : IAsyncLifetime
     public async Task InitializeAsync()
     {
         _fixture = new PatchNotesApiFixture();
-        // trigger-all returns 503 without this, which is correct behaviour but not what these
-        // tests are about. The ping itself goes through the fixture's mock HTTP factory.
-        _fixture.ConfigureSettings(b => b.UseSetting("SyncFunction:Url", "http://localhost/sync"));
         await _fixture.InitializeAsync();
         _client = _fixture.CreateClient();
         _authClient = _fixture.CreateAuthenticatedClient();
@@ -142,65 +138,4 @@ public class AdminPackageAndSyncApiTests : IAsyncLifetime
 
     #endregion
 
-    #region POST /api/admin/sync/trigger-all
-
-    [Fact]
-    public async Task TriggerAllSync_GivenNonAdminRequest_ReturnsForbidden()
-    {
-        var response = await _nonAdminClient.PostAsync("/api/admin/sync/trigger-all", null);
-
-        response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
-    }
-
-    [Fact]
-    public async Task TriggerAllSync_QueuesEnabledPackagesAndLeavesDisabledOnesAlone()
-    {
-        // The per-package trigger also re-enables sync. Doing that in bulk would resurrect every
-        // package someone had deliberately disabled, so trigger-all must skip them entirely.
-        var now = DateTimeOffset.UtcNow;
-        using (var scope = _fixture.Services.CreateScope())
-        {
-            var db = scope.ServiceProvider.GetRequiredService<PatchNotesDbContext>();
-            db.Packages.AddRange(
-                new Package
-                {
-                    Name = "enabled-a", Url = "https://github.com/o/enabled-a",
-                    GithubOwner = "o", GithubRepo = "enabled-a", LastFetchedAt = now,
-                },
-                new Package
-                {
-                    Name = "enabled-b", Url = "https://github.com/o/enabled-b",
-                    GithubOwner = "o", GithubRepo = "enabled-b", LastFetchedAt = now,
-                },
-                new Package
-                {
-                    Name = "disabled", Url = "https://github.com/o/disabled",
-                    GithubOwner = "o", GithubRepo = "disabled", LastFetchedAt = now,
-                    IsSyncDisabled = true, ConsecutiveFailures = 9,
-                });
-            await db.SaveChangesAsync();
-        }
-
-        var response = await _authClient.PostAsync("/api/admin/sync/trigger-all", null);
-
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var body = await response.Content.ReadFromJsonAsync<JsonElement>();
-        body.GetProperty("packagesQueued").GetInt32().Should().Be(2);
-        body.GetProperty("packagesSkipped").GetInt32().Should().Be(1);
-
-        using var verify = _fixture.Services.CreateScope();
-        var db2 = verify.ServiceProvider.GetRequiredService<PatchNotesDbContext>();
-
-        db2.Packages.Where(p => !p.IsSyncDisabled).ToList()
-            .Should().AllSatisfy(p => p.LastFetchedAt.Should().BeNull());
-
-        var disabled = db2.Packages.Single(p => p.Name == "disabled");
-        disabled.LastFetchedAt.Should().NotBeNull();
-        disabled.IsSyncDisabled.Should().BeTrue();
-
-        // Failure state is preserved; clearing it is what per-package reset-sync is for.
-        disabled.ConsecutiveFailures.Should().Be(9);
-    }
-
-    #endregion
 }
