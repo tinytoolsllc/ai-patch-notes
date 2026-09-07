@@ -1102,29 +1102,6 @@
         }
       }
     },
-    "/api/admin/sync/trigger-all": {
-      "post": {
-        "tags": [
-          "AdminSync"
-        ],
-        "operationId": "TriggerAllSync",
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/TriggerAllResult"
-                }
-              }
-            }
-          },
-          "503": {
-            "description": "Service Unavailable"
-          }
-        }
-      }
-    },
     "/api/admin/users": {
       "get": {
         "tags": [
@@ -3032,19 +3009,6 @@
           }
         }
       },
-      "TriggerAllResult": {
-        "type": "object",
-        "properties": {
-          "packagesQueued": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "packagesSkipped": {
-            "type": "integer",
-            "format": "int32"
-          }
-        }
-      },
       "UpdateEmailPreferencesRequest": {
         "required": [
           "emailDigestEnabled",
@@ -3311,9 +3275,6 @@
     },
     {
       "name": "Feed"
-    },
-    {
-      "name": "AdminSync"
     },
     {
       "name": "AdminUsers"

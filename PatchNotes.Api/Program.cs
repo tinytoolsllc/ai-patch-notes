@@ -149,7 +149,6 @@ app.MapSubscriptionRoutes();
 app.MapFeedRoutes();
 app.MapStytchWebhook();
 app.MapStripeWebhook();
-app.MapAdminSyncRoutes();
 app.MapAdminReadRoutes();
 app.MapAdminWatchlistTemplateRoutes();
 app.MapAdminSummaryRoutes();
