@@ -15,9 +15,9 @@
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.11" />
-    <PackageReference Include="Stripe.net" Version="50.3.0" />
-    <PackageReference Include="Stytch.net" Version="3.2.0" />
-    <PackageReference Include="Svix" Version="1.90.0" />
+    <PackageReference Include="Stripe.net" Version="52.4.1" />
+    <PackageReference Include="Stytch.net" Version="4.1.0" />
+    <PackageReference Include="Svix" Version="2.3.0" />
   </ItemGroup>
 
   <ItemGroup>
