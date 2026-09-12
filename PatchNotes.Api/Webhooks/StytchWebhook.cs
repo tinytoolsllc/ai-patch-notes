@@ -216,6 +216,8 @@ public static class StytchWebhook
             db.ProcessedWebhookEvents.Add(new ProcessedWebhookEvent
             {
                 EventId = svixId,
+                // Stytch splits this across two fields; joined to read like Stripe's dotted types.
+                EventType = $"{stytchEvent.object_type}.{stytchEvent.action}",
                 ProcessedAt = DateTimeOffset.UtcNow
             });
             await db.SaveChangesAsync();

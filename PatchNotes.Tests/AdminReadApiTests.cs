@@ -262,6 +262,35 @@ public class AdminReadApiTests : IAsyncLifetime
     }
 
     [Fact]
+    public async Task GetWebhookEvents_ReturnsTheEventType()
+    {
+        // Without the type, every row in this ledger looks the same and it cannot answer which
+        // event types are actually reaching their handlers -- the question it exists to answer.
+        await SeedAsync(db =>
+        {
+            db.ProcessedWebhookEvents.Add(new ProcessedWebhookEvent
+            {
+                EventId = "evt_typed",
+                EventType = "invoice.payment_succeeded",
+                ProcessedAt = DateTimeOffset.UtcNow,
+            });
+            db.ProcessedWebhookEvents.Add(new ProcessedWebhookEvent
+            {
+                EventId = "evt_legacy",
+                ProcessedAt = DateTimeOffset.UtcNow.AddHours(-1),
+            });
+        });
+
+        var response = await _authClient.GetAsync("/api/admin/webhook-events");
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var items = (await response.Content.ReadFromJsonAsync<JsonElement>()).GetProperty("items");
+        items[0].GetProperty("eventType").GetString().Should().Be("invoice.payment_succeeded");
+        // Rows predating the column stay null rather than being dropped from the response.
+        items[1].GetProperty("eventType").ValueKind.Should().Be(JsonValueKind.Null);
+    }
+
+    [Fact]
     public async Task GetWebhookEvents_ClampsPageSizeToTheMaximum()
     {
         var response = await _authClient.GetAsync("/api/admin/webhook-events?limit=9999");

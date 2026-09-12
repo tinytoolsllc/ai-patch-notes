@@ -7,5 +7,7 @@
 
 export interface AdminWebhookEventDto {
   eventId: string;
+  /** @nullable */
+  eventType?: string | null;
   processedAt?: string;
 }

@@ -2000,6 +2000,12 @@
           "eventId": {
             "type": "string"
           },
+          "eventType": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
           "processedAt": {
             "type": "string",
             "format": "date-time"

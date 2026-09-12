@@ -37,6 +37,7 @@ model Packages {
 model ProcessedWebhookEvents {
   EventId     String   @id(map: "PK_ProcessedWebhookEvents") @db.NVarChar(128)
   ProcessedAt DateTime @db.DateTimeOffset
+  EventType   String?  @db.NVarChar(128)
 }
 
 model Releases {

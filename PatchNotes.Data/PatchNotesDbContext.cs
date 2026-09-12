@@ -98,6 +98,7 @@ public class PatchNotesDbContext : DbContext
         {
             entity.HasKey(e => e.EventId);
             entity.Property(e => e.EventId).HasMaxLength(128).IsRequired();
+            entity.Property(e => e.EventType).HasMaxLength(128);
         });
 
         modelBuilder.Entity<ReleaseSummary>(entity =>

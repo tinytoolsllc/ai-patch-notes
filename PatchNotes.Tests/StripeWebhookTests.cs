@@ -296,6 +296,24 @@ public class StripeWebhookTests : IAsyncLifetime
 
     #endregion
 
+    #region Event ledger
+
+    [Fact]
+    public async Task HandleWebhook_RecordsTheEventTypeItProcessed()
+    {
+        // The provider's event id is opaque, so without the type the ledger cannot answer
+        // which event types are actually reaching their handlers.
+        await SeedUserAsync(status: "active", subscriptionId: CurrentSubscriptionId);
+
+        await PostEventAsync("invoice.payment_failed", InvoiceJson());
+
+        using var scope = _fixture.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<PatchNotesDbContext>();
+        db.ProcessedWebhookEvents.Single().EventType.Should().Be("invoice.payment_failed");
+    }
+
+    #endregion
+
     #region Transport
 
     [Fact]
