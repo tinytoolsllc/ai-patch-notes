@@ -83,6 +83,14 @@ public static class SubscriptionRoutes
             // Determine the base URL for success/cancel redirects
             var origin = GetValidatedOrigin(httpContext, configuration);
 
+            // One dictionary for both: the session tag and the subscription tag have to agree,
+            // and building it twice is how they would come to disagree.
+            var appMetadata = new Dictionary<string, string>
+            {
+                { "stytch_user_id", stytchUserId },
+                { "app", "patchnotes" },
+            };
+
             var sessionOptions = new SessionCreateOptions
             {
                 Mode = "subscription",
@@ -98,11 +106,11 @@ public static class SubscriptionRoutes
                 SuccessUrl = $"{origin}/subscription-success?session_id={{CHECKOUT_SESSION_ID}}",
                 CancelUrl = $"{origin}/subscription-canceled",
                 CustomerEmail = user.Email,
-                Metadata = new Dictionary<string, string>
-                {
-                    { "stytch_user_id", stytchUserId },
-                    { "app", "patchnotes" },
-                },
+                Metadata = appMetadata,
+                // Stripe does not copy the session's metadata onto the subscription it creates,
+                // so the tag is set again here. Without it the subscription and its invoices
+                // arrive at our webhook carrying nothing that identifies them as ours.
+                SubscriptionData = new SessionSubscriptionDataOptions { Metadata = appMetadata },
             };
 
             // If user already has a Stripe customer ID, use it
